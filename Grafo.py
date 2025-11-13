@@ -57,7 +57,7 @@ class Grafo:
             return list(self.arestas[id_no].keys())
         return []
 
-    def get_custo_aresta(self, origem: str, destino: str) -> (float, float):
+    def get_custo_aresta(self, origem: str, destino: str) -> (float, float): # type: ignore
         """
         Retorna o custo atual de uma aresta.
         Retorna (distancia_km, tempo_viagem_min)
