@@ -28,6 +28,7 @@ class Simulador:
         self.grafo = gestor.grafo
         
         # Controlo do Tempo
+        self.hora_inicio = hora_inicio
         self.current_time = hora_inicio
         self.end_time = hora_inicio + timedelta(hours=duracao_sim_horas)
         self.time_step = timedelta(minutes=1) # Cada "tick" da simulação é 1 minuto
@@ -88,7 +89,8 @@ class Simulador:
                 pref_ambiental=random.choice([True, False]),
                 prioridade=random.choices(
                     [p for p in PrioridadePedido], [0.6, 0.3, 0.1]
-                )[0]
+                )[0],
+                hora_criacao = self.current_time
             )
             
             print(f"TEMPO: {self.current_time} - NOVO PEDIDO {novo_pedido.id_pedido} ({origem} -> {destino})")
@@ -268,7 +270,7 @@ class Simulador:
             return
 
         print("\n--- 🏁 Relatório Final da Simulação 🏁 ---")
-        print(f"Período Simulado: {self.current_time - self.end_time} horas")
+        print(f"Período Simulado: {self.end_time - self.hora_inicio} (HH:MM:SS)")
         
         # --- Métricas de Pedidos ---
         print("\n### Métricas de Pedidos")

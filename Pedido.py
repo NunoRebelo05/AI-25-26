@@ -24,6 +24,7 @@ class Pedido:
                  origem: str, 
                  destino: str, 
                  num_passageiros: int, 
+                 hora_criacao: datetime,
                  pref_ambiental: bool,
                  horario_pretendido: datetime = None,
                  prioridade: PrioridadePedido = PrioridadePedido.NORMAL):
@@ -37,12 +38,12 @@ class Pedido:
         self.prioridade = prioridade
         
         # Se o horário for None, assume-se que é um pedido imediato
-        self.horario_pretendido = horario_pretendido if horario_pretendido else datetime.now()
+        self.hora_criacao = hora_criacao
+        self.horario_pretendido = horario_pretendido if horario_pretendido else self.hora_criacao
         
         # Gestão de Estado e Métricas
         self.estado = EstadoPedido.PENDENTE
         self.id_veiculo_alocado = None
-        self.hora_criacao = datetime.now()
         self.hora_recolha_estimada = None
         self.hora_conclusao = None
 
@@ -86,37 +87,43 @@ class Pedido:
         return 0.0
 
 
-# --- Exemplo de utilização (para testar o ficheiro) ---
+# --- Exemplo de utilização (para testar o ficheiro) Já não deve funcionar ---
 if __name__ == "__main__":
 
     print("--- Criar Pedidos ---")
     
+    # Precisamos da hora atual para o teste
+    agora = datetime.now()
+
     # Pedido 1: Imediato, normal, sem preferência ambiental
     pedido_1 = Pedido(
         origem="Centro",
         destino="Aeroporto",
         num_passageiros=2,
-        pref_ambiental=False
+        pref_ambiental=False,
+        hora_criacao=agora  # <--- ADICIONA ESTE ARGUMENTO
     )
     
-    # Pedido 2: Imediato, urgente, com preferência ambiental [cite: 13, 28]
+    # Pedido 2: Imediato, urgente, com preferência ambiental
     pedido_2 = Pedido(
         origem="Hospital",
         destino="Estacao_CP",
         num_passageiros=1,
         pref_ambiental=True,
-        prioridade=PrioridadePedido.URGENTE
+        prioridade=PrioridadePedido.URGENTE,
+        hora_criacao=agora  # <--- ADICIONA ESTE ARGUMENTO
     )
     
     # Pedido 3: Agendado para daqui a 2 horas
     from datetime import timedelta
-    hora_agendada = datetime.now() + timedelta(hours=2)
+    hora_agendada = agora + timedelta(hours=2)
     pedido_3 = Pedido(
         origem="Universidade",
         destino="Centro",
         num_passageiros=4,
         pref_ambiental=True,
-        horario_pretendido=hora_agendada
+        horario_pretendido=hora_agendada,
+        hora_criacao=agora  
     )
 
     print(pedido_1)
