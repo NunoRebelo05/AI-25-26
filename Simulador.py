@@ -16,6 +16,10 @@ PROB_NOVO_PEDIDO_POR_MINUTO = 0.15 # 15% de chance a cada minuto
 # Limiar para um táxi elétrico decidir ir carregar
 LIMIAR_RECARGA_ELETTRICO = 0.25 # 25% de autonomia
 
+# --- Constantes de Trânsito (Tarefa 6) ---
+HORAS_DE_PONTA = [8, 9, 17, 18] # 8h, 9h, 17h, 18h
+MULTIPLICADOR_TRANSITO = 1.75   # O trânsito fica 75% mais lento
+
 class Simulador:
     """
     Orquestra a simulação dinâmica.
@@ -50,6 +54,7 @@ class Simulador:
             
             if self.current_time.minute == 0: # Imprime a hora a cada hora
                  print(f"--- {self.current_time} ---")
+                 self._update_traffic()
                  
         self.print_summary()
 
@@ -68,8 +73,6 @@ class Simulador:
         # 4. Gerir táxis livres (ex: ir carregar) 
         self._manage_idle_taxis()
         
-        # 5. (Opcional) Atualizar trânsito [cite: 24, 27]
-        self._update_traffic()
 
     def _generate_new_request(self):
         """Gera um novo pedido com base na probabilidade."""
@@ -244,18 +247,42 @@ class Simulador:
                 
         return melhor_estacao, melhor_caminho
 
+    # Em Simulador.py
+
     def _update_traffic(self):
-        """(Opcional) Simula mudanças de trânsito[cite: 24, 27]."""
-        # A cada hora, pode mudar o trânsito
-        if self.current_time.minute == 0:
-            # Ex: Hora de Ponta (8-9h, 17-18h)
-            if self.current_time.hour in [8, 9, 17, 18]:
-                # Implementar lógica para aumentar multiplicador no grafo
-                pass
-            else:
-                # Implementar lógica para normalizar
-                pass
-            pass
+        """
+        Simula mudanças de trânsito (Tarefa 6).
+        É chamado a cada hora (quando o minuto == 0).
+        """
+        
+        hora_atual = self.current_time.hour
+        
+        if hora_atual in HORAS_DE_PONTA:
+            # É HORA DE PONTA: Aumentar o trânsito
+            print(f"TEMPO: {self.current_time} - 🚦 HORA DE PONTA INICIADA.")
+            
+            # Itera por todas as arestas e aplica o multiplicador
+            for origem, destinos in self.grafo.arestas.items():
+                for destino in destinos:
+                    # Verifica se o trânsito já está aplicado
+                    if self.grafo.condicoes_transito.get((origem, destino), 1.0) == 1.0:
+                        self.grafo.atualizar_transito(origem, destino, MULTIPLICADOR_TRANSITO)
+                        
+        else:
+            # NÃO É HORA DE PONTA: Normalizar o trânsito
+   
+            foi_normalizado_algo = False
+            
+            for origem, destinos in self.grafo.arestas.items():
+                for destino in destinos:
+                    # Verifica se o trânsito estava aplicado
+                    if self.grafo.condicoes_transito.get((origem, destino), 1.0) > 1.0:
+                        self.grafo.atualizar_transito(origem, destino, 1.0)
+                        foi_normalizado_algo = True # Marcamos que *algo* mudou
+            
+            
+            if foi_normalizado_algo:
+                 print(f"TEMPO: {self.current_time} - 🚗 Trânsito normalizado.")
 
     def print_summary(self):
         """Imprime as métricas de avaliação (Tarefa 5)."""
