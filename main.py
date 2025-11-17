@@ -1,61 +1,119 @@
+import json
 from datetime import datetime
 from Grafo import Grafo
 from Taxi import Taxi, TipoMotorizacao
-from Gestor import GestorDeFrota
+from Gestor import GestorDeFrota, EstrategiaProcura # Agora isto vai funcionar
 from Simulador import Simulador
 
-def setup_simulacao():
+def carregar_grafo_de_json(ficheiro_json: str) -> Grafo:
     """
-    Cria todos os objetos iniciais para a simulação.
+    Cria e retorna um objeto Grafo a partir de um ficheiro JSON.
     """
-    
-    # 1. Criar o Grafo (simples)
-    mapa_braga = Grafo()
-    mapa_braga.add_no("Centro", 41.5518, -8.4231, tipo="ZonaRecolha")
-    mapa_braga.add_no("UMinho", 41.5623, -8.3952, tipo="ZonaRecolha")
-    mapa_braga.add_no("Estacao_CP", 41.5471, -8.4326, tipo="PontoInteresse")
-    mapa_braga.add_no("Hospital", 41.5600, -8.4350, tipo="ZonaRecolha")
-    mapa_braga.add_no("Estacao_Recarga_1", 41.5580, -8.4100, tipo="EstacaoRecarga")
-    
-    mapa_braga.add_aresta("Centro", "UMinho", 4.5, 10.0)
-    mapa_braga.add_aresta("UMinho", "Centro", 4.2, 9.0)
-    mapa_braga.add_aresta("Centro", "Estacao_CP", 1.8, 5.0)
-    mapa_braga.add_aresta("Estacao_CP", "Centro", 2.0, 6.0)
-    mapa_braga.add_aresta("Centro", "Hospital", 2.5, 7.0)
-    mapa_braga.add_aresta("Hospital", "Centro", 2.6, 8.0)
-    mapa_braga.add_aresta("UMinho", "Hospital", 3.0, 6.0)
-    mapa_braga.add_aresta("Hospital", "UMinho", 3.0, 6.0)
-    mapa_braga.add_aresta("UMinho", "Estacao_Recarga_1", 2.2, 5.0)
-    mapa_braga.add_aresta("Centro", "Estacao_Recarga_1", 2.0, 4.0)
+    mapa = Grafo()
+    try:
+        with open(ficheiro_json, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            
+            # 1. Carregar os Nós
+            for no in data['nos']:
+                mapa.add_no(no['id'], no['lat'], no['lon'], no.get('tipo', 'PontoInteresse'))
+            
+            # 2. Carregar as Arestas
+            for aresta in data['arestas']:
+                mapa.add_aresta(
+                    aresta['origem'],
+                    aresta['destino'],
+                    aresta['distancia_km'],
+                    aresta['tempo_base_min']
+                )
+            
+            print(f"INFO: Grafo carregado de '{ficheiro_json}' com {len(mapa.nos)} nós e {len(data['arestas'])} arestas.")
+            return mapa
+            
+    except FileNotFoundError:
+        print(f"ERRO: Ficheiro do mapa '{ficheiro_json}' não encontrado.")
+        return None
+    except Exception as e:
+        print(f"ERRO: Falha ao ler o JSON do mapa: {e}")
+        return None
 
-    # 2. Criar a Frota
+def setup_frota(gestor: GestorDeFrota):
+    """
+    Adiciona a frota inicial ao gestor.
+    """
     frota = [
         Taxi("EV01", TipoMotorizacao.ELETRICO, "Centro", 4, 0.15, 250),
         Taxi("EV02", TipoMotorizacao.ELETRICO, "UMinho", 4, 0.15, 300),
         Taxi("GAS01", TipoMotorizacao.COMBUSTAO, "Estacao_CP", 4, 0.25, 600),
         Taxi("GAS02", TipoMotorizacao.COMBUSTAO, "Hospital", 6, 0.30, 550)
     ]
-    
-    # 3. Criar o Gestor
-    gestor = GestorDeFrota(mapa_braga)
     for taxi in frota:
         gestor.add_taxi(taxi)
-        
-    return gestor
 
-# --- Ponto de Entrada Principal ---
+# --- NOVA FUNÇÃO PARA IMPRIMIR A TABELA ---
+def imprimir_tabela_comparativa(resultados: list):
+    """
+    Recebe a lista de resultados e imprime uma tabela formatada no terminal.
+    """
+    print("\n" + "="*80)
+    print("--- 🏆 TABELA DE COMPARAÇÃO FINAL DAS ESTRATÉGIAS 🏆 ---")
+    print("="*80)
+    
+    # Cabeçalho
+    # Ajusta os números (ex: <10, >13) para alinhar as colunas
+    print(f"{'Estratégia':<10} | {'Total Pedidos':>13} | {'Concluídos':>10} | {'Rejeitados':>10} | {'Taxa Rej. (%)':>15} | {'Espera Média (min)':>20}")
+    print("-"*80)
+    
+    # Ordenar os resultados (do melhor para o pior, ex: por taxa de rejeição)
+    resultados_ordenados = sorted(resultados, key=lambda x: (x['taxa_rejeicao'], x['tempo_espera']))
+    
+    for res in resultados_ordenados:
+        print(f"{res['estrategia']:<10} | {res['total_pedidos']:>13} | {res['concluidos']:>10} | {res['rejeitados']:>10} | {res['taxa_rejeicao']:>15.1f} | {res['tempo_espera']:>20.2f}")
+        
+    print("="*80)
+    print("(Menor taxa de rejeição e tempo de espera = Melhor)")
+
+
+# --- Ponto de Entrada Principal (Atualizado) ---
 if __name__ == "__main__":
     
-    # 1. Configurar o mundo
-    print("A configurar o ambiente da simulação...")
-    gestor_taxi_green = setup_simulacao()
+    mapa_braga = carregar_grafo_de_json("braga_mapa.json")
+    if not mapa_braga:
+        print("A simulação não pode continuar sem um mapa.")
+        exit()
+        
+    hora_inicio = datetime(2025, 10, 20, 8, 0, 0)
+    duracao_horas = 12
     
-    # 2. Definir parâmetros da simulação
-    hora_inicio = datetime(2025, 10, 20, 8, 0, 0) # 20/10/2025 às 08:00
-    duracao_horas = 12 # Simular um dia de 12 horas (até às 20:00)
+    estrategias = [
+        EstrategiaProcura.A_STAR,
+        EstrategiaProcura.UCS,
+        EstrategiaProcura.GULOSA,
+        EstrategiaProcura.DFS,
+        EstrategiaProcura.BFS
+    ]
+
+    print("\n--- 🚀 INÍCIO DA COMPARAÇÃO DE ESTRATÉGIAS 🚀 ---")
     
-    # 3. Criar e correr o simulador
-    simulador = Simulador(gestor_taxi_green, hora_inicio, duracao_horas)
+    # --- LISTA PARA GUARDAR RESULTADOS ---
+    resultados_finais = []
+
+    for estrategia in estrategias:
+        print("\n" + "="*50)
+        print(f"A EXECUTAR SIMULAÇÃO COM ESTRATÉGIA: {estrategia.name}")
+        
+        mapa_para_sim = carregar_grafo_de_json("braga_mapa.json")
+        gestor = GestorDeFrota(mapa_para_sim)
+        setup_frota(gestor)
+        gestor.definir_estrategia(estrategia)
+        
+        simulador = Simulador(gestor, hora_inicio, duracao_horas)
+        
+        resultados = simulador.run()
+        resultados['estrategia'] = estrategia.name # Adicionar o nome
+        resultados_finais.append(resultados)
     
-    print("\nA iniciar a simulação...")
-    simulador.run()
+    print("\n" + "="*50)
+    print("--- 🏆 COMPARAÇÃO CONCLUÍDA 🏆 ---")
+    
+    imprimir_tabela_comparativa(resultados_finais)
