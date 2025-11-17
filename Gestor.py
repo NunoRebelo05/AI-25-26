@@ -17,18 +17,15 @@ PESOS_ESTRATEGIA = {
     'PENALIZACAO_PRIORIDADE': 3.0
 }
 
-# Enum de Estratégias (ATUALIZADO)
+# Enum de Estratégias
 class EstrategiaProcura(Enum):
     A_STAR = auto()   # Informada, Ótima
     GULOSA = auto()   # Informada, Não-Ótima
     UCS = auto()      # Não-Informada, Ótima
     DFS = auto()      # Não-Informada, Não-Ótima
-    BFS = auto()      # Não-Informada, Não-Ótima (em custo) (NOVO)
+    BFS = auto()      # Não-Informada, Não-Ótima (em custo)
 
 class GestorDeFrota:
-    """
-    O cérebro da TaxiGreen.
-    """
     
     def __init__(self, grafo: Grafo):
         self.grafo = grafo

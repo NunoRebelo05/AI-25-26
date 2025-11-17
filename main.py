@@ -64,7 +64,7 @@ def imprimir_tabela_comparativa(resultados: list):
     print(f"{'Estratégia':<10} | {'Total Pedidos':>13} | {'Concluídos':>10} | {'Rejeitados':>10} | {'Taxa Rej. (%)':>15} | {'Espera Média (min)':>20}")
     print("-"*80)
     
-    # Ordenar os resultados (do melhor para o pior, ex: por taxa de rejeição)
+    # Ordenar os resultados (do melhor para o pior por taxa de rejeição)
     resultados_ordenados = sorted(resultados, key=lambda x: (x['taxa_rejeicao'], x['tempo_espera']))
     
     for res in resultados_ordenados:
@@ -95,7 +95,6 @@ if __name__ == "__main__":
 
     print("\n--- 🚀 INÍCIO DA COMPARAÇÃO DE ESTRATÉGIAS 🚀 ---")
     
-    # --- LISTA PARA GUARDAR RESULTADOS ---
     resultados_finais = []
 
     for estrategia in estrategias:
@@ -110,10 +109,10 @@ if __name__ == "__main__":
         simulador = Simulador(gestor, hora_inicio, duracao_horas)
         
         resultados = simulador.run()
-        resultados['estrategia'] = estrategia.name # Adicionar o nome
+        resultados['estrategia'] = estrategia.name 
         resultados_finais.append(resultados)
     
-    print("\n" + "="*50)
+    print("\n" + "="*50)    
     print("--- 🏆 COMPARAÇÃO CONCLUÍDA 🏆 ---")
     
     imprimir_tabela_comparativa(resultados_finais)
