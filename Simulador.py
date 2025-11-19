@@ -2,263 +2,273 @@ import random
 import time
 from datetime import datetime, timedelta
 
-# Importar todas as nossas classes
 from Grafo import Grafo
 from Taxi import Taxi, TipoMotorizacao, EstadoVeiculo
 from Pedido import Pedido, PrioridadePedido, EstadoPedido
 from Gestor import GestorDeFrota
 
-# --- Constantes da Simulação ---
-PROB_NOVO_PEDIDO_POR_MINUTO = 0.15
-LIMIAR_RECARGA_ELETTRICO = 0.25
-
 class Simulador:
-    """
-    Orquestra a simulação dinâmica (versão simplificada, sem visualização).
-    """
-    
     def __init__(self, gestor: GestorDeFrota, hora_inicio: datetime, 
-                 duracao_sim_horas: int):
+                 duracao_sim_horas: int,
+                 horas_ponta: list = None,        
+                 prob_pedido: float = 0.15,        
+                 limiar_recarga: float = 0.25,
+                 gui_interface = None):
         
         self.gestor = gestor
         self.grafo = gestor.grafo
+        self.gui = gui_interface
         
-        self.active_services = []
-        self.active_charging = []
         self.pedidos_gerados = [] 
+        
+        # Dicionário para gerir TODOS os movimentos
+        self.movimentos_ativos = {} 
 
         self.hora_inicio = hora_inicio
         self.current_time = hora_inicio
         self.end_time = hora_inicio + timedelta(hours=duracao_sim_horas)
         self.time_step = timedelta(minutes=1) 
         
-        # Constantes de trânsito
-        self.HORAS_DE_PONTA = [8, 9, 17, 18]
+        # Configurações
+        self.HORAS_DE_PONTA = horas_ponta if horas_ponta is not None else [8, 9, 17, 18]
+        self.PROB_NOVO_PEDIDO = prob_pedido
+        self.LIMIAR_RECARGA_ELETTRICO = limiar_recarga
         self.MULTIPLICADOR_TRANSITO = 1.75
+        self.CORES_PEDIDOS = ['#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0']
         
-        print(f"Simulador iniciado. A correr de {hora_inicio} até {self.end_time}.")
+        self.status_descricoes = {}
+        self.paused = False
+        self.delay = 0.2
+
+        print(f"Simulador iniciado ({self.hora_inicio} -> {self.end_time}).")
 
     def run(self):
-        """Corre a simulação inteira, minuto a minuto."""
+        print("\n--- INÍCIO DA SIMULAÇÃO ---")
         while self.current_time <= self.end_time:
             
-            if self.current_time.minute == 0:
-                 print(f"--- {self.current_time} ---")
-                 self._update_traffic()
-                 
+            while self.paused: time.sleep(0.1)
+
+            if self.current_time.minute % 30 == 0:
+                 if self._update_traffic() and self.gui:
+                     self.gui.desenhar_mapa_base()
+
             self.step()
+            
+            if self.gui:
+                self._atualizar_descricoes_gui()
+                pedidos_ativos = [p for p in self.pedidos_gerados if p.estado in [EstadoPedido.PENDENTE, EstadoPedido.EM_CURSO]]
+                self.gui.atualizar_estado(self.gestor.frota, pedidos_ativos, self.current_time, self.status_descricoes)
+                time.sleep(self.delay)
+
             self.current_time += self.time_step
             
-        print("\nSimulação Concluída. A gerar relatório final...")
-        
-        # --- ALTERAÇÃO AQUI ---
-        # Devolve os resultados para o main.py
+        print("Simulação Concluída.")
         return self.print_summary()
 
+    def toggle_pause(self):
+        self.paused = not self.paused
+        return self.paused
+
+    def set_delay(self, delay):
+        self.delay = delay
+
     def step(self):
-        """Executa um único "tick" (1 minuto) da simulação."""
         self._generate_new_request()
-        self._update_active_services()
-        self._update_charging_taxis()
+        self._processar_movimentos()
         self._manage_idle_taxis()
 
     def _generate_new_request(self):
-        if random.random() < PROB_NOVO_PEDIDO_POR_MINUTO:
-            n_recolha = [n for n, d in self.grafo.nos.items() if d.get('tipo') != 'EstacaoRecarga']
-            if len(n_recolha) < 2: return 
+        if random.random() < self.PROB_NOVO_PEDIDO:
+            n_validos = list(self.grafo.nos.keys())
+            if len(n_validos) < 2: return
             
-            origem, destino = random.sample(n_recolha, 2)
+            origem, destino = random.sample(n_validos, 2)
             
             novo_pedido = Pedido(
-                origem=origem,
-                destino=destino,
-                num_passageiros=random.randint(1, 4),
-                pref_ambiental=random.choice([True, False]),
-                hora_criacao = self.current_time,
-                prioridade=random.choices(
-                    [p for p in PrioridadePedido], [0.6, 0.3, 0.1]
-                )[0]
+                origem=origem, destino=destino, num_passageiros=random.randint(1, 4),
+                pref_ambiental=random.choice([True, False]), hora_criacao=self.current_time,
+                prioridade=random.choice(list(PrioridadePedido))
             )
+            novo_pedido.cor_mapa = random.choice(self.CORES_PEDIDOS)
             
-            print(f"TEMPO: {self.current_time} - NOVO PEDIDO {novo_pedido.id_pedido} ({origem} -> {destino})")
+            # print(f"TEMPO: {self.current_time} - NOVO PEDIDO {novo_pedido.id_pedido} ({origem} -> {destino})")
             self.pedidos_gerados.append(novo_pedido)
             
-            taxi_escolhido, custo, caminhos = self.gestor.decidir_alocacao(novo_pedido)
+            taxi, custo, caminhos = self.gestor.decidir_alocacao(novo_pedido)
             
-            if taxi_escolhido:
-                (caminho_pickup, caminho_viagem) = caminhos
+            if taxi:
+                (c_pickup, c_viagem) = caminhos
+                t_pickup = self.gestor._get_tempo_caminho(c_pickup)
+                novo_pedido.alocar(taxi.id_veiculo, self.current_time + timedelta(minutes=t_pickup))
+                taxi.alocar_para_servico()
                 
-                tempo_pickup = self.gestor._get_tempo_caminho(caminho_pickup)
-                tempo_viagem = self.gestor._get_tempo_caminho(caminho_viagem)
-                dist_pickup = self.gestor._get_dist_caminho(caminho_pickup)
-                dist_viagem = self.gestor._get_dist_caminho(caminho_viagem)
-                
-                hora_recolha = self.current_time + timedelta(minutes=tempo_pickup)
-                novo_pedido.alocar(taxi_escolhido.id_veiculo, hora_recolha)
-                taxi_escolhido.alocar_para_servico()
-                
-                servico = {
-                    'taxi': taxi_escolhido,
-                    'pedido': novo_pedido,
-                    'estado_servico': 'PICKUP',
-                    'tempo_restante_etapa': tempo_pickup,
-                    'dist_etapa_total': dist_pickup,
-                    'etapa_viagem': (tempo_viagem, dist_viagem) 
-                }
-                self.active_services.append(servico)
+                self._iniciar_movimento(taxi, c_pickup, "PICKUP", novo_pedido, c_viagem)
+                print(f"TEMPO: {self.current_time} - Pedido {novo_pedido.id_pedido} alocado a {taxi.id_veiculo}")
             else:
                 novo_pedido.rejeitar()
 
-    def _update_active_services(self):
-        for servico in self.active_services[:]:
-            servico['tempo_restante_etapa'] -= 1 
+    def _iniciar_movimento(self, taxi, caminho, tipo, pedido=None, proximo_caminho=None):
+        if not caminho or len(caminho) < 2:
+            tempo_prox = 0
+            prox_no_idx = 0
+        else:
+            prox_no_idx = 1
+            d, tempo_prox = self.grafo.get_custo_aresta(caminho[0], caminho[1])
+            if d == float('inf'):
+                print(f"AVISO: Aresta inválida {caminho[0]}->{caminho[1]}. Movimento abortado.")
+                return
+
+        self.movimentos_ativos[taxi.id_veiculo] = {
+            'taxi': taxi, 'pedido': pedido, 'tipo': tipo, 'caminho': caminho,
+            'idx_prox_no': prox_no_idx, 'tempo_restante_aresta': tempo_prox,
+            'proximo_caminho': proximo_caminho 
+        }
+
+    def _processar_movimentos(self):
+        ids_taxis = list(self.movimentos_ativos.keys())
+        for tid in ids_taxis:
+            mov = self.movimentos_ativos[tid]
+            taxi = mov['taxi']
+            mov['tempo_restante_aresta'] -= 1
             
-            if servico['tempo_restante_etapa'] <= 0:
-                taxi = servico['taxi']
-                pedido = servico['pedido']
-                
-                if servico['estado_servico'] == 'PICKUP':
-                    print(f"TEMPO: {self.current_time} - Taxi {taxi.id_veiculo} recolheu Pedido {pedido.id_pedido}")
-                    taxi.mover_e_consumir(servico['dist_etapa_total'], pedido.origem)
-                    servico['estado_servico'] = 'VIAGEM'
-                    servico['tempo_restante_etapa'] = servico['etapa_viagem'][0]
-                    servico['dist_etapa_total'] = servico['etapa_viagem'][1]
+            if mov['tempo_restante_aresta'] <= 0:
+                if mov['idx_prox_no'] < len(mov['caminho']):
+                    destino_imediato = mov['caminho'][mov['idx_prox_no']]
+                    dist, _ = self.grafo.get_custo_aresta(taxi.localizacao_atual, destino_imediato)
                     
-                elif servico['estado_servico'] == 'VIAGEM':
-                    print(f"TEMPO: {self.current_time} - Taxi {taxi.id_veiculo} concluiu Pedido {pedido.id_pedido}")
-                    taxi.mover_e_consumir(servico['dist_etapa_total'], pedido.destino)
-                    taxi.libertar_no_destino(pedido.destino)
-                    pedido.concluir()
-                    self.active_services.remove(servico)
+                    if dist == float('inf'):
+                        del self.movimentos_ativos[tid]
+                        continue
+
+                    taxi.mover_e_consumir(dist, destino_imediato)
+                    mov['idx_prox_no'] += 1
+                    
+                    if mov['idx_prox_no'] < len(mov['caminho']):
+                        prox = mov['caminho'][mov['idx_prox_no']]
+                        _, t_prox = self.grafo.get_custo_aresta(taxi.localizacao_atual, prox)
+                        mov['tempo_restante_aresta'] = t_prox
+                    else:
+                        self._concluir_segmento(mov)
+                else:
+                    self._concluir_segmento(mov)
+
+    def _concluir_segmento(self, mov):
+        # Recupera as variáveis com segurança
+        taxi = mov['taxi']
+        tipo = mov['tipo']
+        pedido = mov.get('pedido') # Usa .get() para evitar erro se não existir
+        
+        if tipo == "PICKUP":
+            # print(f"TEMPO: {self.current_time} - {taxi.id_veiculo} chegou ao cliente.")
+            self._iniciar_movimento(taxi, mov['proximo_caminho'], "VIAGEM", pedido)
             
+        elif tipo == "VIAGEM":
+            # print(f"TEMPO: {self.current_time} - {taxi.id_veiculo} entregou cliente.")
+            taxi.libertar_no_destino(taxi.localizacao_atual)
+            if pedido: pedido.concluir()
+            del self.movimentos_ativos[taxi.id_veiculo]
+            
+        elif tipo in ["A_CARREGAR", "A_ABASTECER"]:
+            msg = "a carregar" if tipo == "A_CARREGAR" else "a abastecer"
+            print(f"TEMPO: {self.current_time} - {taxi.id_veiculo} chegou a {taxi.localizacao_atual}. {msg}...")
+            taxi.iniciar_carregamento()
+            t_carga = 45 if taxi.tipo == TipoMotorizacao.ELETRICO else 10
+            
+            # --- CORREÇÃO AQUI: Adicionado 'pedido': None ---
+            self.movimentos_ativos[taxi.id_veiculo] = {
+                'taxi': taxi, 
+                'tipo': "EM_CARGA", 
+                'caminho': [], 
+                'idx_prox_no': 0, 
+                'tempo_restante_aresta': t_carga,
+                'pedido': None # Evita o KeyError quando este segmento terminar
+            }
+            
+        elif tipo == "EM_CARGA":
+            print(f"TEMPO: {self.current_time} - {taxi.id_veiculo} pronto (100%).")
+            taxi.terminar_carregamento()
+            del self.movimentos_ativos[taxi.id_veiculo]
+
     def _manage_idle_taxis(self):
         for taxi in self.gestor.frota.values():
-            if taxi.estado == EstadoVeiculo.LIVRE:
-                if taxi.tipo == TipoMotorizacao.ELETRICO and \
-                   taxi.precisa_recarregar(LIMIAR_RECARGA_ELETTRICO):
+            # Verifica se está LIVRE e se não está já num movimento
+            if taxi.estado == EstadoVeiculo.LIVRE and taxi.id_veiculo not in self.movimentos_ativos:
+                
+                # Verifica necessidade de energia (Elétrico ou Combustão)
+                if taxi.precisa_recarregar(self.LIMIAR_RECARGA_ELETTRICO):
                     
-                    estacao, caminho = self._find_nearest_station(taxi.localizacao_atual, 'EstacaoRecarga')
+                    estacao, caminho = self._find_nearest_charger(taxi.localizacao_atual)
                     
                     if estacao:
-                        print(f"TEMPO: {self.current_time} - Taxi {taxi.id_veiculo} (elétrico) está baixo de bateria. A ir para {estacao} carregar.")
-                        tempo_viagem = self.gestor._get_tempo_caminho(caminho)
-                        dist_viagem = self.gestor._get_dist_caminho(caminho)
-                        taxi.iniciar_carregamento()
-                        carga = {
-                            'taxi': taxi,
-                            'destino_estacao': estacao,
-                            'tempo_ate_estacao': tempo_viagem,
-                            'dist_viagem': dist_viagem,
-                            'tempo_restante_carga': -1 
-                        }
-                        self.active_charging.append(carga)
+                        # Verifica se tem autonomia para chegar lá
+                        dist_ate = self.gestor._get_dist_caminho(caminho)
+                        if taxi.autonomia_atual >= dist_ate:
+                            acao = "A_CARREGAR" if taxi.tipo == TipoMotorizacao.ELETRICO else "A_ABASTECER"
+                            msg = "Bateria fraca" if taxi.tipo == TipoMotorizacao.ELETRICO else "Combustível baixo"
+                            print(f"TEMPO: {self.current_time} - {taxi.id_veiculo} ({msg}). A ir para {estacao}...")
+                            self._iniciar_movimento(taxi, caminho, acao)
+                        else:
+                            print(f"ALERTA: {taxi.id_veiculo} sem autonomia para chegar à estação!")
+                            taxi.estado = EstadoVeiculo.EM_FALHA
 
-    def _update_charging_taxis(self):
-        TEMPO_RECARGA_ELETRICO_MIN = 45
-        
-        for carga in self.active_charging[:]:
-            taxi = carga['taxi']
-            
-            if carga['tempo_restante_carga'] == -1: 
-                carga['tempo_ate_estacao'] -= 1
-                if carga['tempo_ate_estacao'] <= 0:
-                    taxi.mover_e_consumir(carga['dist_viagem'], carga['destino_estacao'])
-                    print(f"TEMPO: {self.current_time} - Taxi {taxi.id_veiculo} chegou a {carga['destino_estacao']}. A carregar...")
-                    carga['tempo_restante_carga'] = TEMPO_RECARGA_ELETRICO_MIN
-            else:
-                carga['tempo_restante_carga'] -= 1
-                if carga['tempo_restante_carga'] <= 0:
-                    taxi.terminar_carregamento()
-                    print(f"TEMPO: {self.current_time} - Taxi {taxi.id_veiculo} terminou carregamento.")
-                    self.active_charging.remove(carga)
-
-    def _find_nearest_station(self, origem: str, tipo_estacao: str) -> (str, list):
-        estacoes = [n for n, d in self.grafo.nos.items() if d.get('tipo') == tipo_estacao]
-        if not estacoes:
-            return None, None
-            
-        melhor_estacao = None
-        melhor_caminho = None
-        menor_tempo = float('inf')
-        
-        for estacao in estacoes:
-            caminho, tempo = self.gestor.a_star_search(self.grafo, origem, estacao, 'tempo')
-            if caminho and tempo < menor_tempo:
-                menor_tempo = tempo
-                melhor_estacao = estacao
-                melhor_caminho = caminho
-                
-        return melhor_estacao, melhor_caminho
+    def _find_nearest_charger(self, origem):
+        estacoes = [n for n, d in self.grafo.nos.items() if d.get('pode_carregar')]
+        best_st, best_path, min_t = None, None, float('inf')
+        for st in estacoes:
+            path, t = self.gestor.get_caminho(origem, st)
+            if path and t < min_t:
+                min_t, best_st, best_path = t, st, path
+        return best_st, best_path
 
     def _update_traffic(self):
-        """Simula mudanças de trânsito (Tarefa 6)."""
-        hora_atual = self.current_time.hour
-        
-        multiplicador = self.MULTIPLICADOR_TRANSITO if hora_atual in self.HORAS_DE_PONTA else 1.0
-        
-        primeira_aresta = list(self.grafo.condicoes_transito.keys())[0]
-        if self.grafo.condicoes_transito[primeira_aresta] == multiplicador:
-            return
-            
-        if multiplicador > 1.0:
-            print(f"TEMPO: {self.current_time} - 🚦 HORA DE PONTA INICIADA.")
-        else:
-            print(f"TEMPO: {self.current_time} - 🚗 Trânsito normalizado.")
+        hora = self.current_time.hour
+        is_ponta = hora in self.HORAS_DE_PONTA
+        prob_transito = 0.6 if is_ponta else 0.1
+        max_mult = self.MULTIPLICADOR_TRANSITO if is_ponta else 1.2
 
-        for aresta in self.grafo.condicoes_transito:
-            self.grafo.atualizar_transito(aresta[0], aresta[1], multiplicador)
+        mudou_algo = False
+        for origem, destino in list(self.grafo.condicoes_transito.keys()):
+            if random.random() < 0.3:
+                novo_mult = 1.0
+                if random.random() < prob_transito:
+                    novo_mult = 1.0 + random.random() * (max_mult - 1.0)
+                novo_mult = round(novo_mult, 1)
+                
+                if self.grafo.condicoes_transito.get((origem, destino), 1.0) != novo_mult:
+                    self.grafo.atualizar_transito(origem, destino, novo_mult)
+                    mudou_algo = True
+        return mudou_algo
+
+    def _atualizar_descricoes_gui(self):
+        self.status_descricoes.clear()
+        for t_id, taxi in self.gestor.frota.items():
+            if taxi.estado == EstadoVeiculo.EM_FALHA:
+                 self.status_descricoes[t_id] = "FALHA: SEM ENERGIA"
+                 continue
+
+            if t_id in self.movimentos_ativos:
+                mov = self.movimentos_ativos[t_id]
+                tipo = mov['tipo']
+                if tipo == "PICKUP": txt = f"A ir buscar ({mov['pedido'].origem})"
+                elif tipo == "VIAGEM": txt = f"A levar ({mov['pedido'].destino})"
+                elif tipo in ["A_CARREGAR", "A_ABASTECER"]: txt = f"A ir abastecer"
+                elif tipo == "EM_CARGA": txt = f"A abastecer ({mov['tempo_restante_aresta']}m)"
+                else: txt = tipo
+                
+                if tipo != "EM_CARGA" and mov['idx_prox_no'] < len(mov['caminho']):
+                     prox = mov['caminho'][mov['idx_prox_no']]
+                     txt += f"\n-> {prox}"
+            else:
+                txt = f"Livre em {taxi.localizacao_atual}"
+            self.status_descricoes[t_id] = txt
 
     def print_summary(self):
-        """Imprime as métricas de avaliação (Tarefa 5) e retorna os resultados."""
-        
         concluidos = [p for p in self.pedidos_gerados if p.estado == EstadoPedido.CONCLUIDO]
         rejeitados = [p for p in self.pedidos_gerados if p.estado == EstadoPedido.REJEITADO]
-        
-        total_pedidos = len(self.pedidos_gerados)
-        
-        # --- Valores Padrão ---
-        taxa_rejeicao = 0.0
-        tempo_medio_espera = 0.0
-
-        if total_pedidos == 0:
-            print("\nSimulação terminada. Nenhum pedido foi gerado.")
-            # Retorna um dicionário vazio/default
-            return {
-                "total_pedidos": 0, "concluidos": 0, "rejeitados": 0,
-                "taxa_rejeicao": 0.0, "tempo_espera": 0.0
-            }
-
-        # --- Cálculos Seguros ---
-        if total_pedidos > 0:
-            taxa_rejeicao = (len(rejeitados) / total_pedidos) * 100
-        
-        if len(concluidos) > 0:
-            tempos_espera = [p.get_tempo_espera_total() for p in concluidos]
-            tempo_medio_espera = sum(tempos_espera) / len(concluidos)
-
-        # --- Impressão (como antes) ---
+        total = len(self.pedidos_gerados)
+        taxa = (len(rejeitados)/total)*100 if total > 0 else 0
+        wait = sum([p.get_tempo_espera_total() for p in concluidos])/len(concluidos) if concluidos else 0
         print("\n" + "="*40)
-        print("--- 🏁 Relatório Final da Simulação 🏁 ---")
-        print(f"Período Simulado: {self.end_time - self.hora_inicio} (HH:MM:SS)")
-        
-        print("\n### Métricas de Pedidos")
-        print(f"Total Pedidos Gerados: {total_pedidos}")
-        print(f"  - Concluídos: {len(concluidos)}")
-        print(f"  - Rejeitados: {len(rejeitados)} ({taxa_rejeicao:.1f}%)")
-
-        if concluidos:
-            print(f"\nTempo Médio de Espera (Cliente): {tempo_medio_espera:.2f} minutos")
-        
-        print("\n### Métricas da Frota (Autonomia Restante)")
-        for taxi in self.gestor.frota.values():
-            print(f"  - Taxi {taxi.id_veiculo} ({taxi.tipo.name}): {taxi.autonomia_atual:.1f}/{taxi.autonomia_maxima:.1f} km")
-        print("="*40)
-
-
-        return {
-            "total_pedidos": total_pedidos,
-            "concluidos": len(concluidos),
-            "rejeitados": len(rejeitados),
-            "taxa_rejeicao": taxa_rejeicao,
-            "tempo_espera": tempo_medio_espera
-        }
+        print(f"Total: {total} | OK: {len(concluidos)} | NOK: {len(rejeitados)} ({taxa:.1f}%)")
+        print(f"Espera: {wait:.2f} min")
+        return {'total': total, 'rejeitados': len(rejeitados)}

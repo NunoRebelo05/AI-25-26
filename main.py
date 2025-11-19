@@ -2,45 +2,33 @@ import json
 from datetime import datetime
 from Grafo import Grafo
 from Taxi import Taxi, TipoMotorizacao
-from Gestor import GestorDeFrota, EstrategiaProcura # Agora isto vai funcionar
+from Gestor import GestorDeFrota, EstrategiaProcura 
 from Simulador import Simulador
+from Pedido import EstadoPedido # Necessário para calcular as métricas aqui
 
 def carregar_grafo_de_json(ficheiro_json: str) -> Grafo:
-    """
-    Cria e retorna um objeto Grafo a partir de um ficheiro JSON.
-    """
+    """Cria e retorna um objeto Grafo a partir de um ficheiro JSON."""
     mapa = Grafo()
     try:
         with open(ficheiro_json, 'r', encoding='utf-8') as f:
             data = json.load(f)
-            
-            # 1. Carregar os Nós
             for no in data['nos']:
                 mapa.add_no(no['id'], no['lat'], no['lon'], no.get('tipo', 'PontoInteresse'))
+                # Carregar a flag de carregamento se existir
+                if no.get('pode_carregar'):
+                     mapa.nos[no['id']]['pode_carregar'] = True
             
-            # 2. Carregar as Arestas
             for aresta in data['arestas']:
-                mapa.add_aresta(
-                    aresta['origem'],
-                    aresta['destino'],
-                    aresta['distancia_km'],
-                    aresta['tempo_base_min']
-                )
+                mapa.add_aresta(aresta['origem'], aresta['destino'], aresta['distancia_km'], aresta['tempo_base_min'])
             
-            print(f"INFO: Grafo carregado de '{ficheiro_json}' com {len(mapa.nos)} nós e {len(data['arestas'])} arestas.")
+            print(f"INFO: Grafo carregado de '{ficheiro_json}' com {len(mapa.nos)} nós.")
             return mapa
-            
-    except FileNotFoundError:
-        print(f"ERRO: Ficheiro do mapa '{ficheiro_json}' não encontrado.")
-        return None
     except Exception as e:
         print(f"ERRO: Falha ao ler o JSON do mapa: {e}")
         return None
 
 def setup_frota(gestor: GestorDeFrota):
-    """
-    Adiciona a frota inicial ao gestor.
-    """
+    """Adiciona a frota inicial ao gestor."""
     frota = [
         Taxi("EV01", TipoMotorizacao.ELETRICO, "Centro", 4, 0.15, 250),
         Taxi("EV02", TipoMotorizacao.ELETRICO, "UMinho", 4, 0.15, 300),
@@ -50,37 +38,30 @@ def setup_frota(gestor: GestorDeFrota):
     for taxi in frota:
         gestor.add_taxi(taxi)
 
-# --- NOVA FUNÇÃO PARA IMPRIMIR A TABELA ---
 def imprimir_tabela_comparativa(resultados: list):
-    """
-    Recebe a lista de resultados e imprime uma tabela formatada no terminal.
-    """
-    print("\n" + "="*80)
-    print("--- 🏆 TABELA DE COMPARAÇÃO FINAL DAS ESTRATÉGIAS 🏆 ---")
-    print("="*80)
+    """Imprime a tabela final com os dados recolhidos."""
+    print("\n" + "="*90)
+    print(f"{'--- 🏆 TABELA DE COMPARAÇÃO FINAL DAS ESTRATÉGIAS 🏆 ---':^90}")
+    print("="*90)
     
     # Cabeçalho
-    # Ajusta os números (ex: <10, >13) para alinhar as colunas
-    print(f"{'Estratégia':<10} | {'Total Pedidos':>13} | {'Concluídos':>10} | {'Rejeitados':>10} | {'Taxa Rej. (%)':>15} | {'Espera Média (min)':>20}")
-    print("-"*80)
+    print(f"{'Estratégia':<12} | {'Total':>6} | {'Concl.':>6} | {'Rej.':>6} | {'Taxa Rej.':>10} | {'Espera (min)':>14}")
+    print("-"*90)
     
-    # Ordenar os resultados (do melhor para o pior por taxa de rejeição)
+    # Ordenar (Menor taxa de rejeição primeiro)
     resultados_ordenados = sorted(resultados, key=lambda x: (x['taxa_rejeicao'], x['tempo_espera']))
     
     for res in resultados_ordenados:
-        print(f"{res['estrategia']:<10} | {res['total_pedidos']:>13} | {res['concluidos']:>10} | {res['rejeitados']:>10} | {res['taxa_rejeicao']:>15.1f} | {res['tempo_espera']:>20.2f}")
+        print(f"{res['estrategia']:<12} | {res['total']:>6} | {res['concluidos']:>6} | {res['rejeitados']:>6} | {res['taxa_rejeicao']:>9.1f}% | {res['tempo_espera']:>14.2f}")
         
-    print("="*80)
-    print("(Menor taxa de rejeição e tempo de espera = Melhor)")
+    print("="*90)
 
-
-# --- Ponto de Entrada Principal (Atualizado) ---
+# --- Ponto de Entrada Principal ---
 if __name__ == "__main__":
     
-    mapa_braga = carregar_grafo_de_json("braga_mapa.json")
-    if not mapa_braga:
-        print("A simulação não pode continuar sem um mapa.")
-        exit()
+    # Verificar se o mapa existe
+    mapa_teste = carregar_grafo_de_json("braga_mapa.json")
+    if not mapa_teste: exit()
         
     hora_inicio = datetime(2025, 10, 20, 8, 0, 0)
     duracao_horas = 12
@@ -93,26 +74,45 @@ if __name__ == "__main__":
         EstrategiaProcura.BFS
     ]
 
-    print("\n--- 🚀 INÍCIO DA COMPARAÇÃO DE ESTRATÉGIAS 🚀 ---")
-    
+    print("\n--- 🚀 INÍCIO DO BENCHMARK 🚀 ---")
     resultados_finais = []
 
     for estrategia in estrategias:
-        print("\n" + "="*50)
-        print(f"A EXECUTAR SIMULAÇÃO COM ESTRATÉGIA: {estrategia.name}")
+        print(f"\n>> A TESTAR: {estrategia.name}...")
         
+        # 1. Setup Limpo
         mapa_para_sim = carregar_grafo_de_json("braga_mapa.json")
         gestor = GestorDeFrota(mapa_para_sim)
         setup_frota(gestor)
         gestor.definir_estrategia(estrategia)
         
+        # 2. Correr Simulação
+        # Nota: Assume-se que o Simulador corre sem GUI (rápido) por defeito se gui_interface=None
         simulador = Simulador(gestor, hora_inicio, duracao_horas)
+        simulador.run()
         
-        resultados = simulador.run()
-        resultados['estrategia'] = estrategia.name 
-        resultados_finais.append(resultados)
+        # 3. CALCULAR MÉTRICAS (Aqui mesmo, sem depender do return do Simulador)
+        pedidos = simulador.pedidos_gerados
+        total = len(pedidos)
+        concluidos = [p for p in pedidos if p.estado == EstadoPedido.CONCLUIDO]
+        rejeitados = [p for p in pedidos if p.estado == EstadoPedido.REJEITADO]
+        
+        taxa_rejeicao = (len(rejeitados) / total * 100) if total > 0 else 0.0
+        
+        tempo_medio = 0.0
+        if concluidos:
+            soma_tempos = sum(p.get_tempo_espera_total() for p in concluidos)
+            tempo_medio = soma_tempos / len(concluidos)
+        
+        # Guardar dados
+        resultados_finais.append({
+            'estrategia': estrategia.name,
+            'total': total,
+            'concluidos': len(concluidos),
+            'rejeitados': len(rejeitados),
+            'taxa_rejeicao': taxa_rejeicao,
+            'tempo_espera': tempo_medio
+        })
     
-    print("\n" + "="*50)    
-    print("--- 🏆 COMPARAÇÃO CONCLUÍDA 🏆 ---")
-    
+    # 4. Imprimir Tabela Final
     imprimir_tabela_comparativa(resultados_finais)

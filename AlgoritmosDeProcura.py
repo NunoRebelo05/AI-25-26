@@ -153,7 +153,7 @@ def bfs_search(grafo: Grafo, inicio: str, objetivo: str, cost_type: str = 'tempo
             for i in range(len(caminho) - 1):
                 dist, tempo = grafo.get_custo_aresta(caminho[i], caminho[i+1])
                 custo_real_g += tempo if cost_type == 'tempo' else dist
-            return caminho, custo_real_g # <--- FIX: Retorna (caminho, custo)
+            return caminho, custo_real_g 
 
         for vizinho in grafo.get_vizinhos(no_atual):
             if vizinho not in visited:

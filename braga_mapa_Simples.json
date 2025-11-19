@@ -1,0 +1,52 @@
+{
+  "nos": [
+    {"id": "Centro", "lat": 41.5518, "lon": -8.4231, "tipo": "Local"},
+    {"id": "UMinho", "lat": 41.5623, "lon": -8.3952, "tipo": "Local"},
+    {"id": "Estacao_CP", "lat": 41.5471, "lon": -8.4326, "tipo": "Local"},
+    {"id": "Hospital", "lat": 41.5600, "lon": -8.4350, "tipo": "Local"},
+    {"id": "Braga_Parque", "lat": 41.5582, "lon": -8.4053, "tipo": "Local"},
+    {"id": "Lamaçaes", "lat": 41.5513, "lon": -8.3989, "tipo": "Local"},
+    {"id": "Sequeira", "lat": 41.5381, "lon": -8.4526, "tipo": "Local"},
+    {"id": "Frossos", "lat": 41.5434, "lon": -8.4429, "tipo": "Local"},
+    
+    {"id": "Estacao_Recarga_1", "lat": 41.5580, "lon": -8.4110, "tipo": "Local", "pode_carregar": true},
+    {"id": "Estacao_Recarga_2", "lat": 41.5450, "lon": -8.4230, "tipo": "Local", "pode_carregar": true}
+  ],
+  "arestas": [
+    {"origem": "Centro", "destino": "UMinho", "distancia_km": 4.5, "tempo_base_min": 10.0},
+    {"origem": "Centro", "destino": "Estacao_CP", "distancia_km": 1.8, "tempo_base_min": 5.0},
+    {"origem": "Centro", "destino": "Hospital", "distancia_km": 2.5, "tempo_base_min": 7.0},
+    {"origem": "Centro", "destino": "Braga_Parque", "distancia_km": 3.0, "tempo_base_min": 8.0},
+    {"origem": "Centro", "destino": "Estacao_Recarga_2", "distancia_km": 1.0, "tempo_base_min": 3.0},
+    
+    {"origem": "UMinho", "destino": "Centro", "distancia_km": 4.2, "tempo_base_min": 9.0},
+    {"origem": "UMinho", "destino": "Braga_Parque", "distancia_km": 1.0, "tempo_base_min": 3.0},
+    {"origem": "UMinho", "destino": "Hospital", "distancia_km": 3.0, "tempo_base_min": 6.0},
+    {"origem": "UMinho", "destino": "Lamaçaes", "distancia_km": 1.5, "tempo_base_min": 4.0},
+    {"origem": "UMinho", "destino": "Estacao_Recarga_1", "distancia_km": 2.2, "tempo_base_min": 5.0},
+    
+    {"origem": "Estacao_CP", "destino": "Centro", "distancia_km": 2.0, "tempo_base_min": 6.0},
+    {"origem": "Estacao_CP", "destino": "Frossos", "distancia_km": 1.5, "tempo_base_min": 4.0},
+    {"origem": "Estacao_CP", "destino": "Estacao_Recarga_2", "distancia_km": 0.5, "tempo_base_min": 2.0},
+    
+    {"origem": "Hospital", "destino": "Centro", "distancia_km": 2.6, "tempo_base_min": 8.0},
+    {"origem": "Hospital", "destino": "UMinho", "distancia_km": 3.0, "tempo_base_min": 6.0},
+    {"origem": "Hospital", "destino": "Frossos", "distancia_km": 2.0, "tempo_base_min": 5.0},
+
+    {"origem": "Braga_Parque", "destino": "UMinho", "distancia_km": 1.0, "tempo_base_min": 3.0},
+    {"origem": "Braga_Parque", "destino": "Centro", "distancia_km": 3.0, "tempo_base_min": 8.0},
+    {"origem": "Braga_Parque", "destino": "Lamaçaes", "distancia_km": 1.2, "tempo_base_min": 4.0},
+    {"origem": "Braga_Parque", "destino": "Estacao_Recarga_1", "distancia_km": 0.5, "tempo_base_min": 2.0},
+    
+    {"origem": "Lamaçaes", "destino": "Braga_Parque", "distancia_km": 1.2, "tempo_base_min": 4.0},
+    {"origem": "Lamaçaes", "destino": "UMinho", "distancia_km": 1.5, "tempo_base_min": 4.0},
+    
+    {"origem": "Frossos", "destino": "Estacao_CP", "distancia_km": 1.5, "tempo_base_min": 4.0},
+    {"origem": "Frossos", "destino": "Sequeira", "distancia_km": 2.0, "tempo_base_min": 5.0},
+    
+    {"origem": "Sequeira", "destino": "Frossos", "distancia_km": 2.0, "tempo_base_min": 5.0},
+    
+    {"origem": "Estacao_Recarga_1", "destino": "Braga_Parque", "distancia_km": 0.5, "tempo_base_min": 2.0},
+    {"origem": "Estacao_Recarga_2", "destino": "Centro", "distancia_km": 1.0, "tempo_base_min": 3.0}
+  ]
+}
