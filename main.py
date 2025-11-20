@@ -28,12 +28,23 @@ def carregar_grafo_de_json(ficheiro_json: str) -> Grafo:
         return None
 
 def setup_frota(gestor: GestorDeFrota):
-    """Adiciona a frota inicial ao gestor."""
+    """
+    Adiciona a frota inicial ao gestor (AUMENTADA PARA 10 VEÍCULOS).
+    """
     frota = [
+        # Elétricos (Rápidos e baratos, mas param para carregar)
         Taxi("EV01", TipoMotorizacao.ELETRICO, "Centro", 4, 0.15, 250),
         Taxi("EV02", TipoMotorizacao.ELETRICO, "UMinho", 4, 0.15, 300),
+        Taxi("EV03", TipoMotorizacao.ELETRICO, "Braga_Parque", 4, 0.15, 250),
+        Taxi("EV04", TipoMotorizacao.ELETRICO, "Hospital", 4, 0.15, 250),
+        Taxi("EV05", TipoMotorizacao.ELETRICO, "Lamaçaes", 4, 0.15, 300),
+        
+        # Combustão (Mais caros, mas abastecimento rápido)
         Taxi("GAS01", TipoMotorizacao.COMBUSTAO, "Estacao_CP", 4, 0.25, 600),
-        Taxi("GAS02", TipoMotorizacao.COMBUSTAO, "Hospital", 6, 0.30, 550)
+        Taxi("GAS02", TipoMotorizacao.COMBUSTAO, "Hospital", 6, 0.30, 550),
+        Taxi("GAS03", TipoMotorizacao.COMBUSTAO, "Sequeira", 4, 0.25, 600),
+        Taxi("GAS04", TipoMotorizacao.COMBUSTAO, "Frossos", 8, 0.35, 500), # Carrinha
+        Taxi("GAS05", TipoMotorizacao.COMBUSTAO, "Avenida_Central", 4, 0.25, 600)
     ]
     for taxi in frota:
         gestor.add_taxi(taxi)
