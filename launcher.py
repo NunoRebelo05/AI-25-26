@@ -36,7 +36,7 @@ def iniciar_simulacao(config, app_gui):
         
         locais = list(mapa.nos.keys())
         for i in range(config['num_eletricos']):
-            gestor.add_taxi(Taxi(f"EV{i+1}", TipoMotorizacao.ELETRICO, locais[i%len(locais)], 4, 0.15, 250))
+            gestor.add_taxi(Taxi(f"EV{i+1}", TipoMotorizacao.ELETRICO, locais[i%len(locais)], 4, 0.15, 400))
         for i in range(config['num_combustao']):
             gestor.add_taxi(Taxi(f"GAS{i+1}", TipoMotorizacao.COMBUSTAO, locais[(i+3)%len(locais)], 4, 0.25, 600))
 
