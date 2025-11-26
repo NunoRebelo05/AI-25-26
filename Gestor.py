@@ -21,6 +21,12 @@ class GestorDeFrota:
         self.frota = {} 
         self.pedidos_pendentes = []
         self.estrategia_procura = EstrategiaProcura.A_STAR
+        
+        # Estatísticas de Procura
+        self.stats = {
+            'total_nos_visitados': 0,
+            'total_procuras': 0
+        }
 
     def definir_estrategia(self, estrategia: EstrategiaProcura):
         print(f"\n--- Estratégia de Procura alterada para: {estrategia.name} ---")
@@ -33,18 +39,27 @@ class GestorDeFrota:
         """Calcula o caminho entre dois pontos usando a estratégia definida."""
         tipo_otimizacao = 'tempo'
         
+        resultado = (None, float('inf'), 0)
+        
         if self.estrategia_procura == EstrategiaProcura.A_STAR:
-            return a_star_search(self.grafo, origem, destino, tipo_otimizacao, use_heuristic=True)
+            resultado = a_star_search(self.grafo, origem, destino, tipo_otimizacao, use_heuristic=True)
         elif self.estrategia_procura == EstrategiaProcura.UCS:
-            return a_star_search(self.grafo, origem, destino, tipo_otimizacao, use_heuristic=False)
+            resultado = a_star_search(self.grafo, origem, destino, tipo_otimizacao, use_heuristic=False)
         elif self.estrategia_procura == EstrategiaProcura.GULOSA:
-            return greedy_search(self.grafo, origem, destino, tipo_otimizacao)
+            resultado = greedy_search(self.grafo, origem, destino, tipo_otimizacao)
         elif self.estrategia_procura == EstrategiaProcura.DFS:
-            return dfs_search(self.grafo, origem, destino, tipo_otimizacao)
+            resultado = dfs_search(self.grafo, origem, destino, tipo_otimizacao)
         elif self.estrategia_procura == EstrategiaProcura.BFS:
-            return bfs_search(self.grafo, origem, destino, tipo_otimizacao)
+            resultado = bfs_search(self.grafo, origem, destino, tipo_otimizacao)
             
-        return None, float('inf')
+        caminho, custo, nos_visitados = resultado
+        
+        # Atualizar estatísticas
+        if caminho is not None:
+            self.stats['total_nos_visitados'] += nos_visitados
+            self.stats['total_procuras'] += 1
+            
+        return caminho, custo
 
     def decidir_alocacao(self, pedido: Pedido):
         melhor_taxi, melhor_custo, detalhes_caminho = self._encontrar_melhor_taxi(pedido)

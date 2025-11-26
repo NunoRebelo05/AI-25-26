@@ -38,27 +38,27 @@ def setup_frota(gestor: GestorDeFrota):
 
 def imprimir_tabela_comparativa(resultados: list):
     """Imprime a tabela final com os dados recolhidos."""
-    print("\n" + "="*90)
-    print(f"{'--- TABELA DE COMPARAÇÃO FINAL DAS ESTRATÉGIAS ---':^90}")
-    print("="*90)
+    print("\n" + "="*105)
+    print(f"{'--- TABELA DE COMPARAÇÃO FINAL DAS ESTRATÉGIAS ---':^105}")
+    print("="*105)
     
     # Info da Frota
     num_ev = cfg.get('frota.num_eletricos')
     num_gas = cfg.get('frota.num_combustao')
     print(f"Frota: {num_ev} Elétricos | {num_gas} Combustão")
-    print("-" * 90)
+    print("-" * 105)
     
     # Cabeçalho
-    print(f"{'Estratégia':<12} | {'Total':>6} | {'Concl.':>6} | {'Rej.':>6} | {'Taxa Rej.':>10} | {'Espera (min)':>14}")
-    print("-"*90)
+    print(f"{'Estratégia':<12} | {'Total':>6} | {'Concl.':>6} | {'Rej.':>6} | {'Taxa Rej.':>10} | {'Espera (min)':>14} | {'Média Nós':>12}")
+    print("-"*105)
     
     # Ordenar (Menor taxa de rejeição primeiro)
     resultados_ordenados = sorted(resultados, key=lambda x: (x['taxa_rejeicao'], x['tempo_espera']))
     
     for res in resultados_ordenados:
-        print(f"{res['estrategia']:<12} | {res['total']:>6} | {res['concluidos']:>6} | {res['rejeitados']:>6} | {res['taxa_rejeicao']:>9.1f}% | {res['tempo_espera']:>14.2f}")
+        print(f"{res['estrategia']:<12} | {res['total']:>6} | {res['concluidos']:>6} | {res['rejeitados']:>6} | {res['taxa_rejeicao']:>9.1f}% | {res['tempo_espera']:>14.2f} | {res['media_nos']:>12.1f}")
         
-    print("="*90)
+    print("="*105)
 
 # --- Ponto de Entrada Principal ---
 if __name__ == "__main__":
@@ -112,6 +112,11 @@ if __name__ == "__main__":
         if concluidos:
             soma_tempos = sum(p.get_tempo_espera_total() for p in concluidos)
             tempo_medio = soma_tempos / len(concluidos)
+            
+        # Média de Nós Visitados
+        total_nos = gestor.stats['total_nos_visitados']
+        total_procuras = gestor.stats['total_procuras']
+        media_nos = (total_nos / total_procuras) if total_procuras > 0 else 0.0
         
         # Guardar dados
         resultados_finais.append({
@@ -120,7 +125,8 @@ if __name__ == "__main__":
             'concluidos': len(concluidos),
             'rejeitados': len(rejeitados),
             'taxa_rejeicao': taxa_rejeicao,
-            'tempo_espera': tempo_medio
+            'tempo_espera': tempo_medio,
+            'media_nos': media_nos
         })
     
     # 4. Imprimir Tabela Final

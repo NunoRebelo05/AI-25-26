@@ -49,6 +49,7 @@ def a_star_search(grafo: Grafo, inicio: str, objetivo: str,
                   cost_type: str = 'distancia', use_heuristic: bool = True):
     """
     Implementação do algoritmo A* com Heurística Otimizada.
+    Retorna: (caminho, custo, nos_visitados)
     """
     
     g_costs = {no: float('inf') for no in grafo.nos}
@@ -80,15 +81,17 @@ def a_star_search(grafo: Grafo, inicio: str, objetivo: str,
     
     # Dicionário para rastrear o melhor custo encontrado para um nó
     visited_costs = {inicio: 0}
+    nos_visitados = 0
 
     while frontier:
         f_cost_atual, g_cost_atual, no_atual, caminho = heapq.heappop(frontier)
+        nos_visitados += 1
         
         if no_atual in visited_costs and g_cost_atual > visited_costs[no_atual]:
             continue
             
         if no_atual == objetivo:
-            return caminho, g_cost_atual
+            return caminho, g_cost_atual, nos_visitados
 
         for vizinho in grafo.get_vizinhos(no_atual):
             dist, tempo = grafo.get_custo_aresta(no_atual, vizinho)
@@ -105,14 +108,13 @@ def a_star_search(grafo: Grafo, inicio: str, objetivo: str,
                 
                 heapq.heappush(frontier, (novo_f_cost, novo_g_cost, vizinho, caminho + [vizinho]))
 
-    return None, float('inf')
-
+    return None, float('inf'), nos_visitados
 
 def greedy_search(grafo: Grafo, inicio: str, objetivo: str, 
                   cost_type: str = 'distancia'):
     """
     Implementação do algoritmo Guloso.
-    (Mantemos a heurística simples aqui para destacar a superioridade do A*)
+    Retorna: (caminho, custo, nos_visitados)
     """
     velocidade_media = cfg.get('simulacao.velocidade_media_cidade_kmh', 40.0)
 
@@ -127,9 +129,11 @@ def greedy_search(grafo: Grafo, inicio: str, objetivo: str,
     frontier = [(heuristic(inicio), inicio, [inicio])]
     heapq.heapify(frontier)
     visited = set()
+    nos_visitados = 0
 
     while frontier:
         h_val, no_atual, caminho = heapq.heappop(frontier)
+        nos_visitados += 1
         
         if no_atual in visited:
             continue
@@ -139,7 +143,7 @@ def greedy_search(grafo: Grafo, inicio: str, objetivo: str,
             for i in range(len(caminho) - 1):
                 d, t = grafo.get_custo_aresta(caminho[i], caminho[i+1])
                 custo_real += d if cost_type == 'distancia' else t
-            return caminho, custo_real
+            return caminho, custo_real, nos_visitados
 
         visited.add(no_atual)
 
@@ -148,21 +152,24 @@ def greedy_search(grafo: Grafo, inicio: str, objetivo: str,
                 h_new = heuristic(vizinho)
                 heapq.heappush(frontier, (h_new, vizinho, caminho + [vizinho]))
 
-    return None, float('inf')
+    return None, float('inf'), nos_visitados
 
 
 def dfs_search(grafo: Grafo, inicio: str, objetivo: str, cost_type: str = 'tempo'):
     """
     Implementação do algoritmo DFS.
+    Retorna: (caminho, custo, nos_visitados)
     """
     frontier = [(inicio, [inicio], 0.0)]
     visited = set()
+    nos_visitados = 0
 
     while frontier:
         no_atual, caminho, custo_atual = frontier.pop()
+        nos_visitados += 1
         
         if no_atual == objetivo:
-            return caminho, custo_atual
+            return caminho, custo_atual, nos_visitados
         
         if no_atual not in visited:
             visited.add(no_atual)
@@ -173,21 +180,24 @@ def dfs_search(grafo: Grafo, inicio: str, objetivo: str, cost_type: str = 'tempo
                     c_aresta = d if cost_type == 'distancia' else t
                     frontier.append((vizinho, caminho + [vizinho], custo_atual + c_aresta))
 
-    return None, float('inf')
+    return None, float('inf'), nos_visitados
 
 
 def bfs_search(grafo: Grafo, inicio: str, objetivo: str, cost_type: str = 'tempo'):
     """
     Implementação do algoritmo BFS.
+    Retorna: (caminho, custo, nos_visitados)
     """
     frontier = deque([(inicio, [inicio], 0.0)])
     visited = {inicio}
+    nos_visitados = 0
 
     while frontier:
         no_atual, caminho, custo_atual = frontier.popleft()
+        nos_visitados += 1
         
         if no_atual == objetivo:
-            return caminho, custo_atual
+            return caminho, custo_atual, nos_visitados
 
         for vizinho in grafo.get_vizinhos(no_atual):
             if vizinho not in visited:
@@ -196,4 +206,4 @@ def bfs_search(grafo: Grafo, inicio: str, objetivo: str, cost_type: str = 'tempo
                 c_aresta = d if cost_type == 'distancia' else t
                 frontier.append((vizinho, caminho + [vizinho], custo_atual + c_aresta))
 
-    return None, float('inf')
+    return None, float('inf'), nos_visitados
