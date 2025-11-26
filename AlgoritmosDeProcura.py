@@ -1,51 +1,79 @@
 import heapq
 from collections import deque
 from Grafo import Grafo 
+from Config import cfg
 
-# --- CONFIGURAÇÃO DA HEURÍSTICA ---
-# Velocidade média em cidade (mais realista que 80)
-VELOCIDADE_MEDIA_CIDADE_KMH = 40.0 
+# Cache para parâmetros da heurística
+_heuristic_cache = {
+    'graph_id': None,
+    'max_speed': 1.0,
+    'min_dist_ratio': 1.0
+}
+
+def _update_heuristic_cache(grafo: Grafo):
+    # Identificador simples para o grafo (usando id do objeto)
+    graph_id = id(grafo)
+    
+    if _heuristic_cache['graph_id'] == graph_id:
+        return _heuristic_cache['max_speed'], _heuristic_cache['min_dist_ratio']
+        
+    # --- CÁLCULO DA VELOCIDADE MÁXIMA E FATOR DE CORREÇÃO ---
+    max_speed_kmh = 1.0
+    min_dist_ratio = 1.0
+    
+    for u, vizinhos in grafo.arestas.items():
+        for v, dados in vizinhos.items():
+            dist_aresta = dados['distancia_km']
+            tempo_min = dados['tempo_base_min'] / 60.0 # horas
+            
+            if tempo_min > 0:
+                speed = dist_aresta / tempo_min
+                if speed > max_speed_kmh:
+                    max_speed_kmh = speed
+            
+            dist_hav = grafo.get_distancia_heuristica(u, v)
+            if dist_hav > 0:
+                ratio = dist_aresta / dist_hav
+                if ratio < min_dist_ratio:
+                    min_dist_ratio = ratio
+
+    max_speed_kmh *= 1.05 # Margem de segurança
+    
+    _heuristic_cache['graph_id'] = graph_id
+    _heuristic_cache['max_speed'] = max_speed_kmh
+    _heuristic_cache['min_dist_ratio'] = min_dist_ratio
+    
+    return max_speed_kmh, min_dist_ratio
 
 def a_star_search(grafo: Grafo, inicio: str, objetivo: str, 
                   cost_type: str = 'distancia', use_heuristic: bool = True):
     """
-    Implementação do algoritmo A* com Heurística Dinâmica.
+    Implementação do algoritmo A* com Heurística Otimizada.
     """
     
     g_costs = {no: float('inf') for no in grafo.nos}
     g_costs[inicio] = 0
     
-    # --- CÁLCULO DO FATOR DE TRÂNSITO GLOBAL ---
-    # Calcula a média de trânsito atual na cidade para ajustar a heurística.
-    # Isto torna o A* "consciente" do estado geral da rede.
-    fator_transito = 1.0
-    if cost_type == 'tempo' and grafo.condicoes_transito:
-        soma_transito = sum(grafo.condicoes_transito.values())
-        fator_transito = soma_transito / len(grafo.condicoes_transito)
-        # (Opcional) Forçar um mínimo de 1.0
-        fator_transito = max(1.0, fator_transito)
-    # -------------------------------------------
-    
+    max_speed_kmh, min_dist_ratio = _update_heuristic_cache(grafo)
+
     def heuristic(no_atual):
         if not use_heuristic:
             return 0 
             
         # Distância em linha reta (km)
-        h_dist = grafo.get_distancia_heuristica(no_atual, objetivo)
+        h_dist_raw = grafo.get_distancia_heuristica(no_atual, objetivo)
+        
+        # Aplicar correção geométrica para garantir h(n) <= custo_real
+        h_dist = h_dist_raw * min_dist_ratio
         
         if cost_type == 'distancia':
-            # Tie-breaker simples
-            return h_dist * 1.001 
+            return h_dist
         else: # cost_type == 'tempo'
-            # 1. Converter distância em tempo base (usando velocidade realista)
-            h_tempo_horas = h_dist / VELOCIDADE_MEDIA_CIDADE_KMH
+            # Usamos a velocidade máxima para estimar o tempo mínimo
+            h_tempo_horas = h_dist / max_speed_kmh
             h_tempo_min = h_tempo_horas * 60
             
-            # 2. Aplicar o Fator de Trânsito Global
-            # Se a cidade está lenta, a estimativa de tempo aumenta
-            h_final = h_tempo_min * fator_transito
-            
-            return h_final * 1.001 # Tie-breaker
+            return h_tempo_min
             
     frontier = [(heuristic(inicio), 0, inicio, [inicio])]
     heapq.heapify(frontier)
@@ -86,13 +114,15 @@ def greedy_search(grafo: Grafo, inicio: str, objetivo: str,
     Implementação do algoritmo Guloso.
     (Mantemos a heurística simples aqui para destacar a superioridade do A*)
     """
+    velocidade_media = cfg.get('simulacao.velocidade_media_cidade_kmh', 40.0)
+
     def heuristic(no_atual):
         h_dist = grafo.get_distancia_heuristica(no_atual, objetivo)
         if cost_type == 'distancia':
             return h_dist
         else:
             # Gulosa usa a estimativa simples sem considerar trânsito
-            return (h_dist / VELOCIDADE_MEDIA_CIDADE_KMH) * 60
+            return (h_dist / velocidade_media) * 60
             
     frontier = [(heuristic(inicio), inicio, [inicio])]
     heapq.heapify(frontier)

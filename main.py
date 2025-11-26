@@ -4,56 +4,49 @@ from Grafo import Grafo
 from Taxi import Taxi, TipoMotorizacao
 from Gestor import GestorDeFrota, EstrategiaProcura 
 from Simulador import Simulador
-from Pedido import EstadoPedido # Necessário para calcular as métricas aqui
-
-def carregar_grafo_de_json(ficheiro_json: str) -> Grafo:
-    """Cria e retorna um objeto Grafo a partir de um ficheiro JSON."""
-    mapa = Grafo()
-    try:
-        with open(ficheiro_json, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-            for no in data['nos']:
-                mapa.add_no(no['id'], no['lat'], no['lon'], no.get('tipo', 'PontoInteresse'))
-                # Carregar a flag de carregamento se existir
-                if no.get('pode_carregar'):
-                     mapa.nos[no['id']]['pode_carregar'] = True
-            
-            for aresta in data['arestas']:
-                mapa.add_aresta(aresta['origem'], aresta['destino'], aresta['distancia_km'], aresta['tempo_base_min'])
-            
-            print(f"INFO: Grafo carregado de '{ficheiro_json}' com {len(mapa.nos)} nós.")
-            return mapa
-    except Exception as e:
-        print(f"ERRO: Falha ao ler o JSON do mapa: {e}")
-        return None
+from Pedido import EstadoPedido
+from Config import cfg
+import random
 
 def setup_frota(gestor: GestorDeFrota):
     """
-    Adiciona a frota inicial ao gestor (AUMENTADA PARA 10 VEÍCULOS).
+    Adiciona a frota ao gestor baseada na configuração.
     """
-    frota = [
-        # Elétricos (Rápidos e baratos, mas param para carregar)
-        Taxi("EV01", TipoMotorizacao.ELETRICO, "Centro", 4, 0.15, 250),
-        Taxi("EV02", TipoMotorizacao.ELETRICO, "UMinho", 4, 0.15, 300),
-        Taxi("EV03", TipoMotorizacao.ELETRICO, "Braga_Parque", 4, 0.15, 250),
-        Taxi("EV04", TipoMotorizacao.ELETRICO, "Hospital", 4, 0.15, 250),
-        Taxi("EV05", TipoMotorizacao.ELETRICO, "Lamaçaes", 4, 0.15, 300),
-        
-        # Combustão (Mais caros, mas abastecimento rápido)
-        Taxi("GAS01", TipoMotorizacao.COMBUSTAO, "Estacao_CP", 4, 0.25, 600),
-        Taxi("GAS02", TipoMotorizacao.COMBUSTAO, "Hospital", 6, 0.30, 550),
-        Taxi("GAS03", TipoMotorizacao.COMBUSTAO, "Sequeira", 4, 0.25, 600),
-        Taxi("GAS04", TipoMotorizacao.COMBUSTAO, "Frossos", 8, 0.35, 500), # Carrinha
-        Taxi("GAS05", TipoMotorizacao.COMBUSTAO, "Avenida_Central", 4, 0.25, 600)
-    ]
-    for taxi in frota:
+    # 1. Carregar specs da config
+    specs_ev = cfg.get('frota.specs_eletrico')
+    specs_gas = cfg.get('frota.specs_combustao')
+    
+    num_ev = cfg.get('frota.num_eletricos')
+    num_gas = cfg.get('frota.num_combustao')
+    
+    locais = list(gestor.grafo.nos.keys())
+    if not locais: return
+
+    # 2. Criar Elétricos
+    for i in range(num_ev):
+        local = locais[i % len(locais)]
+        taxi = Taxi(f"EV{i+1:02d}", TipoMotorizacao.ELETRICO, local, 
+                    specs_ev['capacidade'], specs_ev['custo_km'], specs_ev['autonomia'])
+        gestor.add_taxi(taxi)
+
+    # 3. Criar Combustão
+    for i in range(num_gas):
+        local = locais[(i + 3) % len(locais)] # Offset para variar
+        taxi = Taxi(f"GAS{i+1:02d}", TipoMotorizacao.COMBUSTAO, local,
+                    specs_gas['capacidade'], specs_gas['custo_km'], specs_gas['autonomia'])
         gestor.add_taxi(taxi)
 
 def imprimir_tabela_comparativa(resultados: list):
     """Imprime a tabela final com os dados recolhidos."""
     print("\n" + "="*90)
-    print(f"{'--- 🏆 TABELA DE COMPARAÇÃO FINAL DAS ESTRATÉGIAS 🏆 ---':^90}")
+    print(f"{'--- TABELA DE COMPARAÇÃO FINAL DAS ESTRATÉGIAS ---':^90}")
     print("="*90)
+    
+    # Info da Frota
+    num_ev = cfg.get('frota.num_eletricos')
+    num_gas = cfg.get('frota.num_combustao')
+    print(f"Frota: {num_ev} Elétricos | {num_gas} Combustão")
+    print("-" * 90)
     
     # Cabeçalho
     print(f"{'Estratégia':<12} | {'Total':>6} | {'Concl.':>6} | {'Rej.':>6} | {'Taxa Rej.':>10} | {'Espera (min)':>14}")
@@ -70,12 +63,15 @@ def imprimir_tabela_comparativa(resultados: list):
 # --- Ponto de Entrada Principal ---
 if __name__ == "__main__":
     
+    # Carregar Configuração
+    cfg.carregar()
+
     # Verificar se o mapa existe
-    mapa_teste = carregar_grafo_de_json("braga_mapa.json")
+    mapa_teste = Grafo.carregar_de_json("braga_mapa.json")
     if not mapa_teste: exit()
         
     hora_inicio = datetime(2025, 10, 20, 8, 0, 0)
-    duracao_horas = 12
+    duracao_horas = cfg.get('simulacao.duracao_horas')
     
     estrategias = [
         EstrategiaProcura.A_STAR,
@@ -85,21 +81,23 @@ if __name__ == "__main__":
         EstrategiaProcura.BFS
     ]
 
-    print("\n--- 🚀 INÍCIO DO BENCHMARK 🚀 ---")
+    print("\n--- INÍCIO DO BENCHMARK ---")
     resultados_finais = []
 
     for estrategia in estrategias:
         print(f"\n>> A TESTAR: {estrategia.name}...")
         
         # 1. Setup Limpo
-        mapa_para_sim = carregar_grafo_de_json("braga_mapa.json")
+        random.seed(42) # Garantir reprodutibilidade entre estratégias
+        mapa_para_sim = Grafo.carregar_de_json("braga_mapa.json")
         gestor = GestorDeFrota(mapa_para_sim)
         setup_frota(gestor)
         gestor.definir_estrategia(estrategia)
         
         # 2. Correr Simulação
         # Nota: Assume-se que o Simulador corre sem GUI (rápido) por defeito se gui_interface=None
-        simulador = Simulador(gestor, hora_inicio, duracao_horas)
+        # Forçamos usar_estaticos=True para garantir comparação justa
+        simulador = Simulador(gestor, hora_inicio, duracao_horas, usar_estaticos=True)
         simulador.run()
         
         # 3. CALCULAR MÉTRICAS (Aqui mesmo, sem depender do return do Simulador)

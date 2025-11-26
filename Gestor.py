@@ -4,16 +4,9 @@ from datetime import datetime, timedelta
 from Grafo import Grafo
 from Taxi import Taxi, TipoMotorizacao, EstadoVeiculo
 from Pedido import Pedido, PrioridadePedido
+from Config import cfg
 
 from AlgoritmosDeProcura import a_star_search, greedy_search, dfs_search, bfs_search
-
-PESOS_ESTRATEGIA = {
-    'W_TEMPO_ESPERA': 1.5,
-    'W_CUSTO_OPER': 1.0,
-    'W_KM_SEM_PAX': 0.8,
-    'PENALIZACAO_AMBIENTAL': 50.0,
-    'PENALIZACAO_PRIORIDADE': 3.0
-}
 
 class EstrategiaProcura(Enum):
     A_STAR = auto()
@@ -30,7 +23,7 @@ class GestorDeFrota:
         self.estrategia_procura = EstrategiaProcura.A_STAR
 
     def definir_estrategia(self, estrategia: EstrategiaProcura):
-        print(f"\n--- ⚠️  Estratégia de Procura alterada para: {estrategia.name} ---")
+        print(f"\n--- Estratégia de Procura alterada para: {estrategia.name} ---")
         self.estrategia_procura = estrategia
 
     def add_taxi(self, taxi: Taxi):
@@ -86,10 +79,8 @@ class GestorDeFrota:
         dist_viagem = self._get_dist_caminho(caminho_viagem)
         dist_total_servico = dist_pickup + dist_viagem
         
-        # --- REGRA DE SEGURANÇA (NOVO) ---
-        # Só aceita se tiver bateria para o serviço + 20% de margem de segurança
-        # Isto evita que o táxi fique a 0% a meio da viagem
-        margem_seguranca = 1.2 
+        # --- REGRA DE SEGURANÇA ---
+        margem_seguranca = cfg.get('simulacao.margem_seguranca_bateria', 1.2)
         distancia_necessaria = dist_total_servico * margem_seguranca
         
         if not taxi.pode_aceitar_pedido(pedido.num_passageiros, distancia_necessaria):
@@ -103,16 +94,16 @@ class GestorDeFrota:
         
         C_amb = 0.0
         if pedido.pref_ambiental and taxi.tipo == TipoMotorizacao.COMBUSTAO:
-            C_amb = PESOS_ESTRATEGIA['PENALIZACAO_AMBIENTAL']
+            C_amb = cfg.get('pesos_estrategia.PENALIZACAO_AMBIENTAL')
             
-        W_espera = PESOS_ESTRATEGIA['W_TEMPO_ESPERA']
+        W_espera = cfg.get('pesos_estrategia.W_TEMPO_ESPERA')
         if pedido.prioridade == PrioridadePedido.URGENTE:
-            W_espera *= PESOS_ESTRATEGIA['PENALIZACAO_PRIORIDADE']
+            W_espera *= cfg.get('pesos_estrategia.PENALIZACAO_PRIORIDADE')
             
         custo_final = (
             (W_espera * C_espera) +
-            (PESOS_ESTRATEGIA['W_CUSTO_OPER'] * C_oper) +
-            (PESOS_ESTRATEGIA['W_KM_SEM_PAX'] * C_vazio) +
+            (cfg.get('pesos_estrategia.W_CUSTO_OPER') * C_oper) +
+            (cfg.get('pesos_estrategia.W_KM_SEM_PAX') * C_vazio) +
             C_amb
         )
         

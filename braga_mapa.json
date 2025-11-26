@@ -1,107 +1,504 @@
 {
   "nos": [
-    {"id": "Centro", "lat": 41.5503, "lon": -8.4200, "tipo": "ZonaRecolha"},
-    {"id": "Avenida_Central", "lat": 41.5535, "lon": -8.4160, "tipo": "ZonaRecolha"},
-    {"id": "Praca_Republica", "lat": 41.5550, "lon": -8.4250, "tipo": "ZonaRecolha"},
-    {"id": "Estacao_CP", "lat": 41.5430, "lon": -8.4350, "tipo": "PontoInteresse"},
-    {"id": "Maximinos", "lat": 41.5400, "lon": -8.4400, "tipo": "ZonaRecolha"},
-    
-    {"id": "UMinho_Gualtar", "lat": 41.5650, "lon": -8.3900, "tipo": "ZonaRecolha"},
-    {"id": "Hospital", "lat": 41.5650, "lon": -8.4350, "tipo": "ZonaRecolha", "pode_carregar": true},
-    {"id": "Braga_Parque", "lat": 41.5600, "lon": -8.4050, "tipo": "ZonaRecolha", "pode_carregar": true},
-    {"id": "Minho_Center", "lat": 41.5450, "lon": -8.4000, "tipo": "ZonaRecolha", "pode_carregar": true},
-    
-    {"id": "Lamaçaes", "lat": 41.5500, "lon": -8.3900, "tipo": "ZonaRecolha"},
-    {"id": "Fraiao", "lat": 41.5300, "lon": -8.4050, "tipo": "ZonaRecolha"},
-    {"id": "Nogueira", "lat": 41.5250, "lon": -8.4150, "tipo": "ZonaRecolha"},
-    
-    {"id": "Ferreiros", "lat": 41.5250, "lon": -8.4450, "tipo": "ZonaIndustrial"},
-    {"id": "Sequeira", "lat": 41.5350, "lon": -8.4650, "tipo": "ZonaIndustrial"},
-    {"id": "Frossos", "lat": 41.5500, "lon": -8.4550, "tipo": "ZonaIndustrial"},
-    {"id": "Real", "lat": 41.5600, "lon": -8.4500, "tipo": "ZonaRecolha"},
-    
-    {"id": "Estadio", "lat": 41.5700, "lon": -8.4250, "tipo": "PontoInteresse"},
-    {"id": "Infias", "lat": 41.5620, "lon": -8.4200, "tipo": "ZonaRecolha"},
-    {"id": "Bom_Jesus", "lat": 41.5546, "lon": -8.3750, "tipo": "PontoInteresse"},
-    {"id": "Sameiro", "lat": 41.5400, "lon": -8.3650, "tipo": "PontoInteresse"},
-    
-    {"id": "Celeiros", "lat": 41.5150, "lon": -8.4350, "tipo": "ZonaIndustrial"},
-    {"id": "Adaufe", "lat": 41.5850, "lon": -8.3900, "tipo": "ZonaRecolha"},
-    
-    {"id": "Posto_Recarga_Centro", "lat": 41.5480, "lon": -8.4250, "tipo": "EstacaoRecarga", "pode_carregar": true},
-    {"id": "Posto_Recarga_Norte", "lat": 41.5700, "lon": -8.4000, "tipo": "EstacaoRecarga", "pode_carregar": true},
-    {"id": "Posto_Recarga_Sul", "lat": 41.5250, "lon": -8.4350, "tipo": "EstacaoRecarga", "pode_carregar": true}
+    {
+      "id": "Centro",
+      "lat": 41.5503,
+      "lon": -8.4200,
+      "tipo": "ZonaRecolha"
+    },
+    {
+      "id": "Avenida_Central",
+      "lat": 41.5535,
+      "lon": -8.4160,
+      "tipo": "ZonaRecolha"
+    },
+    {
+      "id": "Praca_Republica",
+      "lat": 41.5550,
+      "lon": -8.4250,
+      "tipo": "ZonaRecolha"
+    },
+    {
+      "id": "Estacao_CP",
+      "lat": 41.5430,
+      "lon": -8.4350,
+      "tipo": "PontoInteresse"
+    },
+    {
+      "id": "Maximinos",
+      "lat": 41.5400,
+      "lon": -8.4400,
+      "tipo": "ZonaRecolha"
+    },
+    {
+      "id": "UMinho_Gualtar",
+      "lat": 41.5650,
+      "lon": -8.3900,
+      "tipo": "ZonaRecolha"
+    },
+    {
+      "id": "Hospital",
+      "lat": 41.5650,
+      "lon": -8.4350,
+      "tipo": "ZonaRecolha",
+      "pode_carregar": true
+    },
+    {
+      "id": "Braga_Parque",
+      "lat": 41.5600,
+      "lon": -8.4050,
+      "tipo": "ZonaRecolha",
+      "pode_carregar": true
+    },
+    {
+      "id": "Minho_Center",
+      "lat": 41.5450,
+      "lon": -8.4000,
+      "tipo": "ZonaRecolha",
+      "pode_carregar": true
+    },
+    {
+      "id": "Lamaçaes",
+      "lat": 41.5500,
+      "lon": -8.3900,
+      "tipo": "ZonaRecolha"
+    },
+    {
+      "id": "Fraiao",
+      "lat": 41.5300,
+      "lon": -8.4050,
+      "tipo": "ZonaRecolha"
+    },
+    {
+      "id": "Nogueira",
+      "lat": 41.5250,
+      "lon": -8.4150,
+      "tipo": "ZonaRecolha"
+    },
+    {
+      "id": "Ferreiros",
+      "lat": 41.5250,
+      "lon": -8.4450,
+      "tipo": "ZonaIndustrial"
+    },
+    {
+      "id": "Sequeira",
+      "lat": 41.5350,
+      "lon": -8.4650,
+      "tipo": "ZonaIndustrial"
+    },
+    {
+      "id": "Frossos",
+      "lat": 41.5500,
+      "lon": -8.4550,
+      "tipo": "ZonaIndustrial"
+    },
+    {
+      "id": "Real",
+      "lat": 41.5600,
+      "lon": -8.4500,
+      "tipo": "ZonaRecolha"
+    },
+    {
+      "id": "Estadio",
+      "lat": 41.5700,
+      "lon": -8.4250,
+      "tipo": "PontoInteresse"
+    },
+    {
+      "id": "Infias",
+      "lat": 41.5620,
+      "lon": -8.4200,
+      "tipo": "ZonaRecolha"
+    },
+    {
+      "id": "Bom_Jesus",
+      "lat": 41.5546,
+      "lon": -8.3750,
+      "tipo": "PontoInteresse"
+    },
+    {
+      "id": "Sameiro",
+      "lat": 41.5400,
+      "lon": -8.3650,
+      "tipo": "PontoInteresse"
+    },
+    {
+      "id": "Celeiros",
+      "lat": 41.5150,
+      "lon": -8.4350,
+      "tipo": "ZonaIndustrial"
+    },
+    {
+      "id": "Adaufe",
+      "lat": 41.5850,
+      "lon": -8.3900,
+      "tipo": "ZonaRecolha"
+    },
+    {
+      "id": "Posto_Recarga_Centro",
+      "lat": 41.5480,
+      "lon": -8.4250,
+      "tipo": "EstacaoRecarga",
+      "pode_carregar": true
+    },
+    {
+      "id": "Posto_Recarga_Norte",
+      "lat": 41.5700,
+      "lon": -8.4000,
+      "tipo": "EstacaoRecarga",
+      "pode_carregar": true
+    },
+    {
+      "id": "Posto_Recarga_Sul",
+      "lat": 41.5250,
+      "lon": -8.4350,
+      "tipo": "EstacaoRecarga",
+      "pode_carregar": true
+    }
   ],
   "arestas": [
-    {"origem": "Centro", "destino": "Avenida_Central", "distancia_km": 0.8, "tempo_base_min": 3.0},
-    {"origem": "Centro", "destino": "Praca_Republica", "distancia_km": 0.9, "tempo_base_min": 3.5},
-    {"origem": "Centro", "destino": "Posto_Recarga_Centro", "distancia_km": 0.5, "tempo_base_min": 2.0},
-    {"origem": "Avenida_Central", "destino": "Centro", "distancia_km": 0.8, "tempo_base_min": 3.0},
-    {"origem": "Praca_Republica", "destino": "Centro", "distancia_km": 0.9, "tempo_base_min": 3.5},
-    {"origem": "Posto_Recarga_Centro", "destino": "Centro", "distancia_km": 0.5, "tempo_base_min": 2.0},
-    
-    {"origem": "Avenida_Central", "destino": "Infias", "distancia_km": 1.5, "tempo_base_min": 5.0},
-    {"origem": "Infias", "destino": "Avenida_Central", "distancia_km": 1.5, "tempo_base_min": 5.0},
-    {"origem": "Infias", "destino": "Estadio", "distancia_km": 1.2, "tempo_base_min": 4.0},
-    {"origem": "Estadio", "destino": "Infias", "distancia_km": 1.2, "tempo_base_min": 4.0},
-    {"origem": "Estadio", "destino": "Hospital", "distancia_km": 2.0, "tempo_base_min": 6.0},
-    {"origem": "Hospital", "destino": "Estadio", "distancia_km": 2.0, "tempo_base_min": 6.0},
-    
-    {"origem": "Hospital", "destino": "Infias", "distancia_km": 2.5, "tempo_base_min": 7.0},
-    {"origem": "Hospital", "destino": "Real", "distancia_km": 3.0, "tempo_base_min": 8.0},
-    {"origem": "Real", "destino": "Hospital", "distancia_km": 3.0, "tempo_base_min": 8.0},
-    {"origem": "Real", "destino": "Frossos", "distancia_km": 2.0, "tempo_base_min": 5.0},
-    {"origem": "Frossos", "destino": "Real", "distancia_km": 2.0, "tempo_base_min": 5.0},
-    
-    {"origem": "Estacao_CP", "destino": "Maximinos", "distancia_km": 1.0, "tempo_base_min": 3.0},
-    {"origem": "Maximinos", "destino": "Estacao_CP", "distancia_km": 1.0, "tempo_base_min": 3.0},
-    {"origem": "Maximinos", "destino": "Ferreiros", "distancia_km": 2.5, "tempo_base_min": 6.0},
-    {"origem": "Ferreiros", "destino": "Maximinos", "distancia_km": 2.5, "tempo_base_min": 6.0},
-    
-    {"origem": "Ferreiros", "destino": "Celeiros", "distancia_km": 3.0, "tempo_base_min": 8.0},
-    {"origem": "Celeiros", "destino": "Ferreiros", "distancia_km": 3.0, "tempo_base_min": 8.0},
-    {"origem": "Celeiros", "destino": "Posto_Recarga_Sul", "distancia_km": 1.5, "tempo_base_min": 4.0},
-    {"origem": "Posto_Recarga_Sul", "destino": "Celeiros", "distancia_km": 1.5, "tempo_base_min": 4.0},
-    
-    {"origem": "Sequeira", "destino": "Frossos", "distancia_km": 2.5, "tempo_base_min": 6.0},
-    {"origem": "Frossos", "destino": "Sequeira", "distancia_km": 2.5, "tempo_base_min": 6.0},
-    {"origem": "Sequeira", "destino": "Ferreiros", "distancia_km": 4.0, "tempo_base_min": 9.0},
-    {"origem": "Ferreiros", "destino": "Sequeira", "distancia_km": 4.0, "tempo_base_min": 9.0},
-    
-    {"origem": "Estacao_CP", "destino": "Centro", "distancia_km": 2.2, "tempo_base_min": 7.0},
-    {"origem": "Centro", "destino": "Estacao_CP", "distancia_km": 2.2, "tempo_base_min": 7.0},
-    {"origem": "Estacao_CP", "destino": "Posto_Recarga_Centro", "distancia_km": 1.5, "tempo_base_min": 4.0},
-    {"origem": "Posto_Recarga_Centro", "destino": "Estacao_CP", "distancia_km": 1.5, "tempo_base_min": 4.0},
-
-    {"origem": "Avenida_Central", "destino": "Braga_Parque", "distancia_km": 3.0, "tempo_base_min": 9.0},
-    {"origem": "Braga_Parque", "destino": "Avenida_Central", "distancia_km": 3.0, "tempo_base_min": 9.0},
-    
-    {"origem": "Braga_Parque", "destino": "UMinho_Gualtar", "distancia_km": 1.5, "tempo_base_min": 4.0},
-    {"origem": "UMinho_Gualtar", "destino": "Braga_Parque", "distancia_km": 1.5, "tempo_base_min": 4.0},
-    {"origem": "UMinho_Gualtar", "destino": "Posto_Recarga_Norte", "distancia_km": 1.0, "tempo_base_min": 3.0},
-    {"origem": "Posto_Recarga_Norte", "destino": "UMinho_Gualtar", "distancia_km": 1.0, "tempo_base_min": 3.0},
-    {"origem": "UMinho_Gualtar", "destino": "Adaufe", "distancia_km": 3.5, "tempo_base_min": 8.0},
-    {"origem": "Adaufe", "destino": "UMinho_Gualtar", "distancia_km": 3.5, "tempo_base_min": 8.0},
-    
-    {"origem": "Braga_Parque", "destino": "Lamaçaes", "distancia_km": 2.0, "tempo_base_min": 5.0},
-    {"origem": "Lamaçaes", "destino": "Braga_Parque", "distancia_km": 2.0, "tempo_base_min": 5.0},
-    
-    {"origem": "Lamaçaes", "destino": "Minho_Center", "distancia_km": 2.0, "tempo_base_min": 5.0},
-    {"origem": "Minho_Center", "destino": "Lamaçaes", "distancia_km": 2.0, "tempo_base_min": 5.0},
-    {"origem": "Minho_Center", "destino": "Fraiao", "distancia_km": 1.5, "tempo_base_min": 4.0},
-    {"origem": "Fraiao", "destino": "Minho_Center", "distancia_km": 1.5, "tempo_base_min": 4.0},
-    {"origem": "Fraiao", "destino": "Nogueira", "distancia_km": 2.0, "tempo_base_min": 5.0},
-    {"origem": "Nogueira", "destino": "Fraiao", "distancia_km": 2.0, "tempo_base_min": 5.0},
-    
-    {"origem": "Minho_Center", "destino": "Estacao_CP", "distancia_km": 4.0, "tempo_base_min": 10.0},
-    {"origem": "Estacao_CP", "destino": "Minho_Center", "distancia_km": 4.0, "tempo_base_min": 10.0},
-
-    {"origem": "UMinho_Gualtar", "destino": "Bom_Jesus", "distancia_km": 3.0, "tempo_base_min": 8.0},
-    {"origem": "Bom_Jesus", "destino": "UMinho_Gualtar", "distancia_km": 3.0, "tempo_base_min": 8.0},
-    {"origem": "Bom_Jesus", "destino": "Sameiro", "distancia_km": 2.5, "tempo_base_min": 6.0},
-    {"origem": "Sameiro", "destino": "Bom_Jesus", "distancia_km": 2.5, "tempo_base_min": 6.0},
-    
-    {"origem": "Lamaçaes", "destino": "Bom_Jesus", "distancia_km": 4.0, "tempo_base_min": 11.0},
-    {"origem": "Bom_Jesus", "destino": "Lamaçaes", "distancia_km": 4.0, "tempo_base_min": 11.0}
+    {
+      "origem": "Centro",
+      "destino": "Avenida_Central",
+      "distancia_km": 0.8,
+      "tempo_base_min": 3.0
+    },
+    {
+      "origem": "Centro",
+      "destino": "Praca_Republica",
+      "distancia_km": 0.9,
+      "tempo_base_min": 3.5
+    },
+    {
+      "origem": "Centro",
+      "destino": "Posto_Recarga_Centro",
+      "distancia_km": 0.5,
+      "tempo_base_min": 2.0
+    },
+    {
+      "origem": "Avenida_Central",
+      "destino": "Centro",
+      "distancia_km": 0.8,
+      "tempo_base_min": 3.0
+    },
+    {
+      "origem": "Praca_Republica",
+      "destino": "Centro",
+      "distancia_km": 0.9,
+      "tempo_base_min": 3.5
+    },
+    {
+      "origem": "Posto_Recarga_Centro",
+      "destino": "Centro",
+      "distancia_km": 0.5,
+      "tempo_base_min": 2.0
+    },
+    {
+      "origem": "Avenida_Central",
+      "destino": "Infias",
+      "distancia_km": 1.5,
+      "tempo_base_min": 5.0
+    },
+    {
+      "origem": "Infias",
+      "destino": "Avenida_Central",
+      "distancia_km": 1.5,
+      "tempo_base_min": 5.0
+    },
+    {
+      "origem": "Infias",
+      "destino": "Estadio",
+      "distancia_km": 1.2,
+      "tempo_base_min": 4.0
+    },
+    {
+      "origem": "Estadio",
+      "destino": "Infias",
+      "distancia_km": 1.2,
+      "tempo_base_min": 4.0
+    },
+    {
+      "origem": "Estadio",
+      "destino": "Hospital",
+      "distancia_km": 2.0,
+      "tempo_base_min": 6.0
+    },
+    {
+      "origem": "Hospital",
+      "destino": "Estadio",
+      "distancia_km": 2.0,
+      "tempo_base_min": 6.0
+    },
+    {
+      "origem": "Hospital",
+      "destino": "Infias",
+      "distancia_km": 2.5,
+      "tempo_base_min": 7.0
+    },
+    {
+      "origem": "Hospital",
+      "destino": "Real",
+      "distancia_km": 3.0,
+      "tempo_base_min": 8.0
+    },
+    {
+      "origem": "Real",
+      "destino": "Hospital",
+      "distancia_km": 3.0,
+      "tempo_base_min": 8.0
+    },
+    {
+      "origem": "Real",
+      "destino": "Frossos",
+      "distancia_km": 2.0,
+      "tempo_base_min": 5.0
+    },
+    {
+      "origem": "Frossos",
+      "destino": "Real",
+      "distancia_km": 2.0,
+      "tempo_base_min": 5.0
+    },
+    {
+      "origem": "Estacao_CP",
+      "destino": "Maximinos",
+      "distancia_km": 1.0,
+      "tempo_base_min": 3.0
+    },
+    {
+      "origem": "Maximinos",
+      "destino": "Estacao_CP",
+      "distancia_km": 1.0,
+      "tempo_base_min": 3.0
+    },
+    {
+      "origem": "Maximinos",
+      "destino": "Ferreiros",
+      "distancia_km": 2.5,
+      "tempo_base_min": 6.0
+    },
+    {
+      "origem": "Ferreiros",
+      "destino": "Maximinos",
+      "distancia_km": 2.5,
+      "tempo_base_min": 6.0
+    },
+    {
+      "origem": "Ferreiros",
+      "destino": "Celeiros",
+      "distancia_km": 3.0,
+      "tempo_base_min": 8.0
+    },
+    {
+      "origem": "Celeiros",
+      "destino": "Ferreiros",
+      "distancia_km": 3.0,
+      "tempo_base_min": 8.0
+    },
+    {
+      "origem": "Celeiros",
+      "destino": "Posto_Recarga_Sul",
+      "distancia_km": 1.5,
+      "tempo_base_min": 4.0
+    },
+    {
+      "origem": "Posto_Recarga_Sul",
+      "destino": "Celeiros",
+      "distancia_km": 1.5,
+      "tempo_base_min": 4.0
+    },
+    {
+      "origem": "Sequeira",
+      "destino": "Frossos",
+      "distancia_km": 2.5,
+      "tempo_base_min": 6.0
+    },
+    {
+      "origem": "Frossos",
+      "destino": "Sequeira",
+      "distancia_km": 2.5,
+      "tempo_base_min": 6.0
+    },
+    {
+      "origem": "Sequeira",
+      "destino": "Ferreiros",
+      "distancia_km": 4.0,
+      "tempo_base_min": 9.0
+    },
+    {
+      "origem": "Ferreiros",
+      "destino": "Sequeira",
+      "distancia_km": 4.0,
+      "tempo_base_min": 9.0
+    },
+    {
+      "origem": "Estacao_CP",
+      "destino": "Centro",
+      "distancia_km": 2.2,
+      "tempo_base_min": 7.0
+    },
+    {
+      "origem": "Centro",
+      "destino": "Estacao_CP",
+      "distancia_km": 2.2,
+      "tempo_base_min": 7.0
+    },
+    {
+      "origem": "Estacao_CP",
+      "destino": "Posto_Recarga_Centro",
+      "distancia_km": 1.5,
+      "tempo_base_min": 4.0
+    },
+    {
+      "origem": "Posto_Recarga_Centro",
+      "destino": "Estacao_CP",
+      "distancia_km": 1.5,
+      "tempo_base_min": 4.0
+    },
+    {
+      "origem": "Avenida_Central",
+      "destino": "Braga_Parque",
+      "distancia_km": 3.0,
+      "tempo_base_min": 9.0
+    },
+    {
+      "origem": "Braga_Parque",
+      "destino": "Avenida_Central",
+      "distancia_km": 3.0,
+      "tempo_base_min": 9.0
+    },
+    {
+      "origem": "Braga_Parque",
+      "destino": "UMinho_Gualtar",
+      "distancia_km": 1.5,
+      "tempo_base_min": 4.0
+    },
+    {
+      "origem": "UMinho_Gualtar",
+      "destino": "Braga_Parque",
+      "distancia_km": 1.5,
+      "tempo_base_min": 4.0
+    },
+    {
+      "origem": "UMinho_Gualtar",
+      "destino": "Posto_Recarga_Norte",
+      "distancia_km": 1.0,
+      "tempo_base_min": 3.0
+    },
+    {
+      "origem": "Posto_Recarga_Norte",
+      "destino": "UMinho_Gualtar",
+      "distancia_km": 1.0,
+      "tempo_base_min": 3.0
+    },
+    {
+      "origem": "UMinho_Gualtar",
+      "destino": "Adaufe",
+      "distancia_km": 3.5,
+      "tempo_base_min": 8.0
+    },
+    {
+      "origem": "Adaufe",
+      "destino": "UMinho_Gualtar",
+      "distancia_km": 3.5,
+      "tempo_base_min": 8.0
+    },
+    {
+      "origem": "Braga_Parque",
+      "destino": "Lamaçaes",
+      "distancia_km": 2.0,
+      "tempo_base_min": 5.0
+    },
+    {
+      "origem": "Lamaçaes",
+      "destino": "Braga_Parque",
+      "distancia_km": 2.0,
+      "tempo_base_min": 5.0
+    },
+    {
+      "origem": "Lamaçaes",
+      "destino": "Minho_Center",
+      "distancia_km": 2.0,
+      "tempo_base_min": 5.0
+    },
+    {
+      "origem": "Minho_Center",
+      "destino": "Lamaçaes",
+      "distancia_km": 2.0,
+      "tempo_base_min": 5.0
+    },
+    {
+      "origem": "Minho_Center",
+      "destino": "Fraiao",
+      "distancia_km": 1.5,
+      "tempo_base_min": 4.0
+    },
+    {
+      "origem": "Fraiao",
+      "destino": "Minho_Center",
+      "distancia_km": 1.5,
+      "tempo_base_min": 4.0
+    },
+    {
+      "origem": "Fraiao",
+      "destino": "Nogueira",
+      "distancia_km": 2.0,
+      "tempo_base_min": 5.0
+    },
+    {
+      "origem": "Nogueira",
+      "destino": "Fraiao",
+      "distancia_km": 2.0,
+      "tempo_base_min": 5.0
+    },
+    {
+      "origem": "Minho_Center",
+      "destino": "Estacao_CP",
+      "distancia_km": 4.0,
+      "tempo_base_min": 10.0
+    },
+    {
+      "origem": "Estacao_CP",
+      "destino": "Minho_Center",
+      "distancia_km": 4.0,
+      "tempo_base_min": 10.0
+    },
+    {
+      "origem": "UMinho_Gualtar",
+      "destino": "Bom_Jesus",
+      "distancia_km": 3.0,
+      "tempo_base_min": 8.0
+    },
+    {
+      "origem": "Bom_Jesus",
+      "destino": "UMinho_Gualtar",
+      "distancia_km": 3.0,
+      "tempo_base_min": 8.0
+    },
+    {
+      "origem": "Bom_Jesus",
+      "destino": "Sameiro",
+      "distancia_km": 2.5,
+      "tempo_base_min": 6.0
+    },
+    {
+      "origem": "Sameiro",
+      "destino": "Bom_Jesus",
+      "distancia_km": 2.5,
+      "tempo_base_min": 6.0
+    },
+    {
+      "origem": "Lamaçaes",
+      "destino": "Bom_Jesus",
+      "distancia_km": 4.0,
+      "tempo_base_min": 11.0
+    },
+    {
+      "origem": "Bom_Jesus",
+      "destino": "Lamaçaes",
+      "distancia_km": 4.0,
+      "tempo_base_min": 11.0
+    }
   ]
 }

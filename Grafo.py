@@ -1,4 +1,6 @@
-import math # Para a fórmula de Haversine
+import math
+import json
+import os
 
 class Grafo:
     """
@@ -7,6 +9,43 @@ class Grafo:
     juntamente com os custos dinâmicos (distância e tempo).
     """
     
+    @staticmethod
+    def carregar_de_json(caminho_ficheiro: str) -> 'Grafo':
+        """
+        Carrega um grafo a partir de um ficheiro JSON.
+        Centraliza a lógica de carregamento e tratamento de erros.
+        """
+        if not os.path.exists(caminho_ficheiro):
+            print(f"ERRO CRÍTICO: Ficheiro de mapa '{caminho_ficheiro}' não encontrado.")
+            return None
+
+        mapa = Grafo()
+        try:
+            with open(caminho_ficheiro, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                
+                # Validar estrutura básica
+                if 'nos' not in data or 'arestas' not in data:
+                    raise ValueError("JSON mal formatado: chaves 'nos' ou 'arestas' em falta.")
+
+                for no in data['nos']:
+                    mapa.add_no(no['id'], no['lat'], no['lon'], no.get('tipo', 'PontoInteresse'))
+                    if no.get('pode_carregar'):
+                        mapa.nos[no['id']]['pode_carregar'] = True
+                
+                for aresta in data['arestas']:
+                    mapa.add_aresta(aresta['origem'], aresta['destino'], aresta['distancia_km'], aresta['tempo_base_min'])
+                
+                print(f"INFO: Grafo carregado com sucesso de '{caminho_ficheiro}'. ({len(mapa.nos)} nós)")
+                return mapa
+                
+        except json.JSONDecodeError:
+            print(f"ERRO: Ficheiro '{caminho_ficheiro}' não é um JSON válido.")
+        except Exception as e:
+            print(f"ERRO: Falha ao carregar mapa: {e}")
+        
+        return None
+
     def __init__(self):
         # self.nos armazena dados sobre cada nó (ex: coordenadas, tipo)
         # Formato: { 'id_no': { 'lat': float, 'lon': float, 'tipo': str } }
@@ -57,7 +96,7 @@ class Grafo:
             return list(self.arestas[id_no].keys())
         return []
 
-    def get_custo_aresta(self, origem: str, destino: str) -> (float, float): # type: ignore
+    def get_custo_aresta(self, origem: str, destino: str) -> (float, float):
         """
         Retorna o custo atual de uma aresta.
         Retorna (distancia_km, tempo_viagem_min)
@@ -115,48 +154,10 @@ class Grafo:
         distancia = R * c
         return distancia
 
-
 # --- Exemplo de utilização (para testar o ficheiro) ---
 if __name__ == "__main__":
-    
-    # Criar um grafo simples (simulando Braga)
-    mapa_braga = Grafo()
-    
-    # Adicionar Nós (com coordenadas approx. de Braga)
-    mapa_braga.add_no("Centro", 41.5518, -8.4231, tipo="ZonaRecolha")
-    mapa_braga.add_no("UMinho_Gualtar", 41.5623, -8.3952, tipo="ZonaRecolha")
-    mapa_braga.add_no("Estacao_CP", 41.5471, -8.4326, tipo="PontoInteresse")
-    mapa_braga.add_no("Estacao_Recarga_Eletrica", 41.5580, -8.4100, tipo="EstacaoRecarga")
-
-    # Adicionar Arestas (custos inventados para o exemplo)
-    mapa_braga.add_aresta("Centro", "UMinho_Gualtar", 4.5, 8.0)
-    mapa_braga.add_aresta("UMinho_Gualtar", "Centro", 4.2, 7.5)
-    
-    mapa_braga.add_aresta("Centro", "Estacao_CP", 1.8, 4.0)
-    mapa_braga.add_aresta("Estacao_CP", "Centro", 2.0, 5.0)
-
-    mapa_braga.add_aresta("Centro", "Estacao_Recarga_Eletrica", 2.5, 6.0)
-    mapa_braga.add_aresta("UMinho_Gualtar", "Estacao_Recarga_Eletrica", 2.2, 5.0)
-
-    print(mapa_braga)
-    
-    print("\n--- Teste de Custos ---")
-    
-    # Custo normal
-    dist, tempo = mapa_braga.get_custo_aresta("Centro", "UMinho_Gualtar")
-    print(f"Centro -> UMinho (Normal): {dist:.1f} km, {tempo:.1f} min")
-    
-    # Simular hora de ponta 
-    mapa_braga.atualizar_transito("Centro", "UMinho_Gualtar", 2.0) # O dobro do tempo
-    dist, tempo = mapa_braga.get_custo_aresta("Centro", "UMinho_Gualtar")
-    print(f"Centro -> UMinho (Trânsito): {dist:.1f} km, {tempo:.1f} min")
-
-    print("\n--- Teste de Heurística (A*) ---")
-    
-    # Distância real vs. heurística (linha reta)
-    dist_real, _ = mapa_braga.get_custo_aresta("Centro", "Estacao_CP")
-    dist_heuristica = mapa_braga.get_distancia_heuristica("Centro", "Estacao_CP")
-    
-    print(f"Custo real (distância) Centro -> Estacao_CP: {dist_real:.2f} km")
-    print(f"Heurística (linha reta) Centro -> Estacao_CP: {dist_heuristica:.2f} km")
-    # Nota: A heurística deve ser sempre <= ao custo real (admissível)
+    # Teste rápido do carregamento
+    print("--- Teste de Carregamento ---")
+    mapa = Grafo.carregar_de_json("braga_mapa.json")
+    if mapa:
+        print(mapa)

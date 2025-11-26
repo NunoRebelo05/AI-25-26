@@ -6,14 +6,15 @@ from Grafo import Grafo
 from Taxi import Taxi, TipoMotorizacao, EstadoVeiculo
 from Pedido import Pedido, PrioridadePedido, EstadoPedido
 from Gestor import GestorDeFrota
+from Config import cfg
 
 class Simulador:
     def __init__(self, gestor: GestorDeFrota, hora_inicio: datetime, 
                  duracao_sim_horas: int,
                  horas_ponta: list = None,        
                  prob_pedido: float = 0.15,        
-                 limiar_recarga: float = 0.25,
-                 gui_interface = None):
+                 gui_interface = None,
+                 usar_estaticos: bool = None):
         
         self.gestor = gestor
         self.grafo = gestor.grafo
@@ -29,23 +30,41 @@ class Simulador:
         self.time_step = timedelta(minutes=1) 
         
         # Configurações
-        self.HORAS_DE_PONTA = horas_ponta if horas_ponta is not None else [8, 9, 17, 18]
+        self.HORAS_DE_PONTA = horas_ponta if horas_ponta is not None else cfg.get('simulacao.horas_ponta')
         self.PROB_NOVO_PEDIDO = prob_pedido
-        self.LIMIAR_RECARGA_ELETTRICO = limiar_recarga
-        self.MULTIPLICADOR_TRANSITO = 1.75
+        self.LIMIAR_RECARGA_ELETTRICO = cfg.get('simulacao.limiar_recarga_eletrico')
+        self.MULTIPLICADOR_TRANSITO = cfg.get('simulacao.multiplicador_transito_ponta')
         self.CORES_PEDIDOS = ['#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0']
         
         self.status_descricoes = {}
         self.paused = False
         self.delay = 0.2 if self.gui else 0.0 # Rápido se não houver GUI
+        
+        # Static Requests
+        if usar_estaticos is not None:
+            self.usar_estaticos = usar_estaticos
+        else:
+            self.usar_estaticos = cfg.get('pedidos_estaticos.usar_estaticos', False)
+            
+        self.lista_estaticos = cfg.get('pedidos_estaticos.lista', [])
+        # Ordenar estáticos por minuto para eficiência
+        self.lista_estaticos.sort(key=lambda x: x['minuto_simulacao'])
 
-        print(f"Simulador iniciado ({self.hora_inicio} -> {self.end_time}).")
+        print(f"Simulador iniciado ({self.hora_inicio} -> {self.end_time}). Modo Estático: {self.usar_estaticos}")
 
     def run(self):
         print(f"\n--- INÍCIO DA SIMULAÇÃO ({'Modo Visual' if self.gui else 'Modo Rápido'}) ---")
-        while self.current_time <= self.end_time:
+        
+        # Loop continua se:
+        # 1. Ainda não chegamos ao fim do tempo
+        # 2. OU existem movimentos ativos (táxis a andar)
+        # 3. OU existem pedidos na fila de espera
+        while self.current_time <= self.end_time or self.movimentos_ativos or self.gestor.pedidos_pendentes:
             
-            while self.paused: time.sleep(0.1)
+            while self.paused: 
+                time.sleep(0.1)
+                # Se tiver GUI, precisamos de atualizar a janela para não bloquear
+                if self.gui: self.gui.update()
 
             if self.current_time.minute % 30 == 0:
                  if self._update_traffic() and self.gui:
@@ -71,7 +90,10 @@ class Simulador:
         self.delay = delay
 
     def step(self):
-        self._generate_new_request()
+        # Só gera novos pedidos se ainda estivermos dentro do horário normal
+        if self.current_time <= self.end_time:
+            self._generate_new_request()
+
         self._processar_movimentos()
         
         # 1. Tentar esvaziar a fila de espera (Prioritário)
@@ -81,6 +103,17 @@ class Simulador:
         self._manage_idle_taxis()
 
     def _generate_new_request(self):
+        # 1. Verificar Pedidos Estáticos
+        if self.usar_estaticos:
+            minutos_passados = int((self.current_time - self.hora_inicio).total_seconds() / 60)
+            
+            # Encontrar pedidos para este minuto
+            for req in self.lista_estaticos:
+                if req['minuto_simulacao'] == minutos_passados:
+                    self._criar_pedido_especifico(req)
+            return
+
+        # 2. Geração Aleatória (se não for estático)
         if random.random() < self.PROB_NOVO_PEDIDO:
             n_validos = list(self.grafo.nos.keys())
             if len(n_validos) < 2: return
@@ -92,18 +125,41 @@ class Simulador:
                 pref_ambiental=random.choice([True, False]), hora_criacao=self.current_time,
                 prioridade=random.choice(list(PrioridadePedido))
             )
-            novo_pedido.cor_mapa = random.choice(self.CORES_PEDIDOS)
-            
-            print(f"TEMPO: {self.current_time} - NOVO PEDIDO {novo_pedido.id_pedido} ({origem} -> {destino})")
-            self.pedidos_gerados.append(novo_pedido)
-            
-            # Tenta alocar imediatamente
-            self._tenta_alocar_pedido(novo_pedido)
+            self._registar_pedido(novo_pedido)
+
+    def _criar_pedido_especifico(self, req_data):
+        origem = req_data['origem']
+        destino = req_data['destino']
+        
+        if origem not in self.grafo.nos or destino not in self.grafo.nos:
+            print(f"ERRO: Pedido Estático ignorado. Nó inválido: {origem} -> {destino}")
+            return
+
+        try:
+            prioridade = PrioridadePedido[req_data['prioridade']]
+        except:
+            prioridade = PrioridadePedido.NORMAL
+
+        novo_pedido = Pedido(
+            origem=origem,
+            destino=destino,
+            num_passageiros=req_data['passageiros'],
+            pref_ambiental=req_data['ambiental'],
+            hora_criacao=self.current_time,
+            prioridade=prioridade
+        )
+        print(f"PEDIDO ESTÁTICO GERADO: {novo_pedido}")
+        self._registar_pedido(novo_pedido)
+
+    def _registar_pedido(self, pedido):
+        pedido.cor_mapa = random.choice(self.CORES_PEDIDOS)
+        print(f"TEMPO: {self.current_time} - NOVO PEDIDO {pedido.id_pedido} ({pedido.origem} -> {pedido.destino})")
+        self.pedidos_gerados.append(pedido)
+        self._tenta_alocar_pedido(pedido)
 
     def _processar_fila_espera(self):
         """Gere a fila: remove expirados e tenta alocar pendentes."""
         
-        # AUMENTADO PARA 60 MINUTOS (para lidar com trânsito)
         MAX_ESPERA = 60 
         
         # 1. Verificar Timeouts
@@ -116,15 +172,12 @@ class Simulador:
                 self.gestor.pedidos_pendentes.remove(pedido)
 
         # 2. Tentar alocar (Ordenado por Prioridade DESC, depois Tempo Espera DESC)
-        # Isto garante que urgentes e antigos vão primeiro
         fila_ordenada = sorted(self.gestor.pedidos_pendentes, 
                                key=lambda p: (p.prioridade.value, p.hora_criacao), 
                                reverse=True)
 
         for pedido in fila_ordenada:
             if self._tenta_alocar_pedido(pedido, vindo_da_fila=True):
-                # Se alocou, o loop continua para o próximo, 
-                # mas a lista original no Gestor já foi atualizada pelo método _tenta_alocar
                 pass
 
     def _tenta_alocar_pedido(self, pedido, vindo_da_fila=False):
@@ -145,7 +198,14 @@ class Simulador:
             pedido.alocar(taxi.id_veiculo, novo_horario)
             taxi.alocar_para_servico()
             
-            self._iniciar_movimento(taxi, c_pickup, "PICKUP", pedido, c_viagem)
+            if not self._iniciar_movimento(taxi, c_pickup, "PICKUP", pedido, c_viagem):
+                print(f"ERRO CRÍTICO: Falha ao iniciar movimento para {taxi.id_veiculo}. Revertendo estado.")
+                taxi.estado = EstadoVeiculo.LIVRE
+                # Devolver pedido à fila (ou rejeitar se for crítico)
+                if pedido not in self.gestor.pedidos_pendentes:
+                    self.gestor.pedidos_pendentes.append(pedido)
+                return False
+                
             return True
         else:
             if not vindo_da_fila:
@@ -160,13 +220,16 @@ class Simulador:
         else:
             prox_no_idx = 1
             d, tempo_prox = self.grafo.get_custo_aresta(caminho[0], caminho[1])
-            if d == float('inf'): return
+            if d == float('inf'): 
+                print(f"ERRO: Aresta inválida no caminho de {taxi.id_veiculo}: {caminho[0]} -> {caminho[1]}")
+                return False
         
         self.movimentos_ativos[taxi.id_veiculo] = {
             'taxi': taxi, 'pedido': pedido, 'tipo': tipo, 'caminho': caminho,
             'idx_prox_no': prox_no_idx, 'tempo_restante_aresta': tempo_prox,
             'proximo_caminho': proximo_caminho 
         }
+        return True
 
     def _processar_movimentos(self):
         ids = list(self.movimentos_ativos.keys())
@@ -178,10 +241,28 @@ class Simulador:
             if mov['tempo_restante_aresta'] <= 0:
                 if mov['idx_prox_no'] < len(mov['caminho']):
                     dest = mov['caminho'][mov['idx_prox_no']]
-                    dist, _ = self.grafo.get_custo_aresta(taxi.localizacao_atual, dest)
+                    
+                    if dest == taxi.localizacao_atual:
+                        dist = 0
+                    else:
+                        dist, _ = self.grafo.get_custo_aresta(taxi.localizacao_atual, dest)
                     
                     if dist == float('inf'): 
+                        print(f"ERRO: Perda de conexão durante movimento de {taxi.id_veiculo} para {dest}")
                         del self.movimentos_ativos[tid]
+                        
+                        # RECUPERAÇÃO DE FALHA
+                        print(f"RECUPERAÇÃO: Taxi {taxi.id_veiculo} reiniciado para estado LIVRE.")
+                        taxi.estado = EstadoVeiculo.LIVRE
+                        
+                        # Tratar do pedido afetado
+                        pedido = mov.get('pedido')
+                        if pedido:
+                            print(f"RECUPERAÇÃO: Pedido {pedido.id_pedido} devolvido à fila.")
+                            pedido.estado = EstadoPedido.PENDENTE
+                            pedido.id_veiculo_alocado = None
+                            if pedido not in self.gestor.pedidos_pendentes:
+                                self.gestor.pedidos_pendentes.append(pedido)
                         continue
 
                     taxi.mover_e_consumir(dist, dest)
@@ -200,11 +281,24 @@ class Simulador:
         taxi, tipo, pedido = mov['taxi'], mov['tipo'], mov.get('pedido')
         
         if tipo == "PICKUP":
-            # print(f"TEMPO: {self.current_time} - {taxi.id_veiculo} chegou ao cliente.")
-            self._iniciar_movimento(taxi, mov['proximo_caminho'], "VIAGEM", pedido)
+            if not self._iniciar_movimento(taxi, mov['proximo_caminho'], "VIAGEM", pedido):
+                 print(f"ERRO: Falha ao iniciar VIAGEM para {taxi.id_veiculo}. Abortando.")
+                 
+                 # RECUPERAÇÃO DE FALHA
+                 print(f"RECUPERAÇÃO: Taxi {taxi.id_veiculo} reiniciado para estado LIVRE.")
+                 taxi.estado = EstadoVeiculo.LIVRE
+                 
+                 if pedido: 
+                     print(f"RECUPERAÇÃO: Pedido {pedido.id_pedido} devolvido à fila.")
+                     pedido.estado = EstadoPedido.PENDENTE
+                     pedido.id_veiculo_alocado = None
+                     if pedido not in self.gestor.pedidos_pendentes:
+                        self.gestor.pedidos_pendentes.append(pedido)
+                 
+                 if taxi.id_veiculo in self.movimentos_ativos:
+                    del self.movimentos_ativos[taxi.id_veiculo]
             
         elif tipo == "VIAGEM":
-            # print(f"TEMPO: {self.current_time} - {taxi.id_veiculo} entregou cliente.")
             taxi.libertar_no_destino(taxi.localizacao_atual)
             if pedido: pedido.concluir()
             del self.movimentos_ativos[taxi.id_veiculo]
@@ -214,8 +308,11 @@ class Simulador:
             print(f"TEMPO: {self.current_time} - {taxi.id_veiculo} chegou. {msg}...")
             taxi.iniciar_carregamento()
             
-            # REDUZIDO PARA 30 MINUTOS (Fast Charging)
-            t_carga = 30 if taxi.tipo == TipoMotorizacao.ELETRICO else 5 
+            # Specs da config
+            if taxi.tipo == TipoMotorizacao.ELETRICO:
+                t_carga = cfg.get('frota.specs_eletrico.tempo_recarga_min', 30)
+            else:
+                t_carga = cfg.get('frota.specs_combustao.tempo_abastecimento_min', 5)
             
             self.movimentos_ativos[taxi.id_veiculo] = {
                 'taxi': taxi, 'tipo': "EM_CARGA", 'caminho': [], 'idx_prox_no': 0, 
@@ -257,7 +354,6 @@ class Simulador:
     def _update_traffic(self):
         hora = self.current_time.hour
         mult = self.MULTIPLICADOR_TRANSITO if hora in self.HORAS_DE_PONTA else 1.0
-        first = list(self.grafo.condicoes_transito.keys())[0]
         
         mudou = False
         for u, v in list(self.grafo.condicoes_transito.keys()):
