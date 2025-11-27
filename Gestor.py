@@ -9,6 +9,7 @@ from Config import cfg
 from AlgoritmosDeProcura import a_star_search, greedy_search, dfs_search, bfs_search
 
 class EstrategiaProcura(Enum):
+    """Enumeração das estratégias de busca disponíveis para o cálculo de rotas."""
     A_STAR = auto()
     GULOSA = auto()
     UCS = auto()
@@ -16,7 +17,19 @@ class EstrategiaProcura(Enum):
     BFS = auto()
 
 class GestorDeFrota:
+    """
+    Controlador central da frota de táxis.
+    
+    Responsável por gerir os veículos, processar pedidos e alocar o táxi mais adequado
+    para cada solicitação com base na estratégia de busca definida e numa função de custo.
+    """
     def __init__(self, grafo: Grafo):
+        """
+        Inicializa o gestor de frota.
+        
+        Args:
+            grafo (Grafo): O mapa da cidade onde a frota opera.
+        """
         self.grafo = grafo
         self.frota = {} 
         self.pedidos_pendentes = []
@@ -29,14 +42,35 @@ class GestorDeFrota:
         }
 
     def definir_estrategia(self, estrategia: EstrategiaProcura):
+        """
+        Define o algoritmo de busca a ser utilizado para calcular rotas.
+        
+        Args:
+            estrategia (EstrategiaProcura): A nova estratégia a adotar.
+        """
         print(f"\n--- Estratégia de Procura alterada para: {estrategia.name} ---")
         self.estrategia_procura = estrategia
 
     def add_taxi(self, taxi: Taxi):
+        """
+        Adiciona um novo táxi à frota gerida.
+        
+        Args:
+            taxi (Taxi): O objeto veículo a adicionar.
+        """
         self.frota[taxi.id_veiculo] = taxi
 
     def get_caminho(self, origem: str, destino: str) -> (list, float):
-        """Calcula o caminho entre dois pontos usando a estratégia definida."""
+        """
+        Calcula o caminho entre dois pontos usando a estratégia de busca atual.
+        
+        Args:
+            origem (str): ID do nó de origem.
+            destino (str): ID do nó de destino.
+            
+        Returns:
+            tuple: (lista_de_nos_do_caminho, custo_total)
+        """
         tipo_otimizacao = 'tempo'
         
         resultado = (None, float('inf'), 0)
@@ -62,10 +96,22 @@ class GestorDeFrota:
         return caminho, custo
 
     def decidir_alocacao(self, pedido: Pedido):
+        """
+        Decide qual o melhor táxi para atender a um pedido específico.
+        
+        Args:
+            pedido (Pedido): O pedido a ser atendido.
+            
+        Returns:
+            tuple: (melhor_taxi, custo_estimado, (caminho_pickup, caminho_viagem))
+        """
         melhor_taxi, melhor_custo, detalhes_caminho = self._encontrar_melhor_taxi(pedido)
         return melhor_taxi, melhor_custo, detalhes_caminho
 
     def _encontrar_melhor_taxi(self, pedido: Pedido) -> (Taxi, float, tuple):
+        """
+        Itera sobre a frota disponível para encontrar o candidato com menor custo de alocação.
+        """
         melhor_custo_global = float('inf')
         melhor_taxi_escolhido = None
         melhores_caminhos = None
@@ -84,6 +130,19 @@ class GestorDeFrota:
         return melhor_taxi_escolhido, melhor_custo_global, melhores_caminhos
 
     def _calcular_custo_alocacao(self, taxi: Taxi, pedido: Pedido) -> (float, tuple):
+        """
+        Calcula o custo (score) de atribuir um táxi específico a um pedido.
+        
+        Leva em conta:
+        - Tempo de espera (distância até o cliente)
+        - Custo operacional da viagem e do deslocamento vazio
+        - Penalizações ambientais (se o cliente preferir eco-friendly)
+        - Prioridade do pedido
+        - Restrições de autonomia do veículo
+        
+        Returns:
+            tuple: (score_final, (caminho_ate_cliente, caminho_viagem))
+        """
         caminho_pickup, tempo_espera = self.get_caminho(taxi.localizacao_atual, pedido.origem)
         caminho_viagem, tempo_viagem = self.get_caminho(pedido.origem, pedido.destino)
             
@@ -125,6 +184,7 @@ class GestorDeFrota:
         return custo_final, (caminho_pickup, caminho_viagem)
 
     def _get_dist_caminho(self, caminho: list) -> float:
+        """Calcula a distância total em km de um caminho (lista de nós)."""
         dist_total = 0.0
         if not caminho: return 0.0
         for i in range(len(caminho) - 1):
@@ -134,6 +194,7 @@ class GestorDeFrota:
         return dist_total
 
     def _get_tempo_caminho(self, caminho: list) -> float:
+        """Calcula o tempo total em minutos de um caminho (lista de nós)."""
         tempo_total = 0.0
         if not caminho: return 0.0
         for i in range(len(caminho) - 1):

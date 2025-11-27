@@ -3,6 +3,7 @@ from tkinter import ttk, messagebox
 import threading
 import json
 from datetime import datetime
+import traceback
 
 from Grafo import Grafo
 from Taxi import Taxi, TipoMotorizacao
@@ -11,37 +12,69 @@ from Simulador import Simulador
 from VisualizadorGUI import MapaVisualizador
 from Config import cfg
 
-def iniciar_simulacao(config_launch, app_gui):
+def iniciar_simulacao(config_launch: dict, app_gui: 'AppLauncher'):
+    """
+    Inicializa e executa a simulação em uma thread separada.
+
+    Configura o grafo, o gestor de frota, a frota de táxis e a interface gráfica
+    de visualização antes de iniciar o loop de simulação.
+
+    Args:
+        config_launch (dict): Dicionário contendo as configurações da simulação
+            (estratégia, número de veículos, duração, etc.).
+        app_gui (AppLauncher): Referência para a janela principal do lançador,
+            usada para reativar os controles após o fim da simulação.
+    """
     try:
-        # 1. Configurar
+        # 1. Carregar o mapa e configurar o gestor
         mapa = Grafo.carregar_de_json("braga_mapa.json")
-        if not mapa: return
+        if not mapa:
+            print("Erro: Não foi possível carregar o mapa.")
+            return
+
         gestor = GestorDeFrota(mapa)
         gestor.definir_estrategia(config_launch['estrategia'])
         
-        # Setup Frota Dinâmica (baseado na config do launcher)
+        # 2. Configurar a Frota (Baseado nas configurações)
         locais = list(mapa.nos.keys())
-        specs_ev = cfg.get('frota.specs_eletrico')
-        specs_gas = cfg.get('frota.specs_combustao')
+        specs_electric = cfg.get('frota.specs_eletrico')
+        specs_combustion = cfg.get('frota.specs_combustao')
 
+        # Inicializar táxis elétricos
         for i in range(config_launch['num_eletricos']):
-            local = locais[i % len(locais)]
-            gestor.add_taxi(Taxi(f"EV{i+1:02d}", TipoMotorizacao.ELETRICO, local, 
-                                 specs_ev['capacidade'], specs_ev['custo_km'], specs_ev['autonomia']))
+            local_inicio = locais[i % len(locais)]
+            novo_taxi = Taxi(
+                id_veiculo=f"EV{i+1:02d}",
+                tipo=TipoMotorizacao.ELETRICO,
+                localizacao_atual=local_inicio, 
+                capacidade_passageiros=specs_electric['capacidade'],
+                custo_por_km=specs_electric['custo_km'],
+                autonomia_maxima=specs_electric['autonomia']
+            )
+            gestor.add_taxi(novo_taxi)
             
+        # Inicializar táxis a combustão
         for i in range(config_launch['num_combustao']):
-            local = locais[(i+3) % len(locais)]
-            gestor.add_taxi(Taxi(f"GAS{i+1:02d}", TipoMotorizacao.COMBUSTAO, local, 
-                                 specs_gas['capacidade'], specs_gas['custo_km'], specs_gas['autonomia']))
+            local_inicio = locais[(i + 3) % len(locais)] # Offset para distribuir melhor
+            novo_taxi = Taxi(
+                id_veiculo=f"GAS{i+1:02d}",
+                tipo=TipoMotorizacao.COMBUSTAO,
+                localizacao_atual=local_inicio, 
+                capacidade_passageiros=specs_combustion['capacidade'],
+                custo_por_km=specs_combustion['custo_km'],
+                autonomia_maxima=specs_combustion['autonomia']
+            )
+            gestor.add_taxi(novo_taxi)
 
-        # 2. Criar Janela de Visualização (Toplevel para ser independente do menu)
-        janela_sim = tk.Toplevel()
-        janela_sim.title(f"Simulação TaxiGreen - {config_launch['estrategia'].name}")
+        # 3. Criar Janela de Visualização
+        # Toplevel permite que esta janela seja independente da janela de configuração
+        janela_simulacao = tk.Toplevel()
+        janela_simulacao.title(f"Simulação TaxiGreen - {config_launch['estrategia'].name}")
         
-        gui_mapa = MapaVisualizador(janela_sim, mapa, largura=800, altura=600)
+        gui_mapa = MapaVisualizador(janela_simulacao, mapa, largura=800, altura=600)
         gui_mapa.pack()
 
-        # 3. Iniciar Simulador com a GUI
+        # 4. Iniciar o Simulador
         simulador = Simulador(
             gestor=gestor,
             hora_inicio=datetime(2025, 10, 20, 8, 0, 0),
@@ -51,24 +84,30 @@ def iniciar_simulacao(config_launch, app_gui):
             gui_interface=gui_mapa,
             usar_estaticos=config_launch['usar_estaticos']
         )
+        
         gui_mapa.set_simulador(simulador)
-        print("\nA iniciar a simulação...")
+        print("\n[Sistema] A iniciar a simulação...")
         simulador.run() 
         
-        messagebox.showinfo("Sucesso", "Simulação concluída!")
+        messagebox.showinfo("Sucesso", "Simulação concluída com sucesso!")
 
     except Exception as e:
-        print(f"ERRO: {e}")
-        import traceback
+        print(f"ERRO FATAL NA SIMULAÇÃO: {e}")
         traceback.print_exc()
     finally:
+        # Garante que o botão de iniciar seja reativado mesmo em caso de erro
         app_gui.reativar_botao()
 
 class AppLauncher(tk.Tk):
+    """
+    Janela principal de configuração e lançamento da simulação.
+    Permite ao utilizador definir parâmetros como tamanho da frota, estratégia e duração.
+    """
     def __init__(self):
+        """Inicializa a aplicação e configura a interface gráfica."""
         super().__init__()
         self.title("Configuração TaxiGreen")
-        self.geometry("450x500") # Aumentei um pouco a altura
+        self.geometry("450x500")
         
         # Carregar config inicial
         cfg.carregar()
@@ -79,7 +118,7 @@ class AppLauncher(tk.Tk):
         # Estratégia
         ttk.Label(p, text="Estratégia de Procura:").pack(anchor="w")
         self.strat_var = tk.StringVar(value=EstrategiaProcura.A_STAR.name)
-        ttk.OptionMenu(p, self.strat_var, *[e.name for e in EstrategiaProcura]).pack(fill="x", pady=5)
+        ttk.OptionMenu(p, self.strat_var, self.strat_var.get(), *[e.name for e in EstrategiaProcura]).pack(fill="x", pady=5)
         
         # Frota
         f_frota = ttk.LabelFrame(p, text="Frota")
@@ -117,10 +156,11 @@ class AppLauncher(tk.Tk):
         self.btn.pack(side="bottom", fill="x", pady=20)
 
     def on_start(self):
+        """Valida os inputs e inicia a thread de simulação."""
         self.btn.config(state="disabled", text="A Executar...")
         try:
             h_ponta = [int(h.strip()) for h in self.h_ponta.get().split(',') if h.strip()]
-        except:
+        except ValueError:
             messagebox.showerror("Erro", "Horas de ponta inválidas.")
             self.reativar_botao()
             return
@@ -137,6 +177,7 @@ class AppLauncher(tk.Tk):
         threading.Thread(target=iniciar_simulacao, args=(config, self)).start()
 
     def reativar_botao(self):
+        """Restaura o estado do botão de início."""
         self.btn.config(state="normal", text="INICIAR SIMULAÇÃO")
 
 if __name__ == "__main__":

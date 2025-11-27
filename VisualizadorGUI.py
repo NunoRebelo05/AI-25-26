@@ -3,7 +3,23 @@ from tkinter import ttk
 from Taxi import EstadoVeiculo, TipoMotorizacao
 
 class MapaVisualizador(tk.Frame):
+    """
+    Componente GUI para visualização da simulação em tempo real.
+    
+    Exibe o mapa da cidade, a posição dos táxis, os pedidos ativos e o estado do trânsito.
+    Inclui controlos para pausar e ajustar a velocidade da simulação.
+    """
+    
     def __init__(self, master, grafo, largura=800, altura=600):
+        """
+        Inicializa o visualizador.
+        
+        Args:
+            master: Widget pai (geralmente Tk ou Toplevel).
+            grafo (Grafo): O grafo da cidade a ser desenhado.
+            largura (int): Largura do canvas em pixels.
+            altura (int): Altura do canvas em pixels.
+        """
         super().__init__(master)
         self.grafo = grafo
         self.largura = largura
@@ -64,24 +80,32 @@ class MapaVisualizador(tk.Frame):
         self.desenhar_mapa_base()
 
     def set_simulador(self, sim):
+        """Define a referência para o simulador."""
         self.simulador = sim
 
     def toggle_pause(self):
+        """Alterna o estado de pausa da simulação e atualiza o botão."""
         if self.simulador:
             is_paused = self.simulador.toggle_pause()
             if is_paused: self.btn_pause.config(text="▶ CONTINUAR", bg="green")
             else: self.btn_pause.config(text="⏸ PAUSA", bg="orange")
 
     def mudar_velocidade(self, val):
+        """Atualiza a velocidade da simulação com base no valor da escala."""
         if self.simulador: self.simulador.set_delay(1.0 / int(val))
 
     def _criar_item_legenda(self, cor, texto):
+        """Cria um item visual na legenda."""
         f = tk.Frame(self.painel_info, bg="#f0f0f0")
         f.pack(anchor="w", pady=2)
         tk.Canvas(f, width=15, height=15, bg=cor, highlightthickness=0).pack(side="left", padx=5)
         tk.Label(f, text=texto, bg="#f0f0f0", font=("Arial", 9)).pack(side="left")
 
     def coords_para_pixel(self, lat, lon):
+        """
+        Converte coordenadas geográficas (lat, lon) para coordenadas de pixel no canvas.
+        Normaliza com base nos limites min/max do grafo.
+        """
         if self.max_lat == self.min_lat: y_norm = 0.5
         else: y_norm = (lat - self.min_lat) / (self.max_lat - self.min_lat)
         if self.max_lon == self.min_lon: x_norm = 0.5
@@ -91,7 +115,10 @@ class MapaVisualizador(tk.Frame):
         return x, y
 
     def get_cor_transito(self, multiplicador):
-        """Retorna uma cor em gradiente de cinza para vermelho."""
+        """
+        Retorna uma cor hexadecimal representando a intensidade do trânsito.
+        Cinza (#CCCCCC) para normal, gradiente até Vermelho (#FF0000) para intenso.
+        """
         if multiplicador <= 1.0: return "#CCCCCC"
         
         # Maximo de 1.75 -> Vermelho puro
@@ -109,6 +136,7 @@ class MapaVisualizador(tk.Frame):
         return f"#{r:02x}{g:02x}{b:02x}"
 
     def desenhar_mapa_base(self):
+        """Desenha os elementos estáticos do mapa (arestas e nós)."""
         self.canvas.delete("base")
         for origem, destinos in self.grafo.arestas.items():
             x1, y1 = self.coords_para_pixel(self.grafo.nos[origem]['lat'], self.grafo.nos[origem]['lon'])
@@ -129,6 +157,13 @@ class MapaVisualizador(tk.Frame):
             self.canvas.create_text(x, y+12, text=id_no, font=("Arial", 8), fill="#555555", tags="base")
 
     def atualizar_estado(self, frota, pedidos_ativos, tempo_atual, descricoes_status):
+        """
+        Atualiza os elementos dinâmicos da interface.
+        
+        1. Atualiza o relógio.
+        2. Atualiza a lista de estado da frota (barras de autonomia e status).
+        3. Redesenha pedidos e táxis no mapa.
+        """
         self.canvas.delete("dinamico")
         self.lbl_hora.config(text=tempo_atual.strftime("%H:%M:%S"))
 

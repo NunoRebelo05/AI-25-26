@@ -10,7 +10,14 @@ import random
 
 def setup_frota(gestor: GestorDeFrota):
     """
-    Adiciona a frota ao gestor baseada na configuração.
+    Inicializa e adiciona a frota de táxis ao gestor.
+    
+    Lê as configurações de 'frota' (número de veículos, especificações)
+    e cria instâncias de Taxi (Elétricos e Combustão), distribuindo-os
+    pelos nós do grafo.
+    
+    Args:
+        gestor (GestorDeFrota): O gestor onde a frota será registada.
     """
     # 1. Carregar specs da config
     specs_ev = cfg.get('frota.specs_eletrico')
@@ -37,7 +44,15 @@ def setup_frota(gestor: GestorDeFrota):
         gestor.add_taxi(taxi)
 
 def imprimir_tabela_comparativa(resultados: list):
-    """Imprime a tabela final com os dados recolhidos."""
+    """
+    Imprime uma tabela formatada comparando o desempenho das estratégias.
+    
+    Exibe métricas como total de pedidos, concluídos/rejeitados, tempo médio de espera
+    e eficiência da procura (média de nós visitados).
+    
+    Args:
+        resultados (list): Lista de dicionários com os resultados de cada simulação.
+    """
     print("\n" + "="*105)
     print(f"{'--- TABELA DE COMPARAÇÃO FINAL DAS ESTRATÉGIAS ---':^105}")
     print("="*105)
@@ -73,6 +88,7 @@ if __name__ == "__main__":
     hora_inicio = datetime(2025, 10, 20, 8, 0, 0)
     duracao_horas = cfg.get('simulacao.duracao_horas')
     
+    # Lista de estratégias a testar no benchmark
     estrategias = [
         EstrategiaProcura.A_STAR,
         EstrategiaProcura.UCS,
@@ -87,7 +103,7 @@ if __name__ == "__main__":
     for estrategia in estrategias:
         print(f"\n>> A TESTAR: {estrategia.name}...")
         
-        # 1. Setup Limpo
+        # 1. Setup Limpo para cada iteração
         random.seed(42) # Garantir reprodutibilidade entre estratégias
         mapa_para_sim = Grafo.carregar_de_json("braga_mapa.json")
         gestor = GestorDeFrota(mapa_para_sim)
@@ -96,7 +112,7 @@ if __name__ == "__main__":
         
         # 2. Correr Simulação
         # Nota: Assume-se que o Simulador corre sem GUI (rápido) por defeito se gui_interface=None
-        # Forçamos usar_estaticos=True para garantir comparação justa
+        # Forçamos usar_estaticos=True para garantir comparação justa (mesmos pedidos)
         simulador = Simulador(gestor, hora_inicio, duracao_horas, usar_estaticos=True)
         simulador.run()
         
@@ -113,7 +129,7 @@ if __name__ == "__main__":
             soma_tempos = sum(p.get_tempo_espera_total() for p in concluidos)
             tempo_medio = soma_tempos / len(concluidos)
             
-        # Média de Nós Visitados
+        # Média de Nós Visitados (Eficiência do algoritmo)
         total_nos = gestor.stats['total_nos_visitados']
         total_procuras = gestor.stats['total_procuras']
         media_nos = (total_nos / total_procuras) if total_procuras > 0 else 0.0

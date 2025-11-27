@@ -3,8 +3,12 @@ from Grafo import Grafo
 
 def criar_grafo_teste_braga():
     """
-    Função auxiliar para criar o mesmo grafo de teste
-    que definimos em Grafo.py.
+    Cria um grafo de teste com alguns pontos de interesse em Braga.
+    
+    Útil para testes rápidos sem necessidade de carregar o ficheiro JSON completo.
+    
+    Returns:
+        Grafo: Um objeto Grafo preenchido com nós e arestas de teste.
     """
     mapa_braga = Grafo()
     
@@ -26,8 +30,14 @@ def criar_grafo_teste_braga():
 
 def desenhar_grafo_em_mapa(grafo: Grafo, nome_ficheiro_html="mapa_grafo_braga.html"):
     """
-    Usa o Folium para desenhar os nós e arestas de um grafo
-    num mapa interativo e guarda como HTML.
+    Gera um mapa interativo HTML visualizando o grafo.
+    
+    Usa a biblioteca Folium para plotar os nós como marcadores e as arestas como linhas.
+    Os marcadores têm cores diferentes dependendo do tipo de nó.
+    
+    Args:
+        grafo (Grafo): O grafo a ser visualizado.
+        nome_ficheiro_html (str, optional): Caminho de saída para o ficheiro HTML.
     """
     
     # 1. Encontrar o ponto central do mapa (média das coordenadas)

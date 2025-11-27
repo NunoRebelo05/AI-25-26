@@ -2,9 +2,18 @@ import json
 import os
 
 class Config:
+    """
+    Gerenciador de configurações da aplicação (Singleton).
+    
+    Responsável por carregar, armazenar e fornecer acesso às configurações
+    do sistema, permitindo o uso de um arquivo JSON externo ou valores padrão.
+    """
     _instance = None
 
     def __new__(cls):
+        """
+        Implementação do padrão Singleton para garantir apenas uma instância de configuração.
+        """
         if cls._instance is None:
             cls._instance = super(Config, cls).__new__(cls)
             cls._instance.dados = {}
@@ -12,6 +21,15 @@ class Config:
         return cls._instance
 
     def carregar(self, caminho="config.json"):
+        """
+        Carrega as configurações a partir de um arquivo JSON.
+        
+        Se o arquivo não for encontrado ou ocorrer erro na leitura,
+        carrega as configurações padrão.
+        
+        Args:
+            caminho (str): Caminho para o arquivo de configuração.
+        """
         if not os.path.exists(caminho):
             print(f"AVISO: Ficheiro de configuração '{caminho}' não encontrado. A usar predefinições.")
             self.dados = self._get_defaults()
@@ -26,7 +44,18 @@ class Config:
             self.dados = self._get_defaults()
 
     def get(self, chave, default=None):
-        """Acede a valores aninhados com notação de ponto (ex: 'simulacao.duracao_horas')"""
+        """
+        Acede a valores de configuração usando notação de ponto para chaves aninhadas.
+        
+        Exemplo: cfg.get('simulacao.duracao_horas')
+        
+        Args:
+            chave (str): Chave de acesso (ex: 'categoria.subcategoria.item').
+            default (any, optional): Valor a retornar se a chave não existir.
+            
+        Returns:
+            any: O valor da configuração ou o valor default.
+        """
         chaves = chave.split('.')
         valor = self.dados
         try:
@@ -37,6 +66,12 @@ class Config:
             return default
 
     def _get_defaults(self):
+        """
+        Retorna o dicionário com as configurações padrão do sistema.
+        
+        Returns:
+            dict: Configurações padrão.
+        """
         return {
             "simulacao": {
                 "duracao_horas": 12,
@@ -66,5 +101,5 @@ class Config:
             }
         }
 
-# Instância global para acesso fácil
+# Instância global para acesso fácil em toda a aplicação
 cfg = Config()

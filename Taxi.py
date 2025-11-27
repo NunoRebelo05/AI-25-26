@@ -1,10 +1,12 @@
 from enum import Enum, auto
 
 class TipoMotorizacao(Enum):
+    """Tipos de motorização disponíveis para os táxis."""
     COMBUSTAO = auto()
     ELETRICO = auto()
 
 class EstadoVeiculo(Enum):
+    """Estados possíveis de um táxi na simulação."""
     LIVRE = auto()
     OCUPADO = auto()        # Em serviço (a ir buscar ou a levar passageiro)
     A_CARREGAR = auto()     # Apenas elétricos, em estação
@@ -12,6 +14,12 @@ class EstadoVeiculo(Enum):
     EM_FALHA = auto()       # Estado adicional para simular falhas
 
 class Taxi:
+    """
+    Representa um veículo da frota (táxi).
+    
+    Mantém o estado do veículo (localização, autonomia, disponibilidade)
+    e define comportamentos como aceitar pedidos, mover-se e recarregar.
+    """
     
     def __init__(self, 
                  id_veiculo: str, 
@@ -20,6 +28,17 @@ class Taxi:
                  capacidade_passageiros: int, 
                  custo_por_km: float, 
                  autonomia_maxima: float):
+        """
+        Inicializa um novo táxi.
+        
+        Args:
+            id_veiculo (str): Identificador único do veículo (ex: 'EV01').
+            tipo (TipoMotorizacao): Elétrico ou Combustão.
+            localizacao_atual (str): ID do nó onde o táxi começa.
+            capacidade_passageiros (int): Lotação máxima.
+            custo_por_km (float): Custo operacional por quilómetro.
+            autonomia_maxima (float): Autonomia total em km.
+        """
         
         self.id_veiculo = id_veiculo
         
@@ -46,6 +65,18 @@ class Taxi:
     def pode_aceitar_pedido(self, num_passageiros: int, distancia_total_estimada: float) -> bool:
         """
         Verifica se o táxi pode aceitar um pedido com base no seu estado atual.
+        
+        Critérios:
+        1. Deve estar LIVRE.
+        2. Deve ter capacidade suficiente para os passageiros.
+        3. Deve ter autonomia suficiente para a viagem completa (incluindo margem).
+        
+        Args:
+            num_passageiros (int): Número de pessoas no pedido.
+            distancia_total_estimada (float): Distância total (pickup + viagem) em km.
+            
+        Returns:
+            bool: True se puder aceitar, False caso contrário.
         """
         if self.estado != EstadoVeiculo.LIVRE:
             return False
@@ -63,20 +94,34 @@ class Taxi:
         return True
 
     def precisa_recarregar(self, limiar_percentagem: float = 0.20) -> bool:
-        """Verifica se a autonomia está abaixo de um limiar crítico."""
+        """
+        Verifica se a autonomia está abaixo de um limiar crítico.
+        
+        Args:
+            limiar_percentagem (float): Percentagem mínima (0.0 a 1.0).
+            
+        Returns:
+            bool: True se precisar de recarregar.
+        """
         return (self.autonomia_atual / self.autonomia_maxima) < limiar_percentagem
 
     # --- Métodos de Atualização de Estado ---
 
     def alocar_para_servico(self):
-        """Muda o estado do táxi para ocupado (ex: ao aceitar um pedido)."""
+        """Muda o estado do táxi para OCUPADO (ex: ao aceitar um pedido)."""
         if self.estado == EstadoVeiculo.LIVRE:
             self.estado = EstadoVeiculo.OCUPADO
         else:
             print(f"AVISO: Tentativa de alocar Taxi {self.id_veiculo} que não está LIVRE.")
 
     def mover_e_consumir(self, distancia_km: float, localizacao_destino: str):
-        """Move o táxi, consome autonomia e atualiza a localização."""
+        """
+        Move o táxi para uma nova localização e consome a autonomia correspondente.
+        
+        Args:
+            distancia_km (float): Distância percorrida.
+            localizacao_destino (str): ID do nó de destino.
+        """
         if self.autonomia_atual >= distancia_km:
             self.autonomia_atual -= distancia_km
             self.localizacao_atual = localizacao_destino
@@ -87,20 +132,25 @@ class Taxi:
             self.estado = EstadoVeiculo.EM_FALHA # Simula falha por falta de energia
 
     def iniciar_carregamento(self):
-        """Muda o estado para carregar/abastecer."""
+        """Muda o estado para A_CARREGAR ou A_ABASTECER, dependendo do tipo."""
         if self.tipo == TipoMotorizacao.ELETRICO:
             self.estado = EstadoVeiculo.A_CARREGAR
         else:
             self.estado = EstadoVeiculo.A_ABASTECER
 
     def terminar_carregamento(self):
-        """Completa o carregamento/abastecimento e liberta o táxi."""
+        """Restaura a autonomia a 100% e coloca o táxi como LIVRE."""
         self.autonomia_atual = self.autonomia_maxima
         self.estado = EstadoVeiculo.LIVRE
         print(f"INFO: Taxi {self.id_veiculo} carregado e LIVRE.")
         
     def libertar_no_destino(self, localizacao_destino: str):
-        """Termina um serviço, atualiza a localização e fica LIVRE."""
+        """
+        Finaliza um serviço, atualiza a localização final e liberta o táxi.
+        
+        Args:
+            localizacao_destino (str): ID do nó onde o serviço terminou.
+        """
         self.localizacao_atual = localizacao_destino
         self.estado = EstadoVeiculo.LIVRE
 

@@ -5,6 +5,7 @@ import os
 class Grafo:
     """
     Representa a cidade (mapa) como um grafo ponderado e dirigido.
+    
     Armazena os nós (localizações) e as arestas (caminhos),
     juntamente com os custos dinâmicos (distância e tempo).
     """
@@ -13,7 +14,14 @@ class Grafo:
     def carregar_de_json(caminho_ficheiro: str) -> 'Grafo':
         """
         Carrega um grafo a partir de um ficheiro JSON.
+        
         Centraliza a lógica de carregamento e tratamento de erros.
+        
+        Args:
+            caminho_ficheiro (str): Caminho para o ficheiro JSON do mapa.
+            
+        Returns:
+            Grafo: Instância do grafo carregado ou None em caso de erro.
         """
         if not os.path.exists(caminho_ficheiro):
             print(f"ERRO CRÍTICO: Ficheiro de mapa '{caminho_ficheiro}' não encontrado.")
@@ -47,6 +55,7 @@ class Grafo:
         return None
 
     def __init__(self):
+        """Inicializa um grafo vazio."""
         # self.nos armazena dados sobre cada nó (ex: coordenadas, tipo)
         # Formato: { 'id_no': { 'lat': float, 'lon': float, 'tipo': str } }
         self.nos = {}
@@ -66,7 +75,12 @@ class Grafo:
     def add_no(self, id_no: str, lat: float, lon: float, tipo: str = 'PontoInteresse'):
         """
         Adiciona um nó (localização) ao grafo.
-        'tipo' pode ser 'Recolha', 'EstacaoRecarga', 'PostoAbastecimento', etc. 
+        
+        Args:
+            id_no (str): Identificador único do nó.
+            lat (float): Latitude.
+            lon (float): Longitude.
+            tipo (str, optional): Tipo de local ('Recolha', 'EstacaoRecarga', etc.).
         """
         if id_no not in self.nos:
             self.nos[id_no] = {'lat': lat, 'lon': lon, 'tipo': tipo}
@@ -78,6 +92,12 @@ class Grafo:
         """
         Adiciona uma aresta dirigida (caminho) entre dois nós.
         Permite que A->B e B->A tenham custos diferentes.
+        
+        Args:
+            origem (str): ID do nó de origem.
+            destino (str): ID do nó de destino.
+            distancia_km (float): Distância da aresta em km.
+            tempo_base_min (float): Tempo base de percurso em minutos (sem trânsito).
         """
         if origem not in self.nos or destino not in self.nos:
             print(f"Erro: Nós de origem ({origem}) ou destino ({destino}) não existem.")
@@ -91,16 +111,30 @@ class Grafo:
         self.condicoes_transito[(origem, destino)] = 1.0
 
     def get_vizinhos(self, id_no: str) -> list:
-        """Retorna uma lista de IDs dos nós vizinhos (destinos)."""
+        """
+        Retorna uma lista de IDs dos nós vizinhos (destinos).
+        
+        Args:
+            id_no (str): ID do nó.
+            
+        Returns:
+            list: Lista de IDs dos nós adjacentes.
+        """
         if id_no in self.arestas:
             return list(self.arestas[id_no].keys())
         return []
 
     def get_custo_aresta(self, origem: str, destino: str) -> (float, float):
         """
-        Retorna o custo atual de uma aresta.
-        Retorna (distancia_km, tempo_viagem_min)
-        O tempo de viagem é afetado pelo trânsito. 
+        Retorna o custo atual de uma aresta, considerando o trânsito.
+        
+        Args:
+            origem (str): ID do nó de origem.
+            destino (str): ID do nó de destino.
+            
+        Returns:
+            tuple: (distancia_km, tempo_viagem_min)
+                   Retorna (inf, inf) se a aresta não existir.
         """
         if destino not in self.arestas.get(origem, {}):
             # Não há ligação direta
@@ -118,8 +152,12 @@ class Grafo:
 
     def atualizar_transito(self, origem: str, destino: str, multiplicador: float):
         """
-        Simula a mudança nas condições de trânsito. 
-        (ex: 1.0 = normal, 1.5 = lento, 2.0 = muito lento)
+        Simula a mudança nas condições de trânsito numa aresta específica.
+        
+        Args:
+            origem (str): ID do nó de origem.
+            destino (str): ID do nó de destino.
+            multiplicador (float): Fator de trânsito (1.0 = normal, >1.0 = lento).
         """
         if (origem, destino) in self.condicoes_transito:
             self.condicoes_transito[(origem, destino)] = multiplicador
@@ -129,8 +167,15 @@ class Grafo:
     def get_distancia_heuristica(self, no_atual: str, no_objetivo: str) -> float:
         """
         Calcula a distância em linha reta (Haversine) entre dois nós.
-        Esta será a nossa heurística 'h(n)' para o A*.
-        Retorna a distância em km.
+        
+        Utilizada como heurística 'h(n)' para o algoritmo A*.
+        
+        Args:
+            no_atual (str): ID do nó atual.
+            no_objetivo (str): ID do nó objetivo.
+            
+        Returns:
+            float: Distância em km.
         """
         if no_atual not in self.nos or no_objetivo not in self.nos:
             return float('inf')

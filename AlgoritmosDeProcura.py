@@ -1,9 +1,15 @@
+"""
+Módulo que contém implementações de vários algoritmos de busca em grafos.
+
+Inclui algoritmos como A* (A-Star), Busca Gulosa (Greedy Best-First Search),
+Busca em Profundidade (DFS) e Busca em Largura (BFS).
+"""
 import heapq
 from collections import deque
 from Grafo import Grafo 
 from Config import cfg
 
-# Cache para parâmetros da heurística
+# Cache para parâmetros da heurística para evitar recálculos desnecessários
 _heuristic_cache = {
     'graph_id': None,
     'max_speed': 1.0,
@@ -11,6 +17,18 @@ _heuristic_cache = {
 }
 
 def _update_heuristic_cache(grafo: Grafo):
+    """
+    Atualiza o cache de parâmetros heurísticos para o grafo fornecido.
+    
+    Calcula a velocidade máxima permitida e a razão mínima entre distância real e
+    distância heurística (linha reta) para garantir a admissibilidade da heurística.
+    
+    Args:
+        grafo (Grafo): O grafo sobre o qual a busca será realizada.
+        
+    Returns:
+        tuple: (velocidade_maxima, razao_minima_distancia)
+    """
     # Identificador simples para o grafo (usando id do objeto)
     graph_id = id(grafo)
     
@@ -48,8 +66,20 @@ def _update_heuristic_cache(grafo: Grafo):
 def a_star_search(grafo: Grafo, inicio: str, objetivo: str, 
                   cost_type: str = 'distancia', use_heuristic: bool = True):
     """
-    Implementação do algoritmo A* com Heurística Otimizada.
-    Retorna: (caminho, custo, nos_visitados)
+    Executa o algoritmo de busca A* (A-Star) para encontrar o caminho mais curto.
+    
+    Args:
+        grafo (Grafo): O grafo onde a busca será executada.
+        inicio (str): ID do nó de origem.
+        objetivo (str): ID do nó de destino.
+        cost_type (str, optional): Tipo de custo a otimizar ('distancia' ou 'tempo'). 
+            Defaults to 'distancia'.
+        use_heuristic (bool, optional): Se True, usa heurística admissível. Se False, 
+            comporta-se como Dijkstra. Defaults to True.
+            
+    Returns:
+        tuple: (caminho_lista_nos, custo_total, numero_nos_visitados)
+               Retorna (None, inf, visitados) se não houver caminho.
     """
     
     g_costs = {no: float('inf') for no in grafo.nos}
@@ -64,13 +94,13 @@ def a_star_search(grafo: Grafo, inicio: str, objetivo: str,
         # Distância em linha reta (km)
         h_dist_raw = grafo.get_distancia_heuristica(no_atual, objetivo)
         
-        # Aplicar correção geométrica para garantir h(n) <= custo_real
+        # Aplicar correção geométrica para garantir h(n) <= custo_real (admissibilidade)
         h_dist = h_dist_raw * min_dist_ratio
         
         if cost_type == 'distancia':
             return h_dist
         else: # cost_type == 'tempo'
-            # Usamos a velocidade máxima para estimar o tempo mínimo
+            # Usamos a velocidade máxima para estimar o tempo mínimo possível
             h_tempo_horas = h_dist / max_speed_kmh
             h_tempo_min = h_tempo_horas * 60
             
@@ -87,6 +117,7 @@ def a_star_search(grafo: Grafo, inicio: str, objetivo: str,
         f_cost_atual, g_cost_atual, no_atual, caminho = heapq.heappop(frontier)
         nos_visitados += 1
         
+        # Se já encontramos um caminho melhor para este nó, ignoramos
         if no_atual in visited_costs and g_cost_atual > visited_costs[no_atual]:
             continue
             
@@ -113,8 +144,19 @@ def a_star_search(grafo: Grafo, inicio: str, objetivo: str,
 def greedy_search(grafo: Grafo, inicio: str, objetivo: str, 
                   cost_type: str = 'distancia'):
     """
-    Implementação do algoritmo Guloso.
-    Retorna: (caminho, custo, nos_visitados)
+    Executa o algoritmo de busca Gulosa (Greedy Best-First Search).
+    
+    A busca gulosa expande sempre o nó que parece estar mais próximo do objetivo,
+    baseado apenas na heurística, ignorando o custo do caminho percorrido até então.
+    
+    Args:
+        grafo (Grafo): O grafo onde a busca será executada.
+        inicio (str): ID do nó de origem.
+        objetivo (str): ID do nó de destino.
+        cost_type (str, optional): Tipo de custo ('distancia' ou 'tempo').
+        
+    Returns:
+        tuple: (caminho_lista_nos, custo_total, numero_nos_visitados)
     """
     velocidade_media = cfg.get('simulacao.velocidade_media_cidade_kmh', 40.0)
 
@@ -139,6 +181,7 @@ def greedy_search(grafo: Grafo, inicio: str, objetivo: str,
             continue
             
         if no_atual == objetivo:
+            # Recalcular custo real do caminho encontrado
             custo_real = 0.0
             for i in range(len(caminho) - 1):
                 d, t = grafo.get_custo_aresta(caminho[i], caminho[i+1])
@@ -157,8 +200,18 @@ def greedy_search(grafo: Grafo, inicio: str, objetivo: str,
 
 def dfs_search(grafo: Grafo, inicio: str, objetivo: str, cost_type: str = 'tempo'):
     """
-    Implementação do algoritmo DFS.
-    Retorna: (caminho, custo, nos_visitados)
+    Executa o algoritmo de Busca em Profundidade (DFS).
+    
+    Nota: DFS não garante o caminho mais curto.
+    
+    Args:
+        grafo (Grafo): O grafo onde a busca será executada.
+        inicio (str): ID do nó de origem.
+        objetivo (str): ID do nó de destino.
+        cost_type (str, optional): Usado apenas para calcular o custo final do caminho.
+        
+    Returns:
+        tuple: (caminho_lista_nos, custo_total, numero_nos_visitados)
     """
     frontier = [(inicio, [inicio], 0.0)]
     visited = set()
@@ -185,8 +238,19 @@ def dfs_search(grafo: Grafo, inicio: str, objetivo: str, cost_type: str = 'tempo
 
 def bfs_search(grafo: Grafo, inicio: str, objetivo: str, cost_type: str = 'tempo'):
     """
-    Implementação do algoritmo BFS.
-    Retorna: (caminho, custo, nos_visitados)
+    Executa o algoritmo de Busca em Largura (BFS).
+    
+    Garante o caminho com menor número de arestas (saltos), mas não necessariamente
+    o menor custo em distância ou tempo se as arestas tiverem pesos diferentes.
+    
+    Args:
+        grafo (Grafo): O grafo onde a busca será executada.
+        inicio (str): ID do nó de origem.
+        objetivo (str): ID do nó de destino.
+        cost_type (str, optional): Usado apenas para calcular o custo final do caminho.
+        
+    Returns:
+        tuple: (caminho_lista_nos, custo_total, numero_nos_visitados)
     """
     frontier = deque([(inicio, [inicio], 0.0)])
     visited = {inicio}

@@ -9,12 +9,31 @@ from Gestor import GestorDeFrota
 from Config import cfg
 
 class Simulador:
+    """
+    Motor principal da simulação.
+    
+    Gerencia o relógio da simulação, a geração de pedidos, o movimento dos táxis
+    e a interação com o gestor de frota e a interface gráfica.
+    """
+    
     def __init__(self, gestor: GestorDeFrota, hora_inicio: datetime, 
                  duracao_sim_horas: int,
                  horas_ponta: list = None,        
                  prob_pedido: float = 0.15,        
                  gui_interface = None,
                  usar_estaticos: bool = None):
+        """
+        Inicializa o simulador.
+        
+        Args:
+            gestor (GestorDeFrota): O gestor que controla a frota.
+            hora_inicio (datetime): Hora inicial da simulação.
+            duracao_sim_horas (int): Duração total em horas.
+            horas_ponta (list, optional): Lista de horas consideradas de ponta.
+            prob_pedido (float, optional): Probabilidade de gerar um novo pedido a cada minuto.
+            gui_interface (VisualizadorGUI, optional): Referência para a GUI (para atualizações visuais).
+            usar_estaticos (bool, optional): Se True, usa lista pré-definida de pedidos.
+        """
         
         self.gestor = gestor
         self.grafo = gestor.grafo
@@ -23,7 +42,7 @@ class Simulador:
         # Listas de Estado
         self.pedidos_gerados = [] 
         self.movimentos_ativos = {} 
-
+        
         self.hora_inicio = hora_inicio
         self.current_time = hora_inicio
         self.end_time = hora_inicio + timedelta(hours=duracao_sim_horas)
@@ -53,6 +72,12 @@ class Simulador:
         print(f"Simulador iniciado ({self.hora_inicio} -> {self.end_time}). Modo Estático: {self.usar_estaticos}")
 
     def run(self):
+        """
+        Executa o loop principal da simulação.
+        
+        Avança o tempo passo a passo, processa movimentos, gera pedidos e atualiza a GUI.
+        Termina quando o tempo acaba e não há mais atividades pendentes.
+        """
         print(f"\n--- INÍCIO DA SIMULAÇÃO ({'Modo Visual' if self.gui else 'Modo Rápido'}) ---")
         
         # Loop continua se:
@@ -84,12 +109,23 @@ class Simulador:
         return self.print_summary()
 
     def toggle_pause(self):
+        """Alterna o estado de pausa da simulação."""
         self.paused = not self.paused
         return self.paused
+
     def set_delay(self, delay):
+        """Define o atraso entre passos (velocidade da simulação)."""
         self.delay = delay
 
     def step(self):
+        """
+        Executa um único passo da simulação (1 minuto).
+        
+        1. Gera novos pedidos (se aplicável).
+        2. Atualiza posições dos táxis em movimento.
+        3. Tenta alocar pedidos em espera.
+        4. Gere táxis livres (ex: recarga).
+        """
         # Só gera novos pedidos se ainda estivermos dentro do horário normal
         if self.current_time <= self.end_time:
             self._generate_new_request()
@@ -103,6 +139,7 @@ class Simulador:
         self._manage_idle_taxis()
 
     def _generate_new_request(self):
+        """Gera novos pedidos, seja a partir da lista estática ou aleatoriamente."""
         # 1. Verificar Pedidos Estáticos
         if self.usar_estaticos:
             minutos_passados = int((self.current_time - self.hora_inicio).total_seconds() / 60)
@@ -128,6 +165,7 @@ class Simulador:
             self._registar_pedido(novo_pedido)
 
     def _criar_pedido_especifico(self, req_data):
+        """Cria um pedido específico a partir de dados de configuração."""
         origem = req_data['origem']
         destino = req_data['destino']
         
@@ -152,13 +190,18 @@ class Simulador:
         self._registar_pedido(novo_pedido)
 
     def _registar_pedido(self, pedido):
+        """Regista um novo pedido no sistema e tenta alocação imediata."""
         pedido.cor_mapa = random.choice(self.CORES_PEDIDOS)
         print(f"TEMPO: {self.current_time} - NOVO PEDIDO {pedido.id_pedido} ({pedido.origem} -> {pedido.destino})")
         self.pedidos_gerados.append(pedido)
         self._tenta_alocar_pedido(pedido)
 
     def _processar_fila_espera(self):
-        """Gere a fila: remove expirados e tenta alocar pendentes."""
+        """
+        Gere a fila de espera:
+        1. Remove pedidos expirados (timeout).
+        2. Tenta alocar pedidos pendentes, ordenados por prioridade e antiguidade.
+        """
         
         MAX_ESPERA = 60 
         
@@ -181,7 +224,15 @@ class Simulador:
                 pass
 
     def _tenta_alocar_pedido(self, pedido, vindo_da_fila=False):
-        """Tenta alocar um pedido. Retorna True se sucesso."""
+        """
+        Solicita ao gestor a alocação de um táxi para o pedido.
+        
+        Se alocado com sucesso, inicia o movimento do táxi.
+        Se falhar, coloca (ou mantém) o pedido na fila de espera.
+        
+        Returns:
+            bool: True se alocado com sucesso, False caso contrário.
+        """
         taxi, custo, caminhos = self.gestor.decidir_alocacao(pedido)
         
         if taxi:
@@ -215,6 +266,16 @@ class Simulador:
             return False
 
     def _iniciar_movimento(self, taxi, caminho, tipo, pedido=None, proximo_caminho=None):
+        """
+        Configura o estado de movimento de um táxi.
+        
+        Args:
+            taxi (Taxi): O táxi a mover.
+            caminho (list): Lista de nós a percorrer.
+            tipo (str): Tipo de movimento ('PICKUP', 'VIAGEM', 'A_CARREGAR', etc.).
+            pedido (Pedido, optional): Pedido associado.
+            proximo_caminho (list, optional): Caminho seguinte (ex: viagem após pickup).
+        """
         if not caminho or len(caminho) < 2:
             tempo_prox, prox_no_idx = 0, 0
         else:
@@ -232,6 +293,12 @@ class Simulador:
         return True
 
     def _processar_movimentos(self):
+        """
+        Atualiza o progresso de todos os táxis em movimento.
+        
+        Decrementa o tempo restante na aresta atual. Se chegar a zero,
+        move o táxi para o próximo nó ou conclui o segmento.
+        """
         ids = list(self.movimentos_ativos.keys())
         for tid in ids:
             mov = self.movimentos_ativos[tid]
@@ -278,6 +345,11 @@ class Simulador:
                     self._concluir_segmento(mov)
 
     def _concluir_segmento(self, mov):
+        """
+        Chamado quando um táxi termina o seu caminho atual.
+        
+        Gere a transição de estados (ex: PICKUP -> VIAGEM, VIAGEM -> LIVRE, etc.).
+        """
         taxi, tipo, pedido = mov['taxi'], mov['tipo'], mov.get('pedido')
         
         if tipo == "PICKUP":
@@ -325,6 +397,9 @@ class Simulador:
             del self.movimentos_ativos[taxi.id_veiculo]
 
     def _manage_idle_taxis(self):
+        """
+        Verifica táxis livres e envia-os para recarga/abastecimento se necessário.
+        """
         for taxi in self.gestor.frota.values():
             if taxi.estado == EstadoVeiculo.LIVRE and taxi.id_veiculo not in self.movimentos_ativos:
                 
@@ -344,6 +419,7 @@ class Simulador:
                             taxi.estado = EstadoVeiculo.EM_FALHA
 
     def _find_nearest_charger(self, origem):
+        """Encontra a estação de recarga mais próxima (em tempo)."""
         estacoes = [n for n, d in self.grafo.nos.items() if d.get('pode_carregar')]
         best, min_t, best_path = None, float('inf'), None
         for st in estacoes:
@@ -352,6 +428,10 @@ class Simulador:
         return best, best_path
 
     def _update_traffic(self):
+        """
+        Atualiza aleatoriamente as condições de trânsito nas horas de ponta.
+        Returns: True se houve alterações.
+        """
         hora = self.current_time.hour
         mult = self.MULTIPLICADOR_TRANSITO if hora in self.HORAS_DE_PONTA else 1.0
         
@@ -365,6 +445,7 @@ class Simulador:
         return mudou
 
     def _atualizar_descricoes_gui(self):
+        """Atualiza o dicionário de descrições de estado para a GUI."""
         self.status_descricoes.clear()
         for t_id, taxi in self.gestor.frota.items():
             if taxi.estado == EstadoVeiculo.EM_FALHA:
@@ -382,6 +463,7 @@ class Simulador:
             else: self.status_descricoes[t_id] = "Livre"
 
     def print_summary(self):
+        """Imprime e retorna um resumo estatístico da simulação."""
         concluidos = [p for p in self.pedidos_gerados if p.estado == EstadoPedido.CONCLUIDO]
         rejeitados = [p for p in self.pedidos_gerados if p.estado == EstadoPedido.REJEITADO]
         total = len(self.pedidos_gerados)
