@@ -57,6 +57,7 @@ class Simulador:
         
         self.status_descricoes = {}
         self.paused = False
+        self.running = True # Control flag
         self.delay = 0.2 if self.gui else 0.0 # Rápido se não houver GUI
         
         # Static Requests
@@ -84,12 +85,15 @@ class Simulador:
         # 1. Ainda não chegamos ao fim do tempo
         # 2. OU existem movimentos ativos (táxis a andar)
         # 3. OU existem pedidos na fila de espera
-        while self.current_time <= self.end_time or self.movimentos_ativos or self.gestor.pedidos_pendentes:
+        # 4. E a flag self.running for True
+        while self.running and (self.current_time <= self.end_time or self.movimentos_ativos or self.gestor.pedidos_pendentes):
             
-            while self.paused: 
+            while self.paused and self.running: 
                 time.sleep(0.1)
                 # Se tiver GUI, precisamos de atualizar a janela para não bloquear
                 if self.gui: self.gui.update()
+
+            if not self.running: break
 
             if self.current_time.minute % 30 == 0:
                  if self._update_traffic() and self.gui:
@@ -107,6 +111,11 @@ class Simulador:
             
         print("Simulação Concluída.")
         return self.print_summary()
+
+    def stop(self):
+        """Para a simulação forçadamente."""
+        self.running = False
+        print("Simulação parada pelo utilizador.")
 
     def toggle_pause(self):
         """Alterna o estado de pausa da simulação."""
