@@ -2,157 +2,157 @@
   "nos": [
     {
       "id": "Centro",
-      "lat": 41.55,
-      "lon": -8.42,
+      "lat": 41.5503,
+      "lon": -8.4200,
       "tipo": "ZonaRecolha"
     },
     {
       "id": "Avenida_Central",
-      "lat": 41.552,
-      "lon": -8.415,
+      "lat": 41.5535,
+      "lon": -8.4160,
       "tipo": "ZonaRecolha"
     },
     {
       "id": "Praca_Republica",
-      "lat": 41.552,
-      "lon": -8.425,
+      "lat": 41.5550,
+      "lon": -8.4250,
       "tipo": "ZonaRecolha"
     },
     {
       "id": "Estacao_CP",
-      "lat": 41.543,
-      "lon": -8.435,
+      "lat": 41.5430,
+      "lon": -8.4350,
       "tipo": "PontoInteresse"
     },
     {
       "id": "Maximinos",
-      "lat": 41.54,
-      "lon": -8.445,
+      "lat": 41.5400,
+      "lon": -8.4400,
       "tipo": "ZonaRecolha"
     },
     {
       "id": "UMinho_Gualtar",
-      "lat": 41.565,
-      "lon": -8.39,
+      "lat": 41.5650,
+      "lon": -8.3900,
       "tipo": "ZonaRecolha"
     },
     {
       "id": "Hospital",
-      "lat": 41.565,
-      "lon": -8.435,
+      "lat": 41.5650,
+      "lon": -8.4350,
       "tipo": "ZonaRecolha",
       "pode_carregar": true
     },
     {
       "id": "Braga_Parque",
-      "lat": 41.56,
-      "lon": -8.405,
+      "lat": 41.5600,
+      "lon": -8.4050,
       "tipo": "ZonaRecolha",
       "pode_carregar": true
     },
     {
       "id": "Minho_Center",
-      "lat": 41.54,
-      "lon": -8.405,
+      "lat": 41.5450,
+      "lon": -8.4000,
       "tipo": "ZonaRecolha",
       "pode_carregar": true
     },
     {
       "id": "Lamaçaes",
-      "lat": 41.55,
-      "lon": -8.395,
+      "lat": 41.5500,
+      "lon": -8.3900,
       "tipo": "ZonaRecolha"
     },
     {
       "id": "Fraiao",
-      "lat": 41.53,
-      "lon": -8.405,
+      "lat": 41.5300,
+      "lon": -8.4050,
       "tipo": "ZonaRecolha"
     },
     {
       "id": "Nogueira",
-      "lat": 41.52,
-      "lon": -8.415,
+      "lat": 41.5250,
+      "lon": -8.4150,
       "tipo": "ZonaRecolha"
     },
     {
       "id": "Ferreiros",
-      "lat": 41.525,
-      "lon": -8.445,
+      "lat": 41.5250,
+      "lon": -8.4450,
       "tipo": "ZonaIndustrial"
     },
     {
       "id": "Sequeira",
-      "lat": 41.535,
-      "lon": -8.465,
+      "lat": 41.5350,
+      "lon": -8.4650,
       "tipo": "ZonaIndustrial"
     },
     {
       "id": "Frossos",
-      "lat": 41.55,
-      "lon": -8.46,
+      "lat": 41.5500,
+      "lon": -8.4550,
       "tipo": "ZonaIndustrial"
     },
     {
       "id": "Real",
-      "lat": 41.56,
-      "lon": -8.45,
+      "lat": 41.5600,
+      "lon": -8.4500,
       "tipo": "ZonaRecolha"
     },
     {
       "id": "Estadio",
-      "lat": 41.57,
-      "lon": -8.425,
+      "lat": 41.5700,
+      "lon": -8.4250,
       "tipo": "PontoInteresse"
     },
     {
       "id": "Infias",
-      "lat": 41.56,
-      "lon": -8.42,
+      "lat": 41.5620,
+      "lon": -8.4200,
       "tipo": "ZonaRecolha"
     },
     {
       "id": "Bom_Jesus",
-      "lat": 41.555,
-      "lon": -8.375,
+      "lat": 41.5546,
+      "lon": -8.3750,
       "tipo": "PontoInteresse"
     },
     {
       "id": "Sameiro",
-      "lat": 41.54,
-      "lon": -8.365,
+      "lat": 41.5400,
+      "lon": -8.3650,
       "tipo": "PontoInteresse"
     },
     {
       "id": "Celeiros",
-      "lat": 41.515,
-      "lon": -8.435,
+      "lat": 41.5150,
+      "lon": -8.4350,
       "tipo": "ZonaIndustrial"
     },
     {
       "id": "Adaufe",
-      "lat": 41.58,
-      "lon": -8.39,
+      "lat": 41.5850,
+      "lon": -8.3900,
       "tipo": "ZonaRecolha"
     },
     {
       "id": "Posto_Recarga_Centro",
-      "lat": 41.548,
-      "lon": -8.42,
+      "lat": 41.5480,
+      "lon": -8.4250,
       "tipo": "EstacaoRecarga",
       "pode_carregar": true
     },
     {
       "id": "Posto_Recarga_Norte",
-      "lat": 41.57,
-      "lon": -8.4,
+      "lat": 41.5700,
+      "lon": -8.4000,
       "tipo": "EstacaoRecarga",
       "pode_carregar": true
     },
     {
       "id": "Posto_Recarga_Sul",
-      "lat": 41.525,
-      "lon": -8.435,
+      "lat": 41.5250,
+      "lon": -8.4350,
       "tipo": "EstacaoRecarga",
       "pode_carregar": true
     }
