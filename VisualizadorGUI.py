@@ -365,46 +365,48 @@ class MapaVisualizador(ctk.CTkFrame):
             # Marcador Destino (Quadrado pequeno)
             self.canvas.create_rectangle(dx-3, dy-3, dx+3, dy+3, fill=p.cor_mapa, outline="", tags="dinamico")
 
-        # 3. Mapa: Táxis (Ícones Rotacionados)
+        # 3. Mapa: Táxis (Ícones Rotacionados com Interpolação)
         for taxi in frota.values():
-            tx, ty = self.coords_para_pixel(self.grafo.nos[taxi.localizacao_atual]['lat'], self.grafo.nos[taxi.localizacao_atual]['lon'])
+            # Posição padrão (nó atual)
+            lat_atual = self.grafo.nos[taxi.localizacao_atual]['lat']
+            lon_atual = self.grafo.nos[taxi.localizacao_atual]['lon']
+            tx, ty = self.coords_para_pixel(lat_atual, lon_atual)
             
-            # Calcular ângulo
             angle = 0
-            # Se estiver em movimento, temos acesso ao próximo nó?
-            # O simulador não expõe o próximo nó diretamente no objeto taxi de forma fácil sem aceder aos movimentos.
-            # Mas podemos inferir ou o simulador pode passar essa info.
-            # Alternativa: O Taxi podia guardar "last_pos" e "current_pos" para calcular vetor.
-            # Ou podemos aceder a self.simulador.movimentos_ativos se disponível.
             
+            # Se estiver em movimento, interpolar posição
             if self.simulador and taxi.id_veiculo in self.simulador.movimentos_ativos:
                 mov = self.simulador.movimentos_ativos[taxi.id_veiculo]
-                # Caminho: [atual, proximo, ...]
-                if len(mov['caminho']) > mov['idx_prox_no']:
-                    prox_no = mov['caminho'][mov['idx_prox_no']]
-                    px, py = self.coords_para_pixel(self.grafo.nos[prox_no]['lat'], self.grafo.nos[prox_no]['lon'])
+                
+                # Verificar se temos dados para interpolar
+                if 'tempo_total_aresta' in mov and mov['tempo_total_aresta'] > 0:
+                    # Calcular progresso (0.0 a 1.0)
+                    # tempo_restante vai de total -> 0
+                    progress = 1.0 - (mov['tempo_restante_aresta'] / mov['tempo_total_aresta'])
+                    progress = max(0.0, min(1.0, progress)) # Clamp
                     
-                    # Vetor (dx, dy)
-                    # Nota: Y cresce para baixo no Canvas.
-                    dx = px - tx
-                    dy = -(py - ty) # Inverter Y para coordenadas cartesianas normais para cálculo de ângulo
-                    
-                    # Math.atan2 retorna radianos. Converter para graus.
-                    # 0 graus = Este.
-                    rads = math.atan2(dy, dx)
-                    angle = math.degrees(rads)
-                    
-                    # Ajuste para PIL rotate (que roda anti-horário)
-                    # Se a imagem aponta para a direita (0 graus):
-                    # angle é o ângulo matemático padrão.
-                    # PIL rotate: positivo é anti-horário.
-                    # Então deve bater certo.
+                    # Obter próximo nó
+                    if mov['idx_prox_no'] < len(mov['caminho']):
+                        prox_no = mov['caminho'][mov['idx_prox_no']]
+                        lat_prox = self.grafo.nos[prox_no]['lat']
+                        lon_prox = self.grafo.nos[prox_no]['lon']
+                        
+                        px, py = self.coords_para_pixel(lat_prox, lon_prox)
+                        
+                        # Interpolação Linear
+                        tx = tx + (px - tx) * progress
+                        ty = ty + (py - ty) * progress
+                        
+                        # Calcular ângulo baseado no vetor de movimento
+                        dx = px - tx
+                        dy = -(py - ty) # Inverter Y do canvas
+                        rads = math.atan2(dy, dx)
+                        angle = math.degrees(rads)
             
             img = self.get_car_image(taxi, angle)
             if img:
                 self.canvas.create_image(tx, ty, image=img, tags="dinamico")
             else:
-                # Fallback se não houver imagem
                 cor = "#ffffff"
                 self.canvas.create_oval(tx-5, ty-5, tx+5, ty+5, fill=cor, tags="dinamico")
 

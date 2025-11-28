@@ -51,7 +51,8 @@ class Taxi:
         # Características dinâmicas (estado)
         self.localizacao_atual = localizacao_atual            #  (ex: 'Nó_A', 'Centro')
         self.autonomia_atual = autonomia_maxima               #  (Assumindo que começa cheio)
-        self.estado = EstadoVeiculo.LIVRE                      
+        self.estado = EstadoVeiculo.LIVRE
+        self.tempo_carregamento_restante = 0
 
     def __repr__(self):
         """Representação textual do objeto para debugging."""
@@ -135,13 +136,18 @@ class Taxi:
         """Muda o estado para A_CARREGAR ou A_ABASTECER, dependendo do tipo."""
         if self.tipo == TipoMotorizacao.ELETRICO:
             self.estado = EstadoVeiculo.A_CARREGAR
+            # Exemplo: 30 mins para carregar
+            self.tempo_carregamento_restante = 30 
         else:
             self.estado = EstadoVeiculo.A_ABASTECER
+            # Exemplo: 10 mins para abastecer
+            self.tempo_carregamento_restante = 10
 
-    def terminar_carregamento(self):
+    def concluir_carregamento(self):
         """Restaura a autonomia a 100% e coloca o táxi como LIVRE."""
         self.autonomia_atual = self.autonomia_maxima
         self.estado = EstadoVeiculo.LIVRE
+        self.tempo_carregamento_restante = 0
         print(f"INFO: Taxi {self.id_veiculo} carregado e LIVRE.")
         
     def libertar_no_destino(self, localizacao_destino: str):
@@ -214,5 +220,5 @@ if __name__ == "__main__":
         print(taxi_eletrico)
         
         # Simular tempo de carregamento (na simulação real, isto demoraria tempo)
-        taxi_eletrico.terminar_carregamento()
+        taxi_eletrico.concluir_carregamento()
         print(taxi_eletrico)

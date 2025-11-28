@@ -289,22 +289,46 @@ class Simulador:
             tempo_prox, prox_no_idx = 0, 0
         else:
             prox_no_idx = 1
-            d, tempo_prox = self.grafo.get_custo_aresta(caminho[0], caminho[1])
-            if d == float('inf'): 
-                print(f"ERRO: Aresta inválida no caminho de {taxi.id_veiculo}: {caminho[0]} -> {caminho[1]}")
-                return False
+            
+        if not caminho:
+            print(f"ERRO: Caminho vazio para {taxi.id_veiculo} no movimento {tipo}.")
+            return False
+
+        origem = caminho[0]
+        destino = caminho[1] if len(caminho) > 1 else origem
+        
+        dist, tempo = self.grafo.get_custo_aresta(origem, destino)
+        
+        if dist == float('inf'):
+            print(f"ERRO: Caminho inválido ou desconectado para {taxi.id_veiculo} de {origem} para {destino}.")
+            return False
+
+        taxi.estado = EstadoVeiculo.OCUPADO
+        taxi.localizacao_atual = origem
         
         self.movimentos_ativos[taxi.id_veiculo] = {
-            'taxi': taxi, 'pedido': pedido, 'tipo': tipo, 'caminho': caminho,
-            'idx_prox_no': prox_no_idx, 'tempo_restante_aresta': tempo_prox,
-            'proximo_caminho': proximo_caminho 
+            'taxi': taxi,
+            'caminho': caminho,
+            'idx_prox_no': prox_no_idx,
+            'tempo_restante_aresta': tempo,
+            'tempo_total_aresta': tempo,
+            'tipo': tipo,
+            'pedido': pedido,
+            'proximo_caminho': proximo_caminho
         }
+        
+        if tipo == "PICKUP":
+            print(f"TEMPO: {self.current_time} - {taxi.id_veiculo} a caminho de {pedido.origem} para pickup.")
+        elif tipo == "VIAGEM":
+            print(f"TEMPO: {self.current_time} - {taxi.id_veiculo} a levar {pedido.id_pedido} de {pedido.origem} para {pedido.destino}.")
+        elif tipo in ["A_CARREGAR", "A_ABASTECER"]:
+            msg = "carregar" if tipo == "A_CARREGAR" else "abastecer"
+            print(f"TEMPO: {self.current_time} - {taxi.id_veiculo} a caminho para {msg} em {caminho[-1]}.")
+            
         return True
 
     def _processar_movimentos(self):
         """
-        Atualiza o progresso de todos os táxis em movimento.
-        
         Decrementa o tempo restante na aresta atual. Se chegar a zero,
         move o táxi para o próximo nó ou conclui o segmento.
         """
@@ -315,16 +339,19 @@ class Simulador:
             mov['tempo_restante_aresta'] -= 1
             
             if mov['tempo_restante_aresta'] <= 0:
-                if mov['idx_prox_no'] < len(mov['caminho']):
-                    dest = mov['caminho'][mov['idx_prox_no']]
+                # Chegou ao próximo nó
+                taxi.localizacao_atual = mov['caminho'][mov['idx_prox_no']]
+                taxi.autonomia_atual -= self.grafo.get_custo_aresta(mov['caminho'][mov['idx_prox_no']-1], taxi.localizacao_atual)[0]
+                
+                if mov['idx_prox_no'] < len(mov['caminho']) - 1:
+                    # Ainda há mais nós no caminho atual
+                    mov['idx_prox_no'] += 1
+                    origem = taxi.localizacao_atual
+                    destino = mov['caminho'][mov['idx_prox_no']]
                     
-                    if dest == taxi.localizacao_atual:
-                        dist = 0
-                    else:
-                        dist, _ = self.grafo.get_custo_aresta(taxi.localizacao_atual, dest)
-                    
+                    dist, tempo = self.grafo.get_custo_aresta(origem, destino)
                     if dist == float('inf'): 
-                        print(f"ERRO: Perda de conexão durante movimento de {taxi.id_veiculo} para {dest}")
+                        print(f"ERRO: Perda de conexão durante movimento de {taxi.id_veiculo} para {destino}")
                         del self.movimentos_ativos[tid]
                         
                         # RECUPERAÇÃO DE FALHA
@@ -339,21 +366,15 @@ class Simulador:
                             pedido.id_veiculo_alocado = None
                             if pedido not in self.gestor.pedidos_pendentes:
                                 self.gestor.pedidos_pendentes.append(pedido)
-                        continue
-
-                    taxi.mover_e_consumir(dist, dest)
-                    mov['idx_prox_no'] += 1
+                        continue # Passa para o próximo táxi
                     
-                    if mov['idx_prox_no'] < len(mov['caminho']):
-                        prox = mov['caminho'][mov['idx_prox_no']]
-                        _, t = self.grafo.get_custo_aresta(taxi.localizacao_atual, prox)
-                        mov['tempo_restante_aresta'] = t
-                    else:
-                        self._concluir_segmento(mov)
+                    mov['tempo_restante_aresta'] = tempo
+                    mov['tempo_total_aresta'] = tempo
                 else:
-                    self._concluir_segmento(mov)
+                    # Chegou ao final do caminho atual
+                    self._concluir_segmento_movimento(mov)
 
-    def _concluir_segmento(self, mov):
+    def _concluir_segmento_movimento(self, mov):
         """
         Chamado quando um táxi termina o seu caminho atual.
         
@@ -378,32 +399,36 @@ class Simulador:
                  
                  if taxi.id_veiculo in self.movimentos_ativos:
                     del self.movimentos_ativos[taxi.id_veiculo]
+            else:
+                print(f"TEMPO: {self.current_time} - {taxi.id_veiculo} fez pickup de {pedido.id_pedido} em {pedido.origem}.")
             
         elif tipo == "VIAGEM":
             taxi.libertar_no_destino(taxi.localizacao_atual)
             if pedido: pedido.concluir()
             del self.movimentos_ativos[taxi.id_veiculo]
+            print(f"TEMPO: {self.current_time} - {taxi.id_veiculo} concluiu viagem de {pedido.id_pedido} em {pedido.destino}.")
             
         elif tipo in ["A_CARREGAR", "A_ABASTECER"]:
             msg = "a carregar" if tipo == "A_CARREGAR" else "a abastecer"
             print(f"TEMPO: {self.current_time} - {taxi.id_veiculo} chegou. {msg}...")
             taxi.iniciar_carregamento()
             
-            # Specs da config
-            if taxi.tipo == TipoMotorizacao.ELETRICO:
-                t_carga = cfg.get('frota.specs_eletrico.tempo_recarga_min', 30)
-            else:
-                t_carga = cfg.get('frota.specs_combustao.tempo_abastecimento_min', 5)
-            
+            # Inicia o movimento de carregamento/abastecimento
             self.movimentos_ativos[taxi.id_veiculo] = {
-                'taxi': taxi, 'tipo': "EM_CARGA", 'caminho': [], 'idx_prox_no': 0, 
-                'tempo_restante_aresta': t_carga, 'pedido': None
+                'taxi': taxi,
+                'caminho': [taxi.localizacao_atual], # Fica parado
+                'idx_prox_no': 0,
+                'tempo_restante_aresta': taxi.tempo_carregamento_restante, # Tempo para carregar
+                'tempo_total_aresta': taxi.tempo_carregamento_restante,
+                'tipo': "EM_CARGA" if tipo == "A_CARREGAR" else "EM_ABASTECIMENTO",
+                'pedido': None,
+                'proximo_caminho': None
             }
-            
-        elif tipo == "EM_CARGA":
-            print(f"TEMPO: {self.current_time} - {taxi.id_veiculo} pronto (100%).")
-            taxi.terminar_carregamento()
+        elif tipo in ["EM_CARGA", "EM_ABASTECIMENTO"]:
+            taxi.concluir_carregamento()
             del self.movimentos_ativos[taxi.id_veiculo]
+            msg = "carregado" if tipo == "EM_CARGA" else "abastecido"
+            print(f"TEMPO: {self.current_time} - {taxi.id_veiculo} totalmente {msg}. LIVRE.")
 
     def _manage_idle_taxis(self):
         """
@@ -454,7 +479,7 @@ class Simulador:
         return mudou
 
     def _atualizar_descricoes_gui(self):
-        """Atualiza o dicionário de descrições de estado para a GUI."""
+        """Atualiza o dicionario de descricoes de estado para a GUI."""
         self.status_descricoes.clear()
         for t_id, taxi in self.gestor.frota.items():
             if taxi.estado == EstadoVeiculo.EM_FALHA:
@@ -472,7 +497,7 @@ class Simulador:
             else: self.status_descricoes[t_id] = "Livre"
 
     def print_summary(self):
-        """Imprime e retorna um resumo estatístico da simulação."""
+        """Imprime e retorna um resumo estatistico da simulacao."""
         concluidos = [p for p in self.pedidos_gerados if p.estado == EstadoPedido.CONCLUIDO]
         rejeitados = [p for p in self.pedidos_gerados if p.estado == EstadoPedido.REJEITADO]
         total = len(self.pedidos_gerados)
