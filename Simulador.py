@@ -263,6 +263,7 @@ class Simulador:
                 taxi.estado = EstadoVeiculo.LIVRE
                 # Devolver pedido à fila (ou rejeitar se for crítico)
                 if pedido not in self.gestor.pedidos_pendentes:
+                    pedido.estado = EstadoPedido.PENDENTE
                     self.gestor.pedidos_pendentes.append(pedido)
                 return False
                 

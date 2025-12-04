@@ -136,6 +136,8 @@ class Grafo:
             tuple: (distancia_km, tempo_viagem_min)
                    Retorna (inf, inf) se a aresta não existir.
         """
+        if origem == destino:
+            return (0.0, 0.0)
         if destino not in self.arestas.get(origem, {}):
             # Não há ligação direta
             return (float('inf'), float('inf'))

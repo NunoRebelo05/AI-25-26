@@ -68,6 +68,18 @@ class MapaVisualizador(ctk.CTkFrame):
         # Bind resize event
         self.canvas.bind("<Configure>", self.on_resize)
         
+        # Bind Zoom and Pan events
+        self.canvas.bind("<MouseWheel>", self.do_zoom)
+        self.canvas.bind("<ButtonPress-1>", self.start_pan)
+        self.canvas.bind("<B1-Motion>", self.do_pan)
+        
+        # Zoom and Pan state
+        self.zoom_level = 1.0
+        self.pan_x = 0
+        self.pan_y = 0
+        self.drag_start_x = 0
+        self.drag_start_y = 0
+        
         self.desenhar_mapa_base()
 
     def load_assets(self):
@@ -178,6 +190,34 @@ class MapaVisualizador(ctk.CTkFrame):
         self.recalc_scale()
         self.desenhar_mapa_base()
 
+    def start_pan(self, event):
+        self.drag_start_x = event.x
+        self.drag_start_y = event.y
+
+    def do_pan(self, event):
+        dx = event.x - self.drag_start_x
+        dy = event.y - self.drag_start_y
+        self.pan_x += dx
+        self.pan_y += dy
+        self.drag_start_x = event.x
+        self.drag_start_y = event.y
+        self.desenhar_mapa_base()
+
+    def do_zoom(self, event):
+        # Windows: event.delta is usually 120 or -120
+        # Linux: Button-4 / Button-5 (handled differently, but MouseWheel might work)
+        factor = 1.1 if event.delta > 0 else 0.9
+        
+        mouse_x = event.x
+        mouse_y = event.y
+        
+        # Adjust pan to keep mouse point stable
+        self.pan_x = mouse_x - (mouse_x - self.pan_x) * factor
+        self.pan_y = mouse_y - (mouse_y - self.pan_y) * factor
+        self.zoom_level *= factor
+        
+        self.desenhar_mapa_base()
+
     def recalc_scale(self):
         """Calcula escala e offsets para manter o aspect ratio."""
         if not self.grafo.nos: return
@@ -239,10 +279,15 @@ class MapaVisualizador(ctk.CTkFrame):
         # Pixel Y = OffsetY + (MaxLat - Lat) * Scale
         # Pixel X = OffsetX + (Lon - MinLon) * LonCorrection * Scale
         
-        y = self.offset_y + (self.max_lat - lat) * self.scale
-        x = self.offset_x + (lon - self.min_lon) * self.lon_correction * self.scale
+        # Base coords (fitted to screen)
+        y_base = self.offset_y + (self.max_lat - lat) * self.scale
+        x_base = self.offset_x + (lon - self.min_lon) * self.lon_correction * self.scale
         
-        return x, y
+        # Apply Zoom and Pan
+        x_final = x_base * self.zoom_level + self.pan_x
+        y_final = y_base * self.zoom_level + self.pan_y
+        
+        return x_final, y_final
 
     def get_cor_transito(self, multiplicador):
         if multiplicador <= 1.0: return self.COLORS['road']

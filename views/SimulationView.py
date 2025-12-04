@@ -12,6 +12,7 @@ from Gestor import GestorDeFrota, EstrategiaProcura
 from Simulador import Simulador
 from VisualizadorGUI import MapaVisualizador
 from Config import cfg
+from RealMapImporter import importar_mapa_osm
 
 class CounterCard(ctk.CTkFrame):
     def __init__(self, master, title, icon_path=None, initial_value=0, min_val=0, max_val=100, step=1, **kwargs):
@@ -114,7 +115,7 @@ class SimulationView(ctk.CTkFrame):
         self.grid_rowconfigure(0, weight=1)
         
         # --- Config Frame ---
-        self.config_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.config_frame = ctk.CTkScrollableFrame(self, fg_color="transparent")
         self.config_frame.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)
         
         self.setup_config_ui()
@@ -208,21 +209,64 @@ class SimulationView(ctk.CTkFrame):
         ctk.CTkLabel(req_container, textvariable=self.prob, font=("Roboto", 12)).pack()
         
         self.usar_estaticos = ctk.BooleanVar(value=cfg.get('pedidos_estaticos.usar_estaticos'))
-        ctk.CTkSwitch(req_container, text="Pedidos Pré-Calculados", variable=self.usar_estaticos).pack(pady=10)
+        self.switch_estaticos = ctk.CTkSwitch(req_container, text="Pedidos Pré-Calculados", variable=self.usar_estaticos)
+        self.switch_estaticos.pack(pady=10)
 
         # Algorithm Selector
         self.card_algo = SelectorCard(grid, "Algoritmo de Procura", [e.name for e in EstrategiaProcura], icon_path="assets/algorithm.png")
         self.card_algo.grid(row=1, column=2, sticky="nsew", padx=8, pady=8)
         
+        # --- Map Source Selection ---
+        map_frame = ctk.CTkFrame(self.config_frame, fg_color="transparent")
+        map_frame.pack(fill="x", padx=20, pady=(10, 0))
+        
+        ctk.CTkLabel(map_frame, text="Fonte do Mapa:", font=("Roboto", 14, "bold")).pack(side="left", padx=(0, 10))
+        
+        self.map_source = ctk.StringVar(value="Default")
+        self.seg_map = ctk.CTkSegmentedButton(map_frame, values=["Default (Braga)", "Mapa Realista (OSM)"], 
+                                              variable=self.map_source, command=self.toggle_map_input)
+        self.seg_map.pack(side="left")
+        
+        self.entry_location = ctk.CTkEntry(map_frame, placeholder_text="Ex: Manhattan, New York", width=200)
+        # Initially hidden
+        
+        # Radius Slider
+        self.radius_frame = ctk.CTkFrame(map_frame, fg_color="transparent")
+        self.radius_var = ctk.IntVar(value=2000)
+        ctk.CTkLabel(self.radius_frame, text="Raio (m):", font=("Roboto", 12)).pack(side="left", padx=5)
+        self.lbl_radius = ctk.CTkLabel(self.radius_frame, textvariable=self.radius_var, font=("Roboto", 12, "bold"), width=40)
+        self.lbl_radius.pack(side="left")
+        self.slider_radius = ctk.CTkSlider(self.radius_frame, from_=500, to=10000, number_of_steps=19, variable=self.radius_var, width=100)
+        self.slider_radius.pack(side="left", padx=5)
+
         # Start Button
         self.btn_start = ctk.CTkButton(self.config_frame, text="INICIAR SIMULAÇÃO", command=self.start_simulation, 
                                        height=45, corner_radius=22, font=("Roboto", 15, "bold"), 
                                        fg_color="#4caf50", hover_color="#388e3c")
         self.btn_start.pack(fill="x", padx=150, pady=20)
 
+    def toggle_map_input(self, value):
+        if value == "Mapa Realista (OSM)":
+            self.entry_location.pack(side="left", padx=10)
+            self.radius_frame.pack(side="left", padx=10)
+            
+            # Disable static requests for OSM (incompatible)
+            self.usar_estaticos.set(False)
+            self.switch_estaticos.configure(state="disabled")
+        else:
+            self.entry_location.pack_forget()
+            self.radius_frame.pack_forget()
+            
+            # Re-enable for default map
+            self.switch_estaticos.configure(state="normal")
+
         # Loading Screen
         self.loading_frame = ctk.CTkFrame(self, fg_color="#1a1a1a")
-        ctk.CTkLabel(self.loading_frame, text="A carregar mapa...", font=("Roboto", 24, "bold")).pack(expand=True)
+        self.lbl_loading = ctk.CTkLabel(self.loading_frame, text="A carregar mapa...", font=("Roboto", 24, "bold"))
+        self.lbl_loading.pack(pady=(0, 20), expand=True)
+        
+        self.progress_bar = ctk.CTkProgressBar(self.loading_frame, width=400, mode="indeterminate")
+        self.progress_bar.pack(pady=(0, 20))
         
     def start_simulation(self):
         try:
@@ -231,6 +275,12 @@ class SimulationView(ctk.CTkFrame):
             self.num_gas = self.card_gas.get()
             self.duracao = self.card_dur.get()
             self.algo_name = self.card_algo.get()
+            
+            # Validação do mapa realista
+            if self.map_source.get() == "Mapa Realista (OSM)" and not self.entry_location.get().strip():
+                messagebox.showerror("Erro", "Por favor introduza uma localização.")
+                return
+                
         except ValueError:
             messagebox.showerror("Erro", "Valores inválidos.")
             return
@@ -238,12 +288,46 @@ class SimulationView(ctk.CTkFrame):
         # Show Loading
         self.config_frame.grid_forget()
         self.loading_frame.grid(row=0, column=0, sticky="nsew")
-        self.update() # Force update to show loading screen immediately
+        self.progress_bar.start() # Start animation
         
-        # Schedule actual start to allow UI to update
-        self.after(100, self._start_simulation_impl)
+        # Determine map source and start process
+        if self.map_source.get() == "Mapa Realista (OSM)":
+            local = self.entry_location.get()
+            dist = self.radius_var.get()
+            self.lbl_loading.configure(text=f"A descarregar mapa de '{local}'\n(Raio: {dist}m)...\nIsto pode demorar um pouco.")
+            # Run download in a separate thread to keep UI responsive
+            threading.Thread(target=self._download_map_thread, args=(local, dist), daemon=True).start()
+        else:
+            self.lbl_loading.configure(text="A carregar mapa local...")
+            # Local map is fast, but we use after to allow UI to refresh
+            self.after(100, lambda: self._load_local_map())
 
-    def _start_simulation_impl(self):
+    def _download_map_thread(self, local, dist):
+        try:
+            mapa = importar_mapa_osm(local, dist)
+            if not mapa:
+                raise Exception("Falha ao importar mapa (retornou None).")
+            # Schedule completion on main thread
+            self.after(0, lambda: self._on_map_ready(mapa))
+        except Exception as e:
+            self.after(0, lambda: self._on_map_error(str(e)))
+
+    def _load_local_map(self):
+        try:
+            mapa = Grafo.carregar_de_json("braga_mapa.json")
+            self._on_map_ready(mapa)
+        except Exception as e:
+            self._on_map_error(str(e))
+
+    def _on_map_error(self, error_msg):
+        self.progress_bar.stop()
+        self.loading_frame.grid_forget()
+        self.config_frame.grid(row=0, column=0, sticky="nsew")
+        messagebox.showerror("Erro", f"Erro ao carregar mapa: {error_msg}")
+
+    def _on_map_ready(self, mapa):
+        self.lbl_loading.configure(text="A iniciar simulação...")
+        
         config = {
             'estrategia': EstrategiaProcura[self.algo_name],
             'num_eletricos': self.num_ev,
@@ -254,32 +338,38 @@ class SimulationView(ctk.CTkFrame):
             'usar_estaticos': self.usar_estaticos.get()
         }
         
-        # 1. Prepare Sim Frame BUT keep Loading Screen on top
-        self.sim_frame.grid(row=0, column=0, sticky="nsew")
-        self.loading_frame.lift() # Ensure loading is on top
-        
-        # Clear previous simulation if any
-        for widget in self.sim_frame.winfo_children():
-            widget.destroy()
+        try:
+            # 1. Prepare Sim Frame BUT keep Loading Screen on top
+            self.sim_frame.grid(row=0, column=0, sticky="nsew")
+            self.loading_frame.lift() # Ensure loading is on top
             
-        # Add Back Button
-        btn_back = ctk.CTkButton(self.sim_frame, text="← Voltar / Parar", command=self.stop_simulation, 
-                                 fg_color="#f44336", hover_color="#d32f2f", width=120)
-        btn_back.pack(side="top", anchor="w", padx=10, pady=10)
-        
-        # Embed Map
-        mapa = Grafo.carregar_de_json("braga_mapa.json")
-        self.gui_mapa = MapaVisualizador(self.sim_frame, mapa, largura=800, altura=600)
-        self.gui_mapa.pack(fill="both", expand=True)
-        
-        # 2. Force layout update so map calculates scale and renders
-        self.update()
-        
-        # 3. NOW remove loading screen
-        self.loading_frame.grid_forget()
-        
-        # Start Thread
-        threading.Thread(target=self.run_sim_thread, args=(config, mapa)).start()
+            # Clear previous simulation if any
+            for widget in self.sim_frame.winfo_children():
+                widget.destroy()
+                
+            # Add Back Button
+            btn_back = ctk.CTkButton(self.sim_frame, text="← Voltar / Parar", command=self.stop_simulation, 
+                                     fg_color="#f44336", hover_color="#d32f2f", width=120)
+            btn_back.pack(side="top", anchor="w", padx=10, pady=10)
+            
+            # Embed Map
+            self.gui_mapa = MapaVisualizador(self.sim_frame, mapa, largura=800, altura=600)
+            self.gui_mapa.pack(fill="both", expand=True)
+            
+            # 2. Force layout update so map calculates scale and renders
+            self.update()
+            
+            # 3. NOW remove loading screen
+            self.progress_bar.stop()
+            self.loading_frame.grid_forget()
+            
+            # Start Thread
+            threading.Thread(target=self.run_sim_thread, args=(config, mapa)).start()
+            
+        except Exception as e:
+            self._on_map_error(str(e))
+
+
 
     def run_sim_thread(self, config, mapa):
         try:
