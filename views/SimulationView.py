@@ -220,30 +220,43 @@ class SimulationView(ctk.CTkFrame):
                                        fg_color="#4caf50", hover_color="#388e3c")
         self.btn_start.pack(fill="x", padx=150, pady=20)
 
+        # Loading Screen
+        self.loading_frame = ctk.CTkFrame(self, fg_color="#1a1a1a")
+        ctk.CTkLabel(self.loading_frame, text="A carregar mapa...", font=("Roboto", 24, "bold")).pack(expand=True)
+        
     def start_simulation(self):
         try:
-            h_ponta = [i for i, var in enumerate(self.hour_vars) if var.get()]
-            num_ev = self.card_ev.get()
-            num_gas = self.card_gas.get()
-            duracao = self.card_dur.get()
-            algo_name = self.card_algo.get()
+            self.h_ponta = [i for i, var in enumerate(self.hour_vars) if var.get()]
+            self.num_ev = self.card_ev.get()
+            self.num_gas = self.card_gas.get()
+            self.duracao = self.card_dur.get()
+            self.algo_name = self.card_algo.get()
         except ValueError:
             messagebox.showerror("Erro", "Valores inválidos.")
             return
 
+        # Show Loading
+        self.config_frame.grid_forget()
+        self.loading_frame.grid(row=0, column=0, sticky="nsew")
+        self.update() # Force update to show loading screen immediately
+        
+        # Schedule actual start to allow UI to update
+        self.after(100, self._start_simulation_impl)
+
+    def _start_simulation_impl(self):
         config = {
-            'estrategia': EstrategiaProcura[algo_name],
-            'num_eletricos': num_ev,
-            'num_combustao': num_gas,
-            'duracao_horas': duracao,
-            'horas_ponta': h_ponta,
+            'estrategia': EstrategiaProcura[self.algo_name],
+            'num_eletricos': self.num_ev,
+            'num_combustao': self.num_gas,
+            'duracao_horas': self.duracao,
+            'horas_ponta': self.h_ponta,
             'prob_pedido': self.prob.get(),
             'usar_estaticos': self.usar_estaticos.get()
         }
         
-        # Switch to Simulation Frame
-        self.config_frame.grid_forget()
+        # 1. Prepare Sim Frame BUT keep Loading Screen on top
         self.sim_frame.grid(row=0, column=0, sticky="nsew")
+        self.loading_frame.lift() # Ensure loading is on top
         
         # Clear previous simulation if any
         for widget in self.sim_frame.winfo_children():
@@ -258,6 +271,12 @@ class SimulationView(ctk.CTkFrame):
         mapa = Grafo.carregar_de_json("braga_mapa.json")
         self.gui_mapa = MapaVisualizador(self.sim_frame, mapa, largura=800, altura=600)
         self.gui_mapa.pack(fill="both", expand=True)
+        
+        # 2. Force layout update so map calculates scale and renders
+        self.update()
+        
+        # 3. NOW remove loading screen
+        self.loading_frame.grid_forget()
         
         # Start Thread
         threading.Thread(target=self.run_sim_thread, args=(config, mapa)).start()

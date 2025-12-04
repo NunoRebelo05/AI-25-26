@@ -249,6 +249,13 @@ class MapaVisualizador(ctk.CTkFrame):
         return self.COLORS['road_traffic']
 
     def desenhar_mapa_base(self):
+        """
+        Agenda o desenho do mapa base para a thread principal.
+        Evita conflitos de threads entre o Simulador e a GUI.
+        """
+        self.after(0, self._desenhar_mapa_base_impl)
+
+    def _desenhar_mapa_base_impl(self):
         self.canvas.delete("base")
         # Desenhar estradas como linhas largas
         for origem, destinos in self.grafo.arestas.items():
