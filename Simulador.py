@@ -46,7 +46,7 @@ class Simulador:
         self.hora_inicio = hora_inicio
         self.current_time = hora_inicio
         self.end_time = hora_inicio + timedelta(hours=duracao_sim_horas)
-        self.time_step = timedelta(minutes=1) 
+        self.time_step = timedelta(seconds=1) 
         
         # Configurações
         self.HORAS_DE_PONTA = horas_ponta if horas_ponta is not None else cfg.get('simulacao.horas_ponta')
@@ -58,8 +58,9 @@ class Simulador:
         self.status_descricoes = {}
         self.paused = False
         self.running = True # Control flag
-        self.delay = 0.2 if self.gui else 0.0 # Rápido se não houver GUI
-        
+        self.delay = 0.03 if self.gui else 0.0 # ~30 FPS para estabilidade
+        self.steps_per_update = 1 # Quantos passos de simulação por frame de GUI
+
         # Static Requests
         if usar_estaticos is not None:
             self.usar_estaticos = usar_estaticos
@@ -95,19 +96,23 @@ class Simulador:
 
             if not self.running: break
 
-            if self.current_time.minute % 30 == 0:
-                 if self._update_traffic() and self.gui:
-                     self.gui.desenhar_mapa_base()
+            # Executar múltiplos passos de simulação por frame (Fast Forward)
+            for _ in range(self.steps_per_update):
+                if not (self.current_time <= self.end_time or self.movimentos_ativos or self.gestor.pedidos_pendentes):
+                    break
 
-            self.step()
+                if self.current_time.minute % 30 == 0 and self.current_time.second == 0:
+                     if self._update_traffic() and self.gui:
+                         self.gui.desenhar_mapa_base()
+
+                self.step()
+                self.current_time += self.time_step
             
             if self.gui:
                 self._atualizar_descricoes_gui()
                 pedidos_ativos = [p for p in self.pedidos_gerados if p.estado in [EstadoPedido.PENDENTE, EstadoPedido.EM_CURSO]]
                 self.gui.atualizar_estado(self.gestor.frota, pedidos_ativos, self.current_time, self.status_descricoes)
                 time.sleep(self.delay)
-
-            self.current_time += self.time_step
             
         print("Simulação Concluída.")
         return self.print_summary()
@@ -122,8 +127,38 @@ class Simulador:
         self.paused = not self.paused
         return self.paused
 
+    def set_speed(self, speed_level):
+        """
+        Define a velocidade da simulação.
+        
+        Args:
+            speed_level (int): Nível de 1 a 20.
+        """
+        # Nível 1-10: Controla o delay (steps=1)
+        # Nível 11-20: Controla steps_per_update (delay=0)
+        
+        if speed_level <= 10:
+            self.steps_per_update = 1
+            # Delay de 0.1s (lento) a 0.0s (rápido)
+            # speed 1 -> 0.1
+            # speed 10 -> 0.0
+            self.delay = 0.1 - ((speed_level - 1) * (0.1 / 9))
+        else:
+            self.delay = 0.0
+            # Steps de 1 a 60 (ou mais)
+            # speed 11 -> 2 steps
+            # speed 20 -> 60 steps
+            factor = speed_level - 10
+            self.steps_per_update = int(1 + (factor * 6)) # 1 -> 7 -> 13 ... -> 61
+            
+        # Garantir mínimo de delay para GUI não bloquear se steps for baixo
+        if self.gui and self.delay < 0.001 and self.steps_per_update < 5:
+             self.delay = 0.001
+             
+        print(f"Velocidade ajustada: Nível {speed_level} -> Delay {self.delay:.4f}s, Steps {self.steps_per_update}")
+
     def set_delay(self, delay):
-        """Define o atraso entre passos (velocidade da simulação)."""
+        """Legacy: Mantido para compatibilidade, mas idealmente usar set_speed."""
         self.delay = delay
 
     def step(self):
@@ -136,7 +171,8 @@ class Simulador:
         4. Gere táxis livres (ex: recarga).
         """
         # Só gera novos pedidos se ainda estivermos dentro do horário normal
-        if self.current_time <= self.end_time:
+        # E apenas no início de cada minuto para manter a probabilidade correta
+        if self.current_time <= self.end_time and self.current_time.second == 0:
             self._generate_new_request()
 
         self._processar_movimentos()
@@ -311,8 +347,8 @@ class Simulador:
             'taxi': taxi,
             'caminho': caminho,
             'idx_prox_no': prox_no_idx,
-            'tempo_restante_aresta': tempo,
-            'tempo_total_aresta': tempo,
+            'tempo_restante_aresta': tempo * 60, # Converter para segundos
+            'tempo_total_aresta': tempo * 60,    # Converter para segundos
             'tipo': tipo,
             'pedido': pedido,
             'proximo_caminho': proximo_caminho
@@ -369,8 +405,8 @@ class Simulador:
                                 self.gestor.pedidos_pendentes.append(pedido)
                         continue # Passa para o próximo táxi
                     
-                    mov['tempo_restante_aresta'] = tempo
-                    mov['tempo_total_aresta'] = tempo
+                    mov['tempo_restante_aresta'] = tempo * 60
+                    mov['tempo_total_aresta'] = tempo * 60
                 else:
                     # Chegou ao final do caminho atual
                     self._concluir_segmento_movimento(mov)
@@ -419,8 +455,8 @@ class Simulador:
                 'taxi': taxi,
                 'caminho': [taxi.localizacao_atual], # Fica parado
                 'idx_prox_no': 0,
-                'tempo_restante_aresta': taxi.tempo_carregamento_restante, # Tempo para carregar
-                'tempo_total_aresta': taxi.tempo_carregamento_restante,
+                'tempo_restante_aresta': taxi.tempo_carregamento_restante * 60, # Tempo para carregar (min -> seg)
+                'tempo_total_aresta': taxi.tempo_carregamento_restante * 60,
                 'tipo': "EM_CARGA" if tipo == "A_CARREGAR" else "EM_ABASTECIMENTO",
                 'pedido': None,
                 'proximo_caminho': None

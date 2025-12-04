@@ -183,7 +183,7 @@ class MapaVisualizador(ctk.CTkFrame):
                 self.btn_pause.configure(text="PAUSA", fg_color="#ff9800", hover_color="#f57c00")
 
     def mudar_velocidade(self, val):
-        if self.simulador: self.simulador.set_delay(1.0 / int(val))
+        if self.simulador: self.simulador.set_speed(int(val))
 
     def on_resize(self, event):
         self.largura = event.width
@@ -505,5 +505,3 @@ class MapaVisualizador(ctk.CTkFrame):
 
             # Nome do Taxi (ID)
             self.canvas.create_text(tx, ty - 25, text=taxi.id_veiculo, fill="white", font=("Roboto", 9, "bold"), tags="dinamico")
-
-        self.update()
