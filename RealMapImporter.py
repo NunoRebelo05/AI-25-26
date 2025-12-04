@@ -89,8 +89,41 @@ def importar_mapa_osm(localizacao: str, dist: int = 2000) -> Grafo:
             # Como o OSMnx é dirigido, se a rua for de duplo sentido, ele já deve ter a aresta inversa?
             # O 'drive' network type geralmente trata disso. Se for oneway=False, ele cria duas arestas.
             
-        print(f"INFO: Mapa importado com sucesso! {len(novo_grafo.nos)} nós, {sum(len(v) for v in novo_grafo.arestas.values())} arestas.")
-        return novo_grafo
+        # 4. Obter geometrias para visualização avançada (Edifícios, Parques, Água)
+        print("INFO: A descarregar elementos visuais (Edifícios, Parques, Água)...")
+        tags = {
+            'building': True,
+            'leisure': ['park', 'garden'],
+            'landuse': ['grass', 'recreation_ground'],
+            'natural': 'water',
+            'waterway': ['river', 'canal']
+        }
+        
+        try:
+            # Tenta usar a API mais recente (v1.0+)
+            features = ox.features_from_point(point, tags, dist=dist)
+        except AttributeError:
+            # Fallback para versões antigas
+            features = ox.geometries_from_point(point, tags, dist=dist)
+
+        # Separar em camadas
+        layers = {
+            'buildings': features[features['building'].notna()] if 'building' in features.columns else None,
+            'parks': features[features['leisure'].isin(['park', 'garden']) | features['landuse'].isin(['grass', 'recreation_ground'])] if 'leisure' in features.columns or 'landuse' in features.columns else None,
+            'water': features[features['natural'] == 'water'] if 'natural' in features.columns else None
+        }
+        
+        # Se 'waterway' existir, adicionar também
+        if 'waterway' in features.columns:
+            waterways = features[features['waterway'].notna()]
+            if layers['water'] is not None:
+                import pandas as pd
+                layers['water'] = pd.concat([layers['water'], waterways])
+            else:
+                layers['water'] = waterways
+
+        print(f"INFO: Mapa importado com sucesso! {len(novo_grafo.nos)} nós. Features carregadas.")
+        return novo_grafo, layers
 
     except Exception as e:
         print(f"ERRO ao importar mapa OSM: {e}")

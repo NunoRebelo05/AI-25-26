@@ -11,9 +11,10 @@ class MapaVisualizador(ctk.CTkFrame):
     Estilo Uber-like com estradas largas e ícones de carros rotativos.
     """
     
-    def __init__(self, master, grafo, largura=800, altura=600):
+    def __init__(self, master, grafo, layers=None, largura=800, altura=600):
         super().__init__(master, fg_color="transparent")
         self.grafo = grafo
+        self.layers = layers
         self.largura = largura
         self.altura = altura
         self.margem = 50
@@ -293,6 +294,41 @@ class MapaVisualizador(ctk.CTkFrame):
         if multiplicador <= 1.0: return self.COLORS['road']
         return self.COLORS['road_traffic']
 
+        return self.COLORS['road_traffic']
+
+    def desenhar_camadas_fundo(self):
+        """Desenha as camadas de polígonos (água, parques, edifícios)."""
+        # Ordem de desenho: Água -> Parques -> Edifícios
+        
+        # Cores
+        C_WATER = "#1a2639" # Azul muito escuro/subtil
+        C_PARK = "#1e2b1e"  # Verde muito escuro
+        C_BUILD = "#262626" # Cinza ligeiramente mais claro que o fundo
+        
+        # Helper para desenhar geometria
+        def draw_geom(gdf, color):
+            if gdf is None or gdf.empty: return
+            for geom in gdf.geometry:
+                if geom.geom_type == 'Polygon':
+                    coords = list(geom.exterior.coords)
+                    pixels = [self.coords_para_pixel(lat, lon) for lon, lat in coords] # Note: OSM uses (lon, lat)
+                    # Flatten list for create_polygon
+                    flat_pixels = [val for sublist in pixels for val in sublist]
+                    if len(flat_pixels) >= 6: # Pelo menos 3 pontos
+                        self.canvas.create_polygon(flat_pixels, fill=color, outline="", tags="base")
+                elif geom.geom_type == 'MultiPolygon':
+                    for poly in geom.geoms:
+                        coords = list(poly.exterior.coords)
+                        pixels = [self.coords_para_pixel(lat, lon) for lon, lat in coords]
+                        flat_pixels = [val for sublist in pixels for val in sublist]
+                        if len(flat_pixels) >= 6:
+                            self.canvas.create_polygon(flat_pixels, fill=color, outline="", tags="base")
+
+        # Desenhar
+        if 'water' in self.layers: draw_geom(self.layers['water'], C_WATER)
+        if 'parks' in self.layers: draw_geom(self.layers['parks'], C_PARK)
+        if 'buildings' in self.layers: draw_geom(self.layers['buildings'], C_BUILD)
+
     def desenhar_mapa_base(self):
         """
         Agenda o desenho do mapa base para a thread principal.
@@ -302,6 +338,11 @@ class MapaVisualizador(ctk.CTkFrame):
 
     def _desenhar_mapa_base_impl(self):
         self.canvas.delete("base")
+        
+        # 0. Desenhar Camadas de Fundo (Se existirem)
+        if self.layers:
+            self.desenhar_camadas_fundo()
+
         # Desenhar estradas como linhas largas
         for origem, destinos in self.grafo.arestas.items():
             x1, y1 = self.coords_para_pixel(self.grafo.nos[origem]['lat'], self.grafo.nos[origem]['lon'])

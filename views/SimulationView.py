@@ -304,18 +304,22 @@ class SimulationView(ctk.CTkFrame):
 
     def _download_map_thread(self, local, dist):
         try:
-            mapa = importar_mapa_osm(local, dist)
-            if not mapa:
+            # Agora retorna (grafo, layers)
+            resultado = importar_mapa_osm(local, dist)
+            if not resultado:
                 raise Exception("Falha ao importar mapa (retornou None).")
+            
+            mapa, layers = resultado
+            
             # Schedule completion on main thread
-            self.after(0, lambda: self._on_map_ready(mapa))
+            self.after(0, lambda: self._on_map_ready(mapa, layers))
         except Exception as e:
             self.after(0, lambda: self._on_map_error(str(e)))
 
     def _load_local_map(self):
         try:
             mapa = Grafo.carregar_de_json("braga_mapa.json")
-            self._on_map_ready(mapa)
+            self._on_map_ready(mapa, None) # Sem layers para mapa local
         except Exception as e:
             self._on_map_error(str(e))
 
@@ -325,7 +329,7 @@ class SimulationView(ctk.CTkFrame):
         self.config_frame.grid(row=0, column=0, sticky="nsew")
         messagebox.showerror("Erro", f"Erro ao carregar mapa: {error_msg}")
 
-    def _on_map_ready(self, mapa):
+    def _on_map_ready(self, mapa, layers):
         self.lbl_loading.configure(text="A iniciar simulação...")
         
         config = {
@@ -353,7 +357,7 @@ class SimulationView(ctk.CTkFrame):
             btn_back.pack(side="top", anchor="w", padx=10, pady=10)
             
             # Embed Map
-            self.gui_mapa = MapaVisualizador(self.sim_frame, mapa, largura=800, altura=600)
+            self.gui_mapa = MapaVisualizador(self.sim_frame, mapa, layers=layers, largura=800, altura=600)
             self.gui_mapa.pack(fill="both", expand=True)
             
             # 2. Force layout update so map calculates scale and renders
