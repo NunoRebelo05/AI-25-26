@@ -119,6 +119,7 @@ class SimulationView(ctk.CTkFrame):
         self.config_frame.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)
         
         self.setup_config_ui()
+        self.setup_loading_ui()
         
         # --- Simulation Frame (Map) ---
         self.sim_frame = ctk.CTkFrame(self, fg_color="transparent")
@@ -260,7 +261,8 @@ class SimulationView(ctk.CTkFrame):
             # Re-enable for default map
             self.switch_estaticos.configure(state="normal")
 
-        # Loading Screen
+        
+    def setup_loading_ui(self):
         self.loading_frame = ctk.CTkFrame(self, fg_color="#1a1a1a")
         self.lbl_loading = ctk.CTkLabel(self.loading_frame, text="A carregar mapa...", font=("Roboto", 24, "bold"))
         self.lbl_loading.pack(pady=(0, 20), expand=True)
