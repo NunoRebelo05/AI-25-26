@@ -48,7 +48,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 2,
+                "minuto_simulacao": 6,
                 "origem": "Sameiro",
                 "destino": "Ferreiros",
                 "passageiros": 2,
@@ -56,7 +56,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 3,
+                "minuto_simulacao": 8,
                 "origem": "Posto_Recarga_Norte",
                 "destino": "Praca_Republica",
                 "passageiros": 1,
@@ -64,7 +64,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 4,
+                "minuto_simulacao": 14,
                 "origem": "Celeiros",
                 "destino": "Posto_Recarga_Sul",
                 "passageiros": 1,
@@ -72,7 +72,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 6,
+                "minuto_simulacao": 16,
                 "origem": "Sequeira",
                 "destino": "Hospital",
                 "passageiros": 2,
@@ -80,7 +80,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 7,
+                "minuto_simulacao": 22,
                 "origem": "Ferreiros",
                 "destino": "Adaufe",
                 "passageiros": 3,
@@ -88,7 +88,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 10,
+                "minuto_simulacao": 26,
                 "origem": "UMinho_Gualtar",
                 "destino": "Sequeira",
                 "passageiros": 1,
@@ -96,7 +96,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 11,
+                "minuto_simulacao": 28,
                 "origem": "Adaufe",
                 "destino": "Real",
                 "passageiros": 3,
@@ -104,71 +104,71 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 19,
+                "minuto_simulacao": 32,
                 "origem": "Fraiao",
                 "destino": "Posto_Recarga_Norte",
-                "passageiros": 3,
-                "prioridade": "NORMAL",
-                "ambiental": false
-            },
-            {
-                "minuto_simulacao": 22,
-                "origem": "Maximinos",
-                "destino": "Posto_Recarga_Norte",
-                "passageiros": 2,
-                "prioridade": "NORMAL",
-                "ambiental": false
-            },
-            {
-                "minuto_simulacao": 22,
-                "origem": "Sequeira",
-                "destino": "Frossos",
-                "passageiros": 4,
-                "prioridade": "URGENTE",
-                "ambiental": false
-            },
-            {
-                "minuto_simulacao": 22,
-                "origem": "Sameiro",
-                "destino": "Nogueira",
-                "passageiros": 1,
-                "prioridade": "NORMAL",
-                "ambiental": true
-            },
-            {
-                "minuto_simulacao": 29,
-                "origem": "Posto_Recarga_Sul",
-                "destino": "Celeiros",
-                "passageiros": 3,
-                "prioridade": "NORMAL",
-                "ambiental": true
-            },
-            {
-                "minuto_simulacao": 32,
-                "origem": "UMinho_Gualtar",
-                "destino": "Sequeira",
-                "passageiros": 4,
-                "prioridade": "NORMAL",
-                "ambiental": false
-            },
-            {
-                "minuto_simulacao": 32,
-                "origem": "Sequeira",
-                "destino": "Lamaçaes",
-                "passageiros": 3,
-                "prioridade": "NORMAL",
-                "ambiental": false
-            },
-            {
-                "minuto_simulacao": 35,
-                "origem": "Posto_Recarga_Norte",
-                "destino": "Hospital",
                 "passageiros": 3,
                 "prioridade": "NORMAL",
                 "ambiental": false
             },
             {
                 "minuto_simulacao": 36,
+                "origem": "Maximinos",
+                "destino": "Posto_Recarga_Norte",
+                "passageiros": 2,
+                "prioridade": "NORMAL",
+                "ambiental": false
+            },
+            {
+                "minuto_simulacao": 42,
+                "origem": "Sequeira",
+                "destino": "Frossos",
+                "passageiros": 4,
+                "prioridade": "URGENTE",
+                "ambiental": false
+            },
+            {
+                "minuto_simulacao": 46,
+                "origem": "Sameiro",
+                "destino": "Nogueira",
+                "passageiros": 1,
+                "prioridade": "NORMAL",
+                "ambiental": true
+            },
+            {
+                "minuto_simulacao": 49,
+                "origem": "Posto_Recarga_Sul",
+                "destino": "Celeiros",
+                "passageiros": 3,
+                "prioridade": "NORMAL",
+                "ambiental": true
+            },
+            {
+                "minuto_simulacao": 52,
+                "origem": "UMinho_Gualtar",
+                "destino": "Sequeira",
+                "passageiros": 4,
+                "prioridade": "NORMAL",
+                "ambiental": false
+            },
+            {
+                "minuto_simulacao": 56,
+                "origem": "Sequeira",
+                "destino": "Lamaçaes",
+                "passageiros": 3,
+                "prioridade": "NORMAL",
+                "ambiental": false
+            },
+            {
+                "minuto_simulacao": 59,
+                "origem": "Posto_Recarga_Norte",
+                "destino": "Hospital",
+                "passageiros": 3,
+                "prioridade": "NORMAL",
+                "ambiental": false
+            },
+            {
+                "minuto_simulacao": 62,
                 "origem": "Posto_Recarga_Centro",
                 "destino": "Posto_Recarga_Sul",
                 "passageiros": 2,
@@ -176,7 +176,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 39,
+                "minuto_simulacao": 65,
                 "origem": "Real",
                 "destino": "Celeiros",
                 "passageiros": 4,
@@ -184,7 +184,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 41,
+                "minuto_simulacao": 69,
                 "origem": "Posto_Recarga_Norte",
                 "destino": "Frossos",
                 "passageiros": 4,
@@ -192,7 +192,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 41,
+                "minuto_simulacao": 72,
                 "origem": "Sameiro",
                 "destino": "Posto_Recarga_Centro",
                 "passageiros": 1,
@@ -200,7 +200,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 45,
+                "minuto_simulacao": 75,
                 "origem": "Sameiro",
                 "destino": "Maximinos",
                 "passageiros": 3,
@@ -208,7 +208,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 52,
+                "minuto_simulacao": 78,
                 "origem": "Estadio",
                 "destino": "Infias",
                 "passageiros": 2,
@@ -216,7 +216,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 53,
+                "minuto_simulacao": 85,
                 "origem": "Bom_Jesus",
                 "destino": "Posto_Recarga_Sul",
                 "passageiros": 4,
@@ -224,7 +224,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 54,
+                "minuto_simulacao": 85,
                 "origem": "Centro",
                 "destino": "Posto_Recarga_Sul",
                 "passageiros": 4,
@@ -232,7 +232,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 58,
+                "minuto_simulacao": 85,
                 "origem": "Estadio",
                 "destino": "Real",
                 "passageiros": 2,
@@ -240,7 +240,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 60,
+                "minuto_simulacao": 89,
                 "origem": "Sameiro",
                 "destino": "Braga_Parque",
                 "passageiros": 1,
@@ -248,7 +248,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 64,
+                "minuto_simulacao": 89,
                 "origem": "Posto_Recarga_Norte",
                 "destino": "Maximinos",
                 "passageiros": 1,
@@ -256,7 +256,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 65,
+                "minuto_simulacao": 92,
                 "origem": "Infias",
                 "destino": "Hospital",
                 "passageiros": 3,
@@ -264,7 +264,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 66,
+                "minuto_simulacao": 96,
                 "origem": "Praca_Republica",
                 "destino": "Frossos",
                 "passageiros": 4,
@@ -272,7 +272,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 71,
+                "minuto_simulacao": 99,
                 "origem": "Posto_Recarga_Norte",
                 "destino": "Estacao_CP",
                 "passageiros": 1,
@@ -280,7 +280,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 75,
+                "minuto_simulacao": 102,
                 "origem": "Hospital",
                 "destino": "Lamaçaes",
                 "passageiros": 1,
@@ -288,7 +288,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 86,
+                "minuto_simulacao": 106,
                 "origem": "Nogueira",
                 "destino": "Frossos",
                 "passageiros": 4,
@@ -296,7 +296,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 97,
+                "minuto_simulacao": 109,
                 "origem": "Avenida_Central",
                 "destino": "UMinho_Gualtar",
                 "passageiros": 1,
@@ -304,7 +304,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 102,
+                "minuto_simulacao": 112,
                 "origem": "Infias",
                 "destino": "Bom_Jesus",
                 "passageiros": 4,
@@ -312,7 +312,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 106,
+                "minuto_simulacao": 116,
                 "origem": "Sequeira",
                 "destino": "Posto_Recarga_Centro",
                 "passageiros": 4,
@@ -320,7 +320,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 107,
+                "minuto_simulacao": 117,
                 "origem": "Lamaçaes",
                 "destino": "Bom_Jesus",
                 "passageiros": 4,
@@ -328,7 +328,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 112,
+                "minuto_simulacao": 117,
                 "origem": "Braga_Parque",
                 "destino": "Fraiao",
                 "passageiros": 3,
@@ -336,7 +336,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 116,
+                "minuto_simulacao": 120,
                 "origem": "Posto_Recarga_Centro",
                 "destino": "Ferreiros",
                 "passageiros": 3,
@@ -344,7 +344,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 116,
+                "minuto_simulacao": 120,
                 "origem": "UMinho_Gualtar",
                 "destino": "Estacao_CP",
                 "passageiros": 3,
@@ -352,7 +352,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 124,
+                "minuto_simulacao": 134,
                 "origem": "UMinho_Gualtar",
                 "destino": "Hospital",
                 "passageiros": 4,
@@ -360,7 +360,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 125,
+                "minuto_simulacao": 144,
                 "origem": "Ferreiros",
                 "destino": "Frossos",
                 "passageiros": 4,
@@ -368,7 +368,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 128,
+                "minuto_simulacao": 148,
                 "origem": "Sameiro",
                 "destino": "Posto_Recarga_Centro",
                 "passageiros": 3,
@@ -376,7 +376,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 129,
+                "minuto_simulacao": 152,
                 "origem": "Braga_Parque",
                 "destino": "Minho_Center",
                 "passageiros": 1,
@@ -384,7 +384,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 129,
+                "minuto_simulacao": 157,
                 "origem": "Hospital",
                 "destino": "Avenida_Central",
                 "passageiros": 3,
@@ -392,7 +392,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 131,
+                "minuto_simulacao": 157,
                 "origem": "Maximinos",
                 "destino": "Lamaçaes",
                 "passageiros": 2,
@@ -400,7 +400,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 133,
+                "minuto_simulacao": 163,
                 "origem": "Centro",
                 "destino": "Ferreiros",
                 "passageiros": 4,
@@ -408,7 +408,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 137,
+                "minuto_simulacao": 167,
                 "origem": "Estadio",
                 "destino": "Celeiros",
                 "passageiros": 4,
@@ -416,7 +416,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 137,
+                "minuto_simulacao": 167,
                 "origem": "Bom_Jesus",
                 "destino": "Avenida_Central",
                 "passageiros": 1,
@@ -424,7 +424,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 139,
+                "minuto_simulacao": 179,
                 "origem": "Lamaçaes",
                 "destino": "Centro",
                 "passageiros": 4,
@@ -432,7 +432,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 140,
+                "minuto_simulacao": 184,
                 "origem": "Braga_Parque",
                 "destino": "Posto_Recarga_Centro",
                 "passageiros": 3,
@@ -440,7 +440,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 145,
+                "minuto_simulacao": 184,
                 "origem": "Lamaçaes",
                 "destino": "Braga_Parque",
                 "passageiros": 2,
@@ -448,7 +448,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 151,
+                "minuto_simulacao": 191,
                 "origem": "Adaufe",
                 "destino": "Estadio",
                 "passageiros": 2,
@@ -456,7 +456,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 154,
+                "minuto_simulacao": 194,
                 "origem": "Real",
                 "destino": "Lamaçaes",
                 "passageiros": 4,
@@ -464,7 +464,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 157,
+                "minuto_simulacao": 197,
                 "origem": "Ferreiros",
                 "destino": "Posto_Recarga_Norte",
                 "passageiros": 3,
@@ -472,7 +472,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 160,
+                "minuto_simulacao": 206,
                 "origem": "Praca_Republica",
                 "destino": "Sameiro",
                 "passageiros": 1,
@@ -480,7 +480,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 165,
+                "minuto_simulacao": 209,
                 "origem": "Maximinos",
                 "destino": "Infias",
                 "passageiros": 2,
@@ -488,7 +488,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 166,
+                "minuto_simulacao": 209,
                 "origem": "Estacao_CP",
                 "destino": "Minho_Center",
                 "passageiros": 2,
@@ -496,7 +496,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 167,
+                "minuto_simulacao": 219,
                 "origem": "Celeiros",
                 "destino": "Ferreiros",
                 "passageiros": 1,
@@ -504,7 +504,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 174,
+                "minuto_simulacao": 224,
                 "origem": "Posto_Recarga_Centro",
                 "destino": "Estadio",
                 "passageiros": 1,
@@ -512,7 +512,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 175,
+                "minuto_simulacao": 234,
                 "origem": "Minho_Center",
                 "destino": "Lamaçaes",
                 "passageiros": 4,
@@ -520,7 +520,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 181,
+                "minuto_simulacao": 234,
                 "origem": "Maximinos",
                 "destino": "Real",
                 "passageiros": 3,
@@ -528,7 +528,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 184,
+                "minuto_simulacao": 244,
                 "origem": "Hospital",
                 "destino": "Posto_Recarga_Centro",
                 "passageiros": 2,
@@ -536,7 +536,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 186,
+                "minuto_simulacao": 246,
                 "origem": "Infias",
                 "destino": "Praca_Republica",
                 "passageiros": 1,
@@ -544,7 +544,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 187,
+                "minuto_simulacao": 246,
                 "origem": "Real",
                 "destino": "Sameiro",
                 "passageiros": 3,
@@ -552,7 +552,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 188,
+                "minuto_simulacao": 256,
                 "origem": "Posto_Recarga_Norte",
                 "destino": "Lamaçaes",
                 "passageiros": 2,
@@ -560,7 +560,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 188,
+                "minuto_simulacao": 256,
                 "origem": "Posto_Recarga_Sul",
                 "destino": "Maximinos",
                 "passageiros": 4,
@@ -568,7 +568,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 192,
+                "minuto_simulacao": 256,
                 "origem": "Celeiros",
                 "destino": "Centro",
                 "passageiros": 2,
@@ -576,7 +576,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 192,
+                "minuto_simulacao": 276,
                 "origem": "Real",
                 "destino": "UMinho_Gualtar",
                 "passageiros": 4,
@@ -584,7 +584,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 194,
+                "minuto_simulacao": 276,
                 "origem": "Praca_Republica",
                 "destino": "Centro",
                 "passageiros": 3,
@@ -592,7 +592,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 195,
+                "minuto_simulacao": 279,
                 "origem": "Frossos",
                 "destino": "Avenida_Central",
                 "passageiros": 2,
@@ -600,7 +600,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 197,
+                "minuto_simulacao": 279,
                 "origem": "Sameiro",
                 "destino": "Fraiao",
                 "passageiros": 1,
@@ -608,7 +608,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 199,
+                "minuto_simulacao": 282,
                 "origem": "Lamaçaes",
                 "destino": "UMinho_Gualtar",
                 "passageiros": 3,
@@ -616,7 +616,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 200,
+                "minuto_simulacao": 282,
                 "origem": "Frossos",
                 "destino": "Praca_Republica",
                 "passageiros": 1,
@@ -624,7 +624,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 202,
+                "minuto_simulacao": 282,
                 "origem": "Praca_Republica",
                 "destino": "Nogueira",
                 "passageiros": 3,
@@ -632,7 +632,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 204,
+                "minuto_simulacao": 285,
                 "origem": "Hospital",
                 "destino": "Praca_Republica",
                 "passageiros": 4,
@@ -640,7 +640,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 206,
+                "minuto_simulacao": 285,
                 "origem": "Posto_Recarga_Centro",
                 "destino": "Posto_Recarga_Norte",
                 "passageiros": 3,
@@ -648,7 +648,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 207,
+                "minuto_simulacao": 287,
                 "origem": "Maximinos",
                 "destino": "Estadio",
                 "passageiros": 4,
@@ -656,7 +656,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 209,
+                "minuto_simulacao": 289,
                 "origem": "Posto_Recarga_Norte",
                 "destino": "Nogueira",
                 "passageiros": 3,
@@ -664,7 +664,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 215,
+                "minuto_simulacao": 291,
                 "origem": "Avenida_Central",
                 "destino": "Hospital",
                 "passageiros": 3,
@@ -672,7 +672,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 218,
+                "minuto_simulacao": 291,
                 "origem": "Braga_Parque",
                 "destino": "UMinho_Gualtar",
                 "passageiros": 2,
@@ -680,7 +680,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 219,
+                "minuto_simulacao": 291,
                 "origem": "Celeiros",
                 "destino": "Minho_Center",
                 "passageiros": 4,
@@ -688,7 +688,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 227,
+                "minuto_simulacao": 294,
                 "origem": "Real",
                 "destino": "Centro",
                 "passageiros": 2,
@@ -696,7 +696,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 228,
+                "minuto_simulacao": 294,
                 "origem": "Lamaçaes",
                 "destino": "Minho_Center",
                 "passageiros": 1,
@@ -704,7 +704,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 230,
+                "minuto_simulacao": 294,
                 "origem": "Ferreiros",
                 "destino": "Estacao_CP",
                 "passageiros": 3,
@@ -712,7 +712,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 231,
+                "minuto_simulacao": 296,
                 "origem": "Maximinos",
                 "destino": "Centro",
                 "passageiros": 4,
@@ -720,7 +720,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 232,
+                "minuto_simulacao": 296,
                 "origem": "Estacao_CP",
                 "destino": "Minho_Center",
                 "passageiros": 2,
@@ -728,7 +728,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 233,
+                "minuto_simulacao": 301,
                 "origem": "UMinho_Gualtar",
                 "destino": "Ferreiros",
                 "passageiros": 4,
@@ -736,7 +736,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 236,
+                "minuto_simulacao": 301,
                 "origem": "Nogueira",
                 "destino": "UMinho_Gualtar",
                 "passageiros": 1,
@@ -744,7 +744,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 239,
+                "minuto_simulacao": 311,
                 "origem": "Nogueira",
                 "destino": "Sameiro",
                 "passageiros": 3,
@@ -752,7 +752,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 241,
+                "minuto_simulacao": 321,
                 "origem": "Posto_Recarga_Norte",
                 "destino": "Nogueira",
                 "passageiros": 3,
@@ -760,7 +760,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 247,
+                "minuto_simulacao": 327,
                 "origem": "Real",
                 "destino": "Maximinos",
                 "passageiros": 1,
@@ -768,7 +768,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 249,
+                "minuto_simulacao": 329,
                 "origem": "Real",
                 "destino": "Posto_Recarga_Sul",
                 "passageiros": 1,
@@ -776,7 +776,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 260,
+                "minuto_simulacao": 330,
                 "origem": "Posto_Recarga_Norte",
                 "destino": "Hospital",
                 "passageiros": 2,
@@ -784,7 +784,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 262,
+                "minuto_simulacao": 362,
                 "origem": "Bom_Jesus",
                 "destino": "Sameiro",
                 "passageiros": 3,
@@ -792,7 +792,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 269,
+                "minuto_simulacao": 369,
                 "origem": "Posto_Recarga_Sul",
                 "destino": "Bom_Jesus",
                 "passageiros": 4,
@@ -800,7 +800,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 271,
+                "minuto_simulacao": 371,
                 "origem": "Celeiros",
                 "destino": "Braga_Parque",
                 "passageiros": 3,
@@ -808,7 +808,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 272,
+                "minuto_simulacao": 372,
                 "origem": "Praca_Republica",
                 "destino": "Posto_Recarga_Centro",
                 "passageiros": 4,
@@ -816,7 +816,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 272,
+                "minuto_simulacao": 372,
                 "origem": "Estadio",
                 "destino": "Lamaçaes",
                 "passageiros": 4,
@@ -824,271 +824,271 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 273,
+                "minuto_simulacao": 376,
                 "origem": "Infias",
                 "destino": "Maximinos",
                 "passageiros": 4,
-                "prioridade": "URGENTE",
-                "ambiental": true
-            },
-            {
-                "minuto_simulacao": 275,
-                "origem": "UMinho_Gualtar",
-                "destino": "Sameiro",
-                "passageiros": 3,
-                "prioridade": "NORMAL",
-                "ambiental": true
-            },
-            {
-                "minuto_simulacao": 276,
-                "origem": "UMinho_Gualtar",
-                "destino": "Infias",
-                "passageiros": 3,
-                "prioridade": "NORMAL",
-                "ambiental": false
-            },
-            {
-                "minuto_simulacao": 281,
-                "origem": "Braga_Parque",
-                "destino": "Bom_Jesus",
-                "passageiros": 3,
-                "prioridade": "NORMAL",
-                "ambiental": true
-            },
-            {
-                "minuto_simulacao": 288,
-                "origem": "Frossos",
-                "destino": "Minho_Center",
-                "passageiros": 3,
-                "prioridade": "URGENTE",
-                "ambiental": true
-            },
-            {
-                "minuto_simulacao": 296,
-                "origem": "Ferreiros",
-                "destino": "Sequeira",
-                "passageiros": 1,
-                "prioridade": "NORMAL",
-                "ambiental": true
-            },
-            {
-                "minuto_simulacao": 302,
-                "origem": "Frossos",
-                "destino": "Sameiro",
-                "passageiros": 4,
-                "prioridade": "URGENTE",
-                "ambiental": true
-            },
-            {
-                "minuto_simulacao": 303,
-                "origem": "Fraiao",
-                "destino": "Estadio",
-                "passageiros": 1,
-                "prioridade": "URGENTE",
-                "ambiental": false
-            },
-            {
-                "minuto_simulacao": 310,
-                "origem": "Infias",
-                "destino": "Ferreiros",
-                "passageiros": 2,
-                "prioridade": "NORMAL",
-                "ambiental": true
-            },
-            {
-                "minuto_simulacao": 315,
-                "origem": "Sequeira",
-                "destino": "Sameiro",
-                "passageiros": 2,
-                "prioridade": "URGENTE",
-                "ambiental": false
-            },
-            {
-                "minuto_simulacao": 320,
-                "origem": "Frossos",
-                "destino": "Praca_Republica",
-                "passageiros": 2,
-                "prioridade": "NORMAL",
-                "ambiental": false
-            },
-            {
-                "minuto_simulacao": 323,
-                "origem": "Ferreiros",
-                "destino": "Posto_Recarga_Centro",
-                "passageiros": 2,
-                "prioridade": "URGENTE",
-                "ambiental": false
-            },
-            {
-                "minuto_simulacao": 325,
-                "origem": "Estadio",
-                "destino": "Posto_Recarga_Centro",
-                "passageiros": 4,
-                "prioridade": "URGENTE",
-                "ambiental": true
-            },
-            {
-                "minuto_simulacao": 332,
-                "origem": "Ferreiros",
-                "destino": "Praca_Republica",
-                "passageiros": 3,
-                "prioridade": "NORMAL",
-                "ambiental": false
-            },
-            {
-                "minuto_simulacao": 334,
-                "origem": "Estacao_CP",
-                "destino": "Braga_Parque",
-                "passageiros": 4,
-                "prioridade": "URGENTE",
-                "ambiental": true
-            },
-            {
-                "minuto_simulacao": 337,
-                "origem": "Posto_Recarga_Sul",
-                "destino": "Nogueira",
-                "passageiros": 2,
-                "prioridade": "NORMAL",
-                "ambiental": true
-            },
-            {
-                "minuto_simulacao": 337,
-                "origem": "Real",
-                "destino": "Avenida_Central",
-                "passageiros": 4,
-                "prioridade": "URGENTE",
-                "ambiental": true
-            },
-            {
-                "minuto_simulacao": 341,
-                "origem": "Real",
-                "destino": "Lamaçaes",
-                "passageiros": 1,
-                "prioridade": "NORMAL",
-                "ambiental": false
-            },
-            {
-                "minuto_simulacao": 351,
-                "origem": "Lamaçaes",
-                "destino": "Braga_Parque",
-                "passageiros": 3,
-                "prioridade": "URGENTE",
-                "ambiental": true
-            },
-            {
-                "minuto_simulacao": 355,
-                "origem": "Frossos",
-                "destino": "Bom_Jesus",
-                "passageiros": 4,
-                "prioridade": "URGENTE",
-                "ambiental": true
-            },
-            {
-                "minuto_simulacao": 357,
-                "origem": "Estacao_CP",
-                "destino": "Praca_Republica",
-                "passageiros": 2,
-                "prioridade": "NORMAL",
-                "ambiental": true
-            },
-            {
-                "minuto_simulacao": 357,
-                "origem": "Maximinos",
-                "destino": "Estacao_CP",
-                "passageiros": 2,
-                "prioridade": "NORMAL",
-                "ambiental": true
-            },
-            {
-                "minuto_simulacao": 357,
-                "origem": "Posto_Recarga_Sul",
-                "destino": "UMinho_Gualtar",
-                "passageiros": 2,
-                "prioridade": "URGENTE",
-                "ambiental": false
-            },
-            {
-                "minuto_simulacao": 357,
-                "origem": "Lamaçaes",
-                "destino": "Braga_Parque",
-                "passageiros": 4,
-                "prioridade": "URGENTE",
-                "ambiental": true
-            },
-            {
-                "minuto_simulacao": 358,
-                "origem": "Maximinos",
-                "destino": "Ferreiros",
-                "passageiros": 2,
-                "prioridade": "URGENTE",
-                "ambiental": false
-            },
-            {
-                "minuto_simulacao": 361,
-                "origem": "Hospital",
-                "destino": "Estadio",
-                "passageiros": 4,
-                "prioridade": "NORMAL",
-                "ambiental": true
-            },
-            {
-                "minuto_simulacao": 362,
-                "origem": "Frossos",
-                "destino": "Bom_Jesus",
-                "passageiros": 4,
-                "prioridade": "URGENTE",
-                "ambiental": true
-            },
-            {
-                "minuto_simulacao": 365,
-                "origem": "Lamaçaes",
-                "destino": "Posto_Recarga_Norte",
-                "passageiros": 3,
-                "prioridade": "URGENTE",
-                "ambiental": false
-            },
-            {
-                "minuto_simulacao": 365,
-                "origem": "Hospital",
-                "destino": "Minho_Center",
-                "passageiros": 1,
-                "prioridade": "URGENTE",
-                "ambiental": true
-            },
-            {
-                "minuto_simulacao": 367,
-                "origem": "Adaufe",
-                "destino": "Avenida_Central",
-                "passageiros": 2,
-                "prioridade": "URGENTE",
-                "ambiental": true
-            },
-            {
-                "minuto_simulacao": 367,
-                "origem": "UMinho_Gualtar",
-                "destino": "Posto_Recarga_Sul",
-                "passageiros": 4,
-                "prioridade": "URGENTE",
-                "ambiental": false
-            },
-            {
-                "minuto_simulacao": 374,
-                "origem": "Braga_Parque",
-                "destino": "Infias",
-                "passageiros": 2,
                 "prioridade": "URGENTE",
                 "ambiental": true
             },
             {
                 "minuto_simulacao": 376,
                 "origem": "UMinho_Gualtar",
+                "destino": "Sameiro",
+                "passageiros": 3,
+                "prioridade": "NORMAL",
+                "ambiental": true
+            },
+            {
+                "minuto_simulacao": 376,
+                "origem": "UMinho_Gualtar",
+                "destino": "Infias",
+                "passageiros": 3,
+                "prioridade": "NORMAL",
+                "ambiental": false
+            },
+            {
+                "minuto_simulacao": 381,
+                "origem": "Braga_Parque",
+                "destino": "Bom_Jesus",
+                "passageiros": 3,
+                "prioridade": "NORMAL",
+                "ambiental": true
+            },
+            {
+                "minuto_simulacao": 388,
+                "origem": "Frossos",
+                "destino": "Minho_Center",
+                "passageiros": 3,
+                "prioridade": "URGENTE",
+                "ambiental": true
+            },
+            {
+                "minuto_simulacao": 396,
+                "origem": "Ferreiros",
+                "destino": "Sequeira",
+                "passageiros": 1,
+                "prioridade": "NORMAL",
+                "ambiental": true
+            },
+            {
+                "minuto_simulacao": 396,
+                "origem": "Frossos",
+                "destino": "Sameiro",
+                "passageiros": 4,
+                "prioridade": "URGENTE",
+                "ambiental": true
+            },
+            {
+                "minuto_simulacao": 396,
+                "origem": "Fraiao",
+                "destino": "Estadio",
+                "passageiros": 1,
+                "prioridade": "URGENTE",
+                "ambiental": false
+            },
+            {
+                "minuto_simulacao": 396,
+                "origem": "Infias",
+                "destino": "Ferreiros",
+                "passageiros": 2,
+                "prioridade": "NORMAL",
+                "ambiental": true
+            },
+            {
+                "minuto_simulacao": 396,
+                "origem": "Sequeira",
+                "destino": "Sameiro",
+                "passageiros": 2,
+                "prioridade": "URGENTE",
+                "ambiental": false
+            },
+            {
+                "minuto_simulacao": 396,
+                "origem": "Frossos",
+                "destino": "Praca_Republica",
+                "passageiros": 2,
+                "prioridade": "NORMAL",
+                "ambiental": false
+            },
+            {
+                "minuto_simulacao": 396,
+                "origem": "Ferreiros",
+                "destino": "Posto_Recarga_Centro",
+                "passageiros": 2,
+                "prioridade": "URGENTE",
+                "ambiental": false
+            },
+            {
+                "minuto_simulacao": 401,
+                "origem": "Estadio",
+                "destino": "Posto_Recarga_Centro",
+                "passageiros": 4,
+                "prioridade": "URGENTE",
+                "ambiental": true
+            },
+            {
+                "minuto_simulacao": 401,
+                "origem": "Ferreiros",
+                "destino": "Praca_Republica",
+                "passageiros": 3,
+                "prioridade": "NORMAL",
+                "ambiental": false
+            },
+            {
+                "minuto_simulacao": 406,
+                "origem": "Estacao_CP",
+                "destino": "Braga_Parque",
+                "passageiros": 4,
+                "prioridade": "URGENTE",
+                "ambiental": true
+            },
+            {
+                "minuto_simulacao": 416,
+                "origem": "Posto_Recarga_Sul",
+                "destino": "Nogueira",
+                "passageiros": 2,
+                "prioridade": "NORMAL",
+                "ambiental": true
+            },
+            {
+                "minuto_simulacao": 416,
+                "origem": "Real",
+                "destino": "Avenida_Central",
+                "passageiros": 4,
+                "prioridade": "URGENTE",
+                "ambiental": true
+            },
+            {
+                "minuto_simulacao": 426,
+                "origem": "Real",
+                "destino": "Lamaçaes",
+                "passageiros": 1,
+                "prioridade": "NORMAL",
+                "ambiental": false
+            },
+            {
+                "minuto_simulacao": 426,
+                "origem": "Lamaçaes",
+                "destino": "Braga_Parque",
+                "passageiros": 3,
+                "prioridade": "URGENTE",
+                "ambiental": true
+            },
+            {
+                "minuto_simulacao": 446,
+                "origem": "Frossos",
+                "destino": "Bom_Jesus",
+                "passageiros": 4,
+                "prioridade": "URGENTE",
+                "ambiental": true
+            },
+            {
+                "minuto_simulacao": 446,
+                "origem": "Estacao_CP",
+                "destino": "Praca_Republica",
+                "passageiros": 2,
+                "prioridade": "NORMAL",
+                "ambiental": true
+            },
+            {
+                "minuto_simulacao": 456,
+                "origem": "Maximinos",
+                "destino": "Estacao_CP",
+                "passageiros": 2,
+                "prioridade": "NORMAL",
+                "ambiental": true
+            },
+            {
+                "minuto_simulacao": 457,
+                "origem": "Posto_Recarga_Sul",
+                "destino": "UMinho_Gualtar",
+                "passageiros": 2,
+                "prioridade": "URGENTE",
+                "ambiental": false
+            },
+            {
+                "minuto_simulacao": 457,
+                "origem": "Lamaçaes",
+                "destino": "Braga_Parque",
+                "passageiros": 4,
+                "prioridade": "URGENTE",
+                "ambiental": true
+            },
+            {
+                "minuto_simulacao": 458,
+                "origem": "Maximinos",
+                "destino": "Ferreiros",
+                "passageiros": 2,
+                "prioridade": "URGENTE",
+                "ambiental": false
+            },
+            {
+                "minuto_simulacao": 461,
+                "origem": "Hospital",
+                "destino": "Estadio",
+                "passageiros": 4,
+                "prioridade": "NORMAL",
+                "ambiental": true
+            },
+            {
+                "minuto_simulacao": 462,
+                "origem": "Frossos",
+                "destino": "Bom_Jesus",
+                "passageiros": 4,
+                "prioridade": "URGENTE",
+                "ambiental": true
+            },
+            {
+                "minuto_simulacao": 465,
+                "origem": "Lamaçaes",
+                "destino": "Posto_Recarga_Norte",
+                "passageiros": 3,
+                "prioridade": "URGENTE",
+                "ambiental": false
+            },
+            {
+                "minuto_simulacao": 465,
+                "origem": "Hospital",
+                "destino": "Minho_Center",
+                "passageiros": 1,
+                "prioridade": "URGENTE",
+                "ambiental": true
+            },
+            {
+                "minuto_simulacao": 467,
+                "origem": "Adaufe",
+                "destino": "Avenida_Central",
+                "passageiros": 2,
+                "prioridade": "URGENTE",
+                "ambiental": true
+            },
+            {
+                "minuto_simulacao": 477,
+                "origem": "UMinho_Gualtar",
+                "destino": "Posto_Recarga_Sul",
+                "passageiros": 4,
+                "prioridade": "URGENTE",
+                "ambiental": false
+            },
+            {
+                "minuto_simulacao": 474,
+                "origem": "Braga_Parque",
+                "destino": "Infias",
+                "passageiros": 2,
+                "prioridade": "URGENTE",
+                "ambiental": true
+            },
+            {
+                "minuto_simulacao": 476,
+                "origem": "UMinho_Gualtar",
                 "destino": "Estacao_CP",
                 "passageiros": 3,
                 "prioridade": "NORMAL",
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 378,
+                "minuto_simulacao": 478,
                 "origem": "Bom_Jesus",
                 "destino": "Infias",
                 "passageiros": 4,
@@ -1096,7 +1096,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 379,
+                "minuto_simulacao": 479,
                 "origem": "Fraiao",
                 "destino": "Posto_Recarga_Norte",
                 "passageiros": 2,
@@ -1104,7 +1104,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 381,
+                "minuto_simulacao": 481,
                 "origem": "Minho_Center",
                 "destino": "Centro",
                 "passageiros": 3,
@@ -1112,7 +1112,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 384,
+                "minuto_simulacao": 484,
                 "origem": "Nogueira",
                 "destino": "Braga_Parque",
                 "passageiros": 3,
@@ -1120,7 +1120,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 387,
+                "minuto_simulacao": 487,
                 "origem": "Posto_Recarga_Sul",
                 "destino": "Braga_Parque",
                 "passageiros": 3,
@@ -1128,7 +1128,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 388,
+                "minuto_simulacao": 488,
                 "origem": "Sameiro",
                 "destino": "Estadio",
                 "passageiros": 1,
@@ -1136,7 +1136,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 392,
+                "minuto_simulacao": 492,
                 "origem": "Real",
                 "destino": "Minho_Center",
                 "passageiros": 2,
@@ -1144,7 +1144,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 393,
+                "minuto_simulacao": 493,
                 "origem": "Infias",
                 "destino": "Praca_Republica",
                 "passageiros": 1,
@@ -1152,7 +1152,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 396,
+                "minuto_simulacao": 496,
                 "origem": "Posto_Recarga_Sul",
                 "destino": "Minho_Center",
                 "passageiros": 3,
@@ -1160,7 +1160,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 397,
+                "minuto_simulacao": 497,
                 "origem": "Adaufe",
                 "destino": "Posto_Recarga_Sul",
                 "passageiros": 2,
@@ -1168,7 +1168,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 397,
+                "minuto_simulacao": 497,
                 "origem": "Adaufe",
                 "destino": "Hospital",
                 "passageiros": 4,
@@ -1176,7 +1176,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 399,
+                "minuto_simulacao": 499,
                 "origem": "Hospital",
                 "destino": "Ferreiros",
                 "passageiros": 2,
@@ -1184,7 +1184,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 399,
+                "minuto_simulacao": 519,
                 "origem": "Maximinos",
                 "destino": "Sameiro",
                 "passageiros": 1,
@@ -1192,7 +1192,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 403,
+                "minuto_simulacao": 520,
                 "origem": "Sameiro",
                 "destino": "Posto_Recarga_Centro",
                 "passageiros": 1,
@@ -1200,7 +1200,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 404,
+                "minuto_simulacao": 524,
                 "origem": "Real",
                 "destino": "Posto_Recarga_Centro",
                 "passageiros": 1,
@@ -1208,7 +1208,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 405,
+                "minuto_simulacao": 525,
                 "origem": "Avenida_Central",
                 "destino": "Centro",
                 "passageiros": 3,
@@ -1216,7 +1216,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 406,
+                "minuto_simulacao": 526,
                 "origem": "Ferreiros",
                 "destino": "UMinho_Gualtar",
                 "passageiros": 3,
@@ -1224,7 +1224,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 412,
+                "minuto_simulacao": 528,
                 "origem": "Nogueira",
                 "destino": "Posto_Recarga_Sul",
                 "passageiros": 2,
@@ -1232,7 +1232,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 416,
+                "minuto_simulacao": 528,
                 "origem": "Hospital",
                 "destino": "Sameiro",
                 "passageiros": 3,
@@ -1240,7 +1240,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 417,
+                "minuto_simulacao": 528,
                 "origem": "Centro",
                 "destino": "Posto_Recarga_Centro",
                 "passageiros": 4,
@@ -1248,7 +1248,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 417,
+                "minuto_simulacao": 528,
                 "origem": "Centro",
                 "destino": "Praca_Republica",
                 "passageiros": 1,
@@ -1256,7 +1256,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 417,
+                "minuto_simulacao": 528,
                 "origem": "Adaufe",
                 "destino": "Braga_Parque",
                 "passageiros": 4,
@@ -1264,7 +1264,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 418,
+                "minuto_simulacao": 528,
                 "origem": "Bom_Jesus",
                 "destino": "UMinho_Gualtar",
                 "passageiros": 2,
@@ -1272,7 +1272,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 422,
+                "minuto_simulacao": 522,
                 "origem": "Maximinos",
                 "destino": "Celeiros",
                 "passageiros": 1,
@@ -1280,7 +1280,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 423,
+                "minuto_simulacao": 523,
                 "origem": "Fraiao",
                 "destino": "Estadio",
                 "passageiros": 1,
@@ -1288,7 +1288,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 423,
+                "minuto_simulacao": 529,
                 "origem": "Braga_Parque",
                 "destino": "UMinho_Gualtar",
                 "passageiros": 1,
@@ -1296,7 +1296,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 424,
+                "minuto_simulacao": 524,
                 "origem": "Minho_Center",
                 "destino": "Sameiro",
                 "passageiros": 2,
@@ -1304,7 +1304,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 424,
+                "minuto_simulacao": 524,
                 "origem": "UMinho_Gualtar",
                 "destino": "Lamaçaes",
                 "passageiros": 4,
@@ -1312,7 +1312,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 427,
+                "minuto_simulacao": 527,
                 "origem": "Real",
                 "destino": "Bom_Jesus",
                 "passageiros": 1,
@@ -1320,7 +1320,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 428,
+                "minuto_simulacao": 528,
                 "origem": "Posto_Recarga_Centro",
                 "destino": "Avenida_Central",
                 "passageiros": 4,
@@ -1328,7 +1328,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 433,
+                "minuto_simulacao": 529,
                 "origem": "Lamaçaes",
                 "destino": "Nogueira",
                 "passageiros": 1,
@@ -1336,7 +1336,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 436,
+                "minuto_simulacao": 526,
                 "origem": "Bom_Jesus",
                 "destino": "Praca_Republica",
                 "passageiros": 3,
@@ -1344,7 +1344,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 439,
+                "minuto_simulacao": 529,
                 "origem": "Fraiao",
                 "destino": "Frossos",
                 "passageiros": 1,
@@ -1352,7 +1352,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 439,
+                "minuto_simulacao": 529,
                 "origem": "Bom_Jesus",
                 "destino": "Nogueira",
                 "passageiros": 4,
@@ -1360,7 +1360,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 442,
+                "minuto_simulacao": 528,
                 "origem": "Posto_Recarga_Sul",
                 "destino": "Hospital",
                 "passageiros": 2,
@@ -1368,7 +1368,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 448,
+                "minuto_simulacao": 528,
                 "origem": "Sameiro",
                 "destino": "Nogueira",
                 "passageiros": 1,
@@ -1376,7 +1376,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 449,
+                "minuto_simulacao": 529,
                 "origem": "Estadio",
                 "destino": "Adaufe",
                 "passageiros": 3,
@@ -1384,7 +1384,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 450,
+                "minuto_simulacao": 529,
                 "origem": "Posto_Recarga_Centro",
                 "destino": "Avenida_Central",
                 "passageiros": 4,
@@ -1392,7 +1392,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 450,
+                "minuto_simulacao": 529,
                 "origem": "Hospital",
                 "destino": "Estacao_CP",
                 "passageiros": 2,
@@ -1400,7 +1400,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 451,
+                "minuto_simulacao": 529,
                 "origem": "Real",
                 "destino": "Maximinos",
                 "passageiros": 2,
@@ -1408,7 +1408,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 454,
+                "minuto_simulacao": 529,
                 "origem": "Frossos",
                 "destino": "Real",
                 "passageiros": 3,
@@ -1416,7 +1416,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 455,
+                "minuto_simulacao": 529,
                 "origem": "UMinho_Gualtar",
                 "destino": "Infias",
                 "passageiros": 4,
@@ -1424,7 +1424,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 457,
+                "minuto_simulacao": 539,
                 "origem": "Estadio",
                 "destino": "Celeiros",
                 "passageiros": 4,
@@ -1432,7 +1432,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 462,
+                "minuto_simulacao": 546,
                 "origem": "Fraiao",
                 "destino": "Ferreiros",
                 "passageiros": 3,
@@ -1440,7 +1440,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 463,
+                "minuto_simulacao": 546,
                 "origem": "Adaufe",
                 "destino": "Sameiro",
                 "passageiros": 3,
@@ -1448,7 +1448,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 471,
+                "minuto_simulacao": 556,
                 "origem": "Lamaçaes",
                 "destino": "Maximinos",
                 "passageiros": 2,
@@ -1456,7 +1456,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 472,
+                "minuto_simulacao": 559,
                 "origem": "Sameiro",
                 "destino": "Real",
                 "passageiros": 1,
@@ -1464,7 +1464,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 473,
+                "minuto_simulacao": 569,
                 "origem": "Braga_Parque",
                 "destino": "Sameiro",
                 "passageiros": 1,
@@ -1472,7 +1472,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 474,
+                "minuto_simulacao": 569,
                 "origem": "Estacao_CP",
                 "destino": "Hospital",
                 "passageiros": 1,
@@ -1480,7 +1480,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 477,
+                "minuto_simulacao": 579,
                 "origem": "Sequeira",
                 "destino": "Maximinos",
                 "passageiros": 3,
@@ -1488,7 +1488,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 481,
+                "minuto_simulacao": 579,
                 "origem": "Avenida_Central",
                 "destino": "Sequeira",
                 "passageiros": 3,
@@ -1496,7 +1496,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 484,
+                "minuto_simulacao": 579,
                 "origem": "Posto_Recarga_Centro",
                 "destino": "Posto_Recarga_Norte",
                 "passageiros": 3,
@@ -1504,7 +1504,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 492,
+                "minuto_simulacao": 579,
                 "origem": "Real",
                 "destino": "Fraiao",
                 "passageiros": 1,
@@ -1512,7 +1512,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 495,
+                "minuto_simulacao": 589,
                 "origem": "Estacao_CP",
                 "destino": "Estadio",
                 "passageiros": 4,
@@ -1520,7 +1520,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 495,
+                "minuto_simulacao": 590,
                 "origem": "Praca_Republica",
                 "destino": "Braga_Parque",
                 "passageiros": 3,
@@ -1528,7 +1528,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 496,
+                "minuto_simulacao": 590,
                 "origem": "Adaufe",
                 "destino": "Braga_Parque",
                 "passageiros": 2,
@@ -1536,7 +1536,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 496,
+                "minuto_simulacao": 592,
                 "origem": "Maximinos",
                 "destino": "Nogueira",
                 "passageiros": 4,
@@ -1544,7 +1544,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 497,
+                "minuto_simulacao": 592,
                 "origem": "Estadio",
                 "destino": "Ferreiros",
                 "passageiros": 3,
@@ -1552,7 +1552,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 497,
+                "minuto_simulacao": 596,
                 "origem": "Posto_Recarga_Sul",
                 "destino": "UMinho_Gualtar",
                 "passageiros": 3,
@@ -1560,7 +1560,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 498,
+                "minuto_simulacao": 596,
                 "origem": "Bom_Jesus",
                 "destino": "Posto_Recarga_Norte",
                 "passageiros": 4,
@@ -1568,7 +1568,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 501,
+                "minuto_simulacao": 596,
                 "origem": "Estadio",
                 "destino": "Praca_Republica",
                 "passageiros": 3,
@@ -1576,7 +1576,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 503,
+                "minuto_simulacao": 598,
                 "origem": "Maximinos",
                 "destino": "Celeiros",
                 "passageiros": 4,
@@ -1584,7 +1584,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 505,
+                "minuto_simulacao": 601,
                 "origem": "Hospital",
                 "destino": "Minho_Center",
                 "passageiros": 4,
@@ -1592,7 +1592,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 506,
+                "minuto_simulacao": 602,
                 "origem": "Posto_Recarga_Norte",
                 "destino": "Braga_Parque",
                 "passageiros": 4,
@@ -1600,7 +1600,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 508,
+                "minuto_simulacao": 602,
                 "origem": "Lamaçaes",
                 "destino": "Estacao_CP",
                 "passageiros": 1,
@@ -1608,7 +1608,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 510,
+                "minuto_simulacao": 607,
                 "origem": "Posto_Recarga_Sul",
                 "destino": "Ferreiros",
                 "passageiros": 4,
@@ -1616,7 +1616,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 516,
+                "minuto_simulacao": 612,
                 "origem": "Sameiro",
                 "destino": "Adaufe",
                 "passageiros": 1,
@@ -1624,7 +1624,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 517,
+                "minuto_simulacao": 612,
                 "origem": "Infias",
                 "destino": "Braga_Parque",
                 "passageiros": 1,
@@ -1632,7 +1632,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 517,
+                "minuto_simulacao": 616,
                 "origem": "Posto_Recarga_Norte",
                 "destino": "Hospital",
                 "passageiros": 3,
@@ -1640,7 +1640,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 520,
+                "minuto_simulacao": 626,
                 "origem": "Infias",
                 "destino": "Sameiro",
                 "passageiros": 3,
@@ -1648,7 +1648,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 520,
+                "minuto_simulacao": 636,
                 "origem": "Celeiros",
                 "destino": "Praca_Republica",
                 "passageiros": 3,
@@ -1656,7 +1656,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 521,
+                "minuto_simulacao": 646,
                 "origem": "Minho_Center",
                 "destino": "Adaufe",
                 "passageiros": 1,
@@ -1664,7 +1664,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 521,
+                "minuto_simulacao": 656,
                 "origem": "Estadio",
                 "destino": "Praca_Republica",
                 "passageiros": 1,
@@ -1672,7 +1672,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 525,
+                "minuto_simulacao": 659,
                 "origem": "Centro",
                 "destino": "Estacao_CP",
                 "passageiros": 1,
@@ -1680,7 +1680,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 527,
+                "minuto_simulacao": 659,
                 "origem": "UMinho_Gualtar",
                 "destino": "Braga_Parque",
                 "passageiros": 1,
@@ -1688,7 +1688,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 531,
+                "minuto_simulacao": 669,
                 "origem": "Fraiao",
                 "destino": "Avenida_Central",
                 "passageiros": 1,
@@ -1696,7 +1696,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 537,
+                "minuto_simulacao": 672,
                 "origem": "Infias",
                 "destino": "Minho_Center",
                 "passageiros": 3,
@@ -1704,7 +1704,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 541,
+                "minuto_simulacao": 676,
                 "origem": "Posto_Recarga_Sul",
                 "destino": "Minho_Center",
                 "passageiros": 4,
@@ -1712,7 +1712,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 542,
+                "minuto_simulacao": 686,
                 "origem": "Posto_Recarga_Norte",
                 "destino": "Nogueira",
                 "passageiros": 2,
@@ -1720,7 +1720,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 542,
+                "minuto_simulacao": 689,
                 "origem": "Sequeira",
                 "destino": "Nogueira",
                 "passageiros": 3,
@@ -1728,7 +1728,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 543,
+                "minuto_simulacao": 692,
                 "origem": "Nogueira",
                 "destino": "Ferreiros",
                 "passageiros": 2,
@@ -1736,7 +1736,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 544,
+                "minuto_simulacao": 696,
                 "origem": "Estacao_CP",
                 "destino": "Hospital",
                 "passageiros": 4,
@@ -1744,7 +1744,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 546,
+                "minuto_simulacao": 699,
                 "origem": "Sequeira",
                 "destino": "Avenida_Central",
                 "passageiros": 3,
@@ -1752,7 +1752,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 546,
+                "minuto_simulacao": 706,
                 "origem": "Adaufe",
                 "destino": "Bom_Jesus",
                 "passageiros": 4,
@@ -1760,7 +1760,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 552,
+                "minuto_simulacao": 709,
                 "origem": "Sequeira",
                 "destino": "Estadio",
                 "passageiros": 4,
@@ -1768,7 +1768,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 553,
+                "minuto_simulacao": 712,
                 "origem": "Lamaçaes",
                 "destino": "Frossos",
                 "passageiros": 3,
@@ -1776,7 +1776,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 554,
+                "minuto_simulacao": 716,
                 "origem": "Maximinos",
                 "destino": "Posto_Recarga_Norte",
                 "passageiros": 2,
@@ -1784,7 +1784,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 556,
+                "minuto_simulacao": 726,
                 "origem": "Minho_Center",
                 "destino": "Avenida_Central",
                 "passageiros": 1,
@@ -1792,7 +1792,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 559,
+                "minuto_simulacao": 729,
                 "origem": "Real",
                 "destino": "Celeiros",
                 "passageiros": 3,
@@ -1800,7 +1800,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 560,
+                "minuto_simulacao": 756,
                 "origem": "Ferreiros",
                 "destino": "Centro",
                 "passageiros": 2,
@@ -1808,7 +1808,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 561,
+                "minuto_simulacao": 766,
                 "origem": "Frossos",
                 "destino": "Ferreiros",
                 "passageiros": 4,
@@ -1816,7 +1816,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 564,
+                "minuto_simulacao": 776,
                 "origem": "Hospital",
                 "destino": "Posto_Recarga_Norte",
                 "passageiros": 3,
@@ -1824,7 +1824,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 565,
+                "minuto_simulacao": 786,
                 "origem": "Centro",
                 "destino": "Frossos",
                 "passageiros": 3,
@@ -1832,7 +1832,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 566,
+                "minuto_simulacao": 796,
                 "origem": "Fraiao",
                 "destino": "Real",
                 "passageiros": 4,
@@ -1840,7 +1840,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 570,
+                "minuto_simulacao": 799,
                 "origem": "Frossos",
                 "destino": "UMinho_Gualtar",
                 "passageiros": 3,
@@ -1848,7 +1848,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 572,
+                "minuto_simulacao": 806,
                 "origem": "Estadio",
                 "destino": "Hospital",
                 "passageiros": 4,
@@ -1856,7 +1856,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 575,
+                "minuto_simulacao": 816,
                 "origem": "Posto_Recarga_Norte",
                 "destino": "Lamaçaes",
                 "passageiros": 1,
@@ -1864,7 +1864,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 580,
+                "minuto_simulacao": 826,
                 "origem": "Maximinos",
                 "destino": "Frossos",
                 "passageiros": 4,
@@ -1872,7 +1872,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 582,
+                "minuto_simulacao": 826,
                 "origem": "Frossos",
                 "destino": "Avenida_Central",
                 "passageiros": 3,
@@ -1880,7 +1880,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 583,
+                "minuto_simulacao": 829,
                 "origem": "Infias",
                 "destino": "Sameiro",
                 "passageiros": 1,
@@ -1888,7 +1888,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 587,
+                "minuto_simulacao": 836,
                 "origem": "Avenida_Central",
                 "destino": "Hospital",
                 "passageiros": 1,
@@ -1896,7 +1896,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 588,
+                "minuto_simulacao": 839,
                 "origem": "Bom_Jesus",
                 "destino": "Posto_Recarga_Sul",
                 "passageiros": 4,
@@ -1904,7 +1904,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 589,
+                "minuto_simulacao": 846,
                 "origem": "Nogueira",
                 "destino": "Ferreiros",
                 "passageiros": 2,
@@ -1912,7 +1912,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 598,
+                "minuto_simulacao": 856,
                 "origem": "Estacao_CP",
                 "destino": "Posto_Recarga_Norte",
                 "passageiros": 2,
@@ -1920,7 +1920,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 600,
+                "minuto_simulacao": 866,
                 "origem": "Praca_Republica",
                 "destino": "Nogueira",
                 "passageiros": 1,
@@ -1928,7 +1928,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 601,
+                "minuto_simulacao": 876,
                 "origem": "Maximinos",
                 "destino": "Bom_Jesus",
                 "passageiros": 4,
@@ -1936,7 +1936,7 @@
                 "ambiental": true
             },
             {
-                "minuto_simulacao": 601,
+                "minuto_simulacao": 876,
                 "origem": "Minho_Center",
                 "destino": "Maximinos",
                 "passageiros": 4,
@@ -1944,7 +1944,7 @@
                 "ambiental": false
             },
             {
-                "minuto_simulacao": 606,
+                "minuto_simulacao": 886,
                 "origem": "Centro",
                 "destino": "Celeiros",
                 "passageiros": 1,
