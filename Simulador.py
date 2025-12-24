@@ -586,5 +586,6 @@ class Simulador:
             "taxa_ocupacao": taxa_ocupacao,
             "custos_totais": total_custos,
             "emissoes_co2": total_co2,
-            "km_vazios": total_km_vazio
+            "km_vazios": total_km_vazio,
+            "total_km": total_km
         }

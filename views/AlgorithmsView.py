@@ -117,27 +117,30 @@ class AlgorithmsView(ctk.CTkFrame):
             gestor.add_taxi(taxi)
 
     def show_results(self, resultados):
-        self.append_log("\n" + "="*105)
-        self.append_log(f"{'--- TABELA DE COMPARAÇÃO FINAL DAS ESTRATÉGIAS ---':^105}")
-        self.append_log("="*105)
+        self.append_log("\n" + "="*116)
+        self.append_log(f"{'--- TABELA DE COMPARAÇÃO FINAL DAS ESTRATÉGIAS ---':^116}")
+        self.append_log("="*116)
         
         # Header
-        header = f"{'Estratégia':<10} | {'Rej.%':>5} | {'Esp.(m)':>8} | {'Ocup.%':>6} | {'Custo':>8} | {'CO2':>6} | {'Vazio%':>6} | {'Nós':>6}"
+        header = f"{'Estratégia':<10} | {'Rej.%':>5} | {'Esp.(m)':>8} | {'Ocup.%':>6} | {'Custo':>8} | {'CO2':>6} | {'Km Tot':>8} | {'Vazio%':>6} | {'Nós':>6}"
         self.append_log(header)
-        self.append_log("-"*105)
+        self.append_log("-"*116)
         
         resultados_ordenados = sorted(resultados, key=lambda x: (x['taxa_rejeicao'], x['tempo_espera']))
         
         for res in resultados_ordenados:
+            pct_vazio = (res['km_vazios'] / res['total_km'] * 100) if res.get('total_km', 0) > 0 else 0.0
+            
             line = (f"{res['estrategia']:<10} | "
                     f"{res['taxa_rejeicao']:>5.1f} | "
                     f"{res['tempo_espera']:>8.2f} | "
                     f"{res['taxa_ocupacao']:>6.1f} | "
                     f"{res['custos_totais']:>8.2f} | "
                     f"{res['emissoes_co2']:>6.2f} | " 
-                    f"{res['km_vazios']:>6.1f} | "
+                    f"{res['total_km']:>8.1f} | "
+                    f"{pct_vazio:>6.1f} | "
                     f"{res['media_nos']:>6.1f}")
             self.append_log(line)
             
-        self.append_log("="*105)
+        self.append_log("="*116)
         self.btn_run.configure(state="normal", text="Executar Benchmark")
