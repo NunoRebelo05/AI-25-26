@@ -30,14 +30,16 @@ def setup_frota(gestor: GestorDeFrota):
     for i in range(num_ev):
         local = locais[i % len(locais)]
         taxi = Taxi(f"EV{i+1:02d}", TipoMotorizacao.ELETRICO, local, 
-                    specs_ev['capacidade'], specs_ev['custo_km'], specs_ev['autonomia'], specs_ev.get('emissao_co2_km', 0.0))
+                    specs_ev['capacidade'], specs_ev['custo_km'], specs_ev['autonomia'], 
+                    specs_ev.get('emissao_co2_km', 0.0), specs_ev.get('tempo_recarga_min', 30))
         gestor.add_taxi(taxi)
 
     # 3. Criar Combustão
     for i in range(num_gas):
         local = locais[(i + 3) % len(locais)] # Offset para variar
         taxi = Taxi(f"GAS{i+1:02d}", TipoMotorizacao.COMBUSTAO, local,
-                    specs_gas['capacidade'], specs_gas['custo_km'], specs_gas['autonomia'], specs_gas.get('emissao_co2_km', 0.14))
+                    specs_gas['capacidade'], specs_gas['custo_km'], specs_gas['autonomia'], 
+                    specs_gas.get('emissao_co2_km', 0.14), specs_gas.get('tempo_abastecimento_min', 5))
         gestor.add_taxi(taxi)
 
 def run_benchmark(log_callback=None, finish_callback=None):

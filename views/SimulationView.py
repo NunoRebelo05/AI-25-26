@@ -151,7 +151,7 @@ class SimulationView(ctk.CTkFrame):
         
         # Duration
         self.card_dur = CounterCard(grid, "Duração (h)", "assets/clock.png", 
-                                    initial_value=cfg.get('simulacao.duracao_horas'), min_val=1, max_val=24)
+                                    initial_value=cfg.get('simulacao.duracao_horas'), min_val=1, max_val=48)
         self.card_dur.grid(row=0, column=2, sticky="nsew", padx=8, pady=8)
         
         # --- Row 1 ---
@@ -389,13 +389,15 @@ class SimulationView(ctk.CTkFrame):
             for i in range(config['num_eletricos']):
                 local_inicio = locais[i % len(locais)]
                 novo_taxi = Taxi(f"EV{i+1:02d}", TipoMotorizacao.ELETRICO, local_inicio, 
-                                 specs_electric['capacidade'], specs_electric['custo_km'], specs_electric['autonomia'])
+                                 specs_electric['capacidade'], specs_electric['custo_km'], specs_electric['autonomia'], 
+                                 specs_electric.get('emissao_co2_km', 0.0), specs_electric.get('tempo_recarga_min', 30))
                 gestor.add_taxi(novo_taxi)
                 
             for i in range(config['num_combustao']):
                 local_inicio = locais[(i + 3) % len(locais)]
                 novo_taxi = Taxi(f"GAS{i+1:02d}", TipoMotorizacao.COMBUSTAO, local_inicio, 
-                                 specs_combustion['capacidade'], specs_combustion['custo_km'], specs_combustion['autonomia'])
+                                 specs_combustion['capacidade'], specs_combustion['custo_km'], specs_combustion['autonomia'], 
+                                 specs_combustion.get('emissao_co2_km', 0.14), specs_combustion.get('tempo_abastecimento_min', 5))
                 gestor.add_taxi(novo_taxi)
 
             self.simulador = Simulador(

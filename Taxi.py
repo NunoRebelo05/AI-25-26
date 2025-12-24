@@ -28,7 +28,8 @@ class Taxi:
                  capacidade_passageiros: int, 
                  custo_por_km: float, 
                  autonomia_maxima: float,
-                 emissao_co2_km: float = 0.0):
+                 emissao_co2_km: float = 0.0,
+                 tempo_servico_min: int = 30):
         """
         Inicializa um novo táxi.
         
@@ -40,6 +41,7 @@ class Taxi:
             custo_por_km (float): Custo operacional por quilómetro.
             autonomia_maxima (float): Autonomia total em km.
             emissao_co2_km (float): Emissão de CO2 por km (em kg).
+            tempo_servico_min (int): Tempo de recarga ou abastecimento em minutos.
         """
         
         self.id_veiculo = id_veiculo
@@ -50,6 +52,7 @@ class Taxi:
         self.custo_por_km = custo_por_km                       
         self.autonomia_maxima = autonomia_maxima
         self.emissao_co2_km = emissao_co2_km
+        self.tempo_servico_min = tempo_servico_min
 
         # Métricas de Eficiência
         self.km_total = 0.0
@@ -144,12 +147,10 @@ class Taxi:
         """Muda o estado para A_CARREGAR ou A_ABASTECER, dependendo do tipo."""
         if self.tipo == TipoMotorizacao.ELETRICO:
             self.estado = EstadoVeiculo.A_CARREGAR
-            # Exemplo: 30 mins para carregar
-            self.tempo_carregamento_restante = 30 
         else:
             self.estado = EstadoVeiculo.A_ABASTECER
-            # Exemplo: 10 mins para abastecer
-            self.tempo_carregamento_restante = 10
+            
+        self.tempo_carregamento_restante = self.tempo_servico_min
 
     def concluir_carregamento(self):
         """Restaura a autonomia a 100% e coloca o táxi como LIVRE."""
