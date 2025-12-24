@@ -20,13 +20,15 @@
             "capacidade": 4,
             "custo_km": 0.15,
             "autonomia": 250.0,
-            "tempo_recarga_min": 30
+            "tempo_recarga_min": 30,
+            "emissao_co2_km": 0.0
         },
         "specs_combustao": {
             "capacidade": 4,
             "custo_km": 0.25,
             "autonomia": 600.0,
-            "tempo_abastecimento_min": 5
+            "tempo_abastecimento_min": 5,
+            "emissao_co2_km": 0.14
         }
     },
     "pesos_estrategia": {

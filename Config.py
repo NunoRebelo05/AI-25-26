@@ -85,8 +85,8 @@ class Config:
             "frota": {
                 "num_eletricos": 2,
                 "num_combustao": 2,
-                "specs_eletrico": {"capacidade": 4, "custo_km": 0.15, "autonomia": 250.0, "tempo_recarga_min": 30},
-                "specs_combustao": {"capacidade": 4, "custo_km": 0.25, "autonomia": 600.0, "tempo_abastecimento_min": 5}
+                "specs_eletrico": {"capacidade": 4, "custo_km": 0.15, "autonomia": 250.0, "tempo_recarga_min": 30, "emissao_co2_km": 0.0},
+                "specs_combustao": {"capacidade": 4, "custo_km": 0.25, "autonomia": 600.0, "tempo_abastecimento_min": 5, "emissao_co2_km": 0.14}
             },
             "pesos_estrategia": {
                 "W_TEMPO_ESPERA": 1.5,

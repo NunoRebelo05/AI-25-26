@@ -183,6 +183,11 @@ class Simulador:
         # 2. Só depois é que vemos se os livres vão carregar
         self._manage_idle_taxis()
 
+        # 3. Atualizar Metricas de Ocupação
+        for taxi in self.gestor.frota.values():
+            if taxi.estado != EstadoVeiculo.LIVRE:
+                taxi.registar_tempo_ocupado(1/60.0) # 1 passo = 1 segundo = 1/60 minutos
+
     def _generate_new_request(self):
         """Gera novos pedidos, seja a partir da lista estática ou aleatoriamente."""
         # 1. Verificar Pedidos Estáticos
@@ -378,7 +383,12 @@ class Simulador:
             if mov['tempo_restante_aresta'] <= 0:
                 # Chegou ao próximo nó
                 taxi.localizacao_atual = mov['caminho'][mov['idx_prox_no']]
-                taxi.autonomia_atual -= self.grafo.get_custo_aresta(mov['caminho'][mov['idx_prox_no']-1], taxi.localizacao_atual)[0]
+                dist_aresta, _ = self.grafo.get_custo_aresta(mov['caminho'][mov['idx_prox_no']-1], taxi.localizacao_atual)
+                taxi.autonomia_atual -= dist_aresta
+                
+                # Registar estatísticas
+                com_pax = (mov['tipo'] == "VIAGEM")
+                taxi.registar_movimento(dist_aresta, com_pax)
                 
                 if mov['idx_prox_no'] < len(mov['caminho']) - 1:
                     # Ainda há mais nós no caminho atual
@@ -542,15 +552,39 @@ class Simulador:
         taxa = (len(rejeitados)/total)*100 if total > 0 else 0
         wait = sum([p.get_tempo_espera_total() for p in concluidos])/len(concluidos) if concluidos else 0
         
-        print("\n" + "="*40)
-        print(f"Total: {total} | OK: {len(concluidos)} | NOK: {len(rejeitados)} ({taxa:.1f}%)")
+        # Novas Métricas
+        total_custos = sum(t.custo_total for t in self.gestor.frota.values())
+        total_co2 = sum(t.co2_total for t in self.gestor.frota.values())
+        total_km = sum(t.km_total for t in self.gestor.frota.values())
+        total_km_vazio = sum((t.km_total - t.km_com_passageiro) for t in self.gestor.frota.values())
+        
+        tempo_simulado_min = (self.current_time - self.hora_inicio).total_seconds() / 60.0
+        total_min_frota = len(self.gestor.frota) * tempo_simulado_min
+        ocupacao_frota = sum(t.minutos_ocupado for t in self.gestor.frota.values())
+        taxa_ocupacao = (ocupacao_frota / total_min_frota * 100) if total_min_frota > 0 else 0.0
+
+        print("\n" + "="*60)
+        print(f"{'RESUMO DA SIMULAÇÃO':^60}")
+        print("="*60)
+        print(f"Ped. Total: {total} | Concluídos: {len(concluidos)} | Rejeitados: {len(rejeitados)} ({taxa:.1f}%)")
         print(f"Espera Média: {wait:.2f} min")
-        print("="*40)
+        print("-" * 60)
+        print(f"Eficiência da Frota:")
+        print(f"  Taxa Ocupação:  {taxa_ocupacao:.1f}%")
+        print(f"  Custos Totais:  {total_custos:.2f} €")
+        print(f"  Emissões CO2:   {total_co2:.2f} kg")
+        print(f"  Km Totais:      {total_km:.1f} km")
+        print(f"  Km Vazios:      {total_km_vazio:.1f} km ({(total_km_vazio/total_km*100 if total_km>0 else 0):.1f}%)")
+        print("="*60)
         
         return {
             "total_pedidos": total,
             "concluidos": len(concluidos),
             "rejeitados": len(rejeitados),
             "taxa_rejeicao": taxa,
-            "tempo_espera": wait
+            "tempo_espera": wait,
+            "taxa_ocupacao": taxa_ocupacao,
+            "custos_totais": total_custos,
+            "emissoes_co2": total_co2,
+            "km_vazios": total_km_vazio
         }

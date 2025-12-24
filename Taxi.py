@@ -27,7 +27,8 @@ class Taxi:
                  localizacao_atual: str,
                  capacidade_passageiros: int, 
                  custo_por_km: float, 
-                 autonomia_maxima: float):
+                 autonomia_maxima: float,
+                 emissao_co2_km: float = 0.0):
         """
         Inicializa um novo táxi.
         
@@ -38,6 +39,7 @@ class Taxi:
             capacidade_passageiros (int): Lotação máxima.
             custo_por_km (float): Custo operacional por quilómetro.
             autonomia_maxima (float): Autonomia total em km.
+            emissao_co2_km (float): Emissão de CO2 por km (em kg).
         """
         
         self.id_veiculo = id_veiculo
@@ -46,7 +48,13 @@ class Taxi:
         self.tipo = tipo                                       
         self.capacidade_passageiros = capacidade_passageiros   
         self.custo_por_km = custo_por_km                       
-        self.autonomia_maxima = autonomia_maxima              
+        self.autonomia_maxima = autonomia_maxima
+        self.emissao_co2_km = emissao_co2_km
+
+        # Métricas de Eficiência
+        self.km_total = 0.0
+        self.km_com_passageiro = 0.0
+        self.minutos_ocupado = 0              
 
         # Características dinâmicas (estado)
         self.localizacao_atual = localizacao_atual            #  (ex: 'Nó_A', 'Centro')
@@ -159,6 +167,26 @@ class Taxi:
         """
         self.localizacao_atual = localizacao_destino
         self.estado = EstadoVeiculo.LIVRE
+
+    def registar_movimento(self, distancia_km: float, com_passageiro: bool):
+        """Regista quilómetros percorridos para estatísticas."""
+        self.km_total += distancia_km
+        if com_passageiro:
+            self.km_com_passageiro += distancia_km
+
+    def registar_tempo_ocupado(self, minutos: int = 1):
+        """Incrementa o tempo em que o táxi esteve ocupado (não LIVRE)."""
+        self.minutos_ocupado += minutos
+
+    @property
+    def custo_total(self) -> float:
+        """Calcula o custo operacional total acumulado."""
+        return self.km_total * self.custo_por_km
+
+    @property
+    def co2_total(self) -> float:
+        """Calcula as emissões totais de CO2 acumuladas (em kg)."""
+        return self.km_total * self.emissao_co2_km
 
 
 # --- Exemplo e Teste de utilização ---

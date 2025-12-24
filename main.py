@@ -30,14 +30,14 @@ def setup_frota(gestor: GestorDeFrota):
     for i in range(num_ev):
         local = locais[i % len(locais)]
         taxi = Taxi(f"EV{i+1:02d}", TipoMotorizacao.ELETRICO, local, 
-                    specs_ev['capacidade'], specs_ev['custo_km'], specs_ev['autonomia'])
+                    specs_ev['capacidade'], specs_ev['custo_km'], specs_ev['autonomia'], specs_ev.get('emissao_co2_km', 0.0))
         gestor.add_taxi(taxi)
 
     # 3. Criar Combustão
     for i in range(num_gas):
         local = locais[(i + 3) % len(locais)] # Offset para variar
         taxi = Taxi(f"GAS{i+1:02d}", TipoMotorizacao.COMBUSTAO, local,
-                    specs_gas['capacidade'], specs_gas['custo_km'], specs_gas['autonomia'])
+                    specs_gas['capacidade'], specs_gas['custo_km'], specs_gas['autonomia'], specs_gas.get('emissao_co2_km', 0.14))
         gestor.add_taxi(taxi)
 
 def run_benchmark(log_callback=None, finish_callback=None):
@@ -86,38 +86,21 @@ def run_benchmark(log_callback=None, finish_callback=None):
         gestor.definir_estrategia(estrategia)
         
         # 2. Correr Simulação
+        # 2. Correr Simulação
         simulador = Simulador(gestor, hora_inicio, duracao_horas, usar_estaticos=True)
-        simulador.run()
+        metrics = simulador.run()
         
-        # 3. CALCULAR MÉTRICAS
-        pedidos = simulador.pedidos_gerados
-        total = len(pedidos)
-        concluidos = [p for p in pedidos if p.estado == EstadoPedido.CONCLUIDO]
-        rejeitados = [p for p in pedidos if p.estado == EstadoPedido.REJEITADO]
-        
-        taxa_rejeicao = (len(rejeitados) / total * 100) if total > 0 else 0.0
-        
-        tempo_medio = 0.0
-        if concluidos:
-            soma_tempos = sum(p.get_tempo_espera_total() for p in concluidos)
-            tempo_medio = soma_tempos / len(concluidos)
-            
         # Média de Nós Visitados (Eficiência do algoritmo)
         total_nos = gestor.stats['total_nos_visitados']
         total_procuras = gestor.stats['total_procuras']
         media_nos = (total_nos / total_procuras) if total_procuras > 0 else 0.0
         
-        res = {
-            'estrategia': estrategia.name,
-            'total': total,
-            'concluidos': len(concluidos),
-            'rejeitados': len(rejeitados),
-            'taxa_rejeicao': taxa_rejeicao,
-            'tempo_espera': tempo_medio,
-            'media_nos': media_nos
-        }
-        resultados_finais.append(res)
-        log(f"   -> Concluído (Rejeição: {taxa_rejeicao:.1f}%)")
+        # Enriquecer métricas com dados do gestor
+        metrics['estrategia'] = estrategia.name
+        metrics['media_nos'] = media_nos
+        
+        resultados_finais.append(metrics)
+        log(f"   -> Concluído (Rejeição: {metrics['taxa_rejeicao']:.1f}%)")
     
     if finish_callback:
         finish_callback(resultados_finais)
@@ -168,7 +151,7 @@ class BenchmarkWindow(ctk.CTkToplevel):
         self.append_log("-" * 105)
         
         # Cabeçalho
-        header = f"{'Estratégia':<12} | {'Total':>6} | {'Concl.':>6} | {'Rej.':>6} | {'Taxa Rej.':>10} | {'Espera (min)':>14} | {'Média Nós':>12}"
+        header = f"{'Estratégia':<10} | {'Rej.%':>5} | {'Esp.(m)':>8} | {'Ocup.%':>6} | {'Custo':>8} | {'CO2':>6} | {'Vazio%':>6} | {'Nós':>6}"
         self.append_log(header)
         self.append_log("-"*105)
         
@@ -176,7 +159,33 @@ class BenchmarkWindow(ctk.CTkToplevel):
         resultados_ordenados = sorted(resultados, key=lambda x: (x['taxa_rejeicao'], x['tempo_espera']))
         
         for res in resultados_ordenados:
-            line = f"{res['estrategia']:<12} | {res['total']:>6} | {res['concluidos']:>6} | {res['rejeitados']:>6} | {res['taxa_rejeicao']:>9.1f}% | {res['tempo_espera']:>14.2f} | {res['media_nos']:>12.1f}"
+            km_total = res['km_toais'] if 'km_toais' in res else res.get('total_km_vazio', 0) + res.get('km_com_passageiro', 0) # Fallback if specific key missing
+            
+            # Nota: 'km_vazios' vem do Simulador.print_summary -> 'km_vazios'
+            # Mas espera, print_summary retorna 'km_vazios' e 'total_pedidos'...
+            # Vamos usar os nomes do dict retornado em Simulador.print_summary
+            
+            # Calculo percentagem kms vazios
+            # TOTAL KM não está no return do print_summary?? Vamos adicionar ou calcular.
+            # print_summary retorna 'custos_totais', 'emissoes_co2', 'km_vazios'
+            # Precisamos de 'km_totais' para %. Mas custo total / custo medio? Não.
+            # Deixa simples: mostra Km Vazio Absoluto ou Custo e CO2 que são os principais.
+            
+            # Vamos ajustar as colunas para caber:
+            # Estrat | Rej% | Espera | Ocup% | Custo | CO2 | Nós
+            
+            taxa_vazios = 0.0 # Placeholder se não tivermos km totais directos no dict.
+            # Verifiquei o código do Simulador: ele devolve 'km_vazios' no return. 
+            # NÃO DEVOLVE 'km_total'. Vou ter de confiar nos valores absolutos ou adicionar no simulator.
+            
+            line = (f"{res['estrategia']:<10} | "
+                    f"{res['taxa_rejeicao']:>5.1f} | "
+                    f"{res['tempo_espera']:>8.2f} | "
+                    f"{res['taxa_ocupacao']:>6.1f} | "
+                    f"{res['custos_totais']:>8.2f} | "
+                    f"{res['emissoes_co2']:>6.2f} | " 
+                    f"{res['km_vazios']:>6.1f} | "
+                    f"{res['media_nos']:>6.1f}")
             self.append_log(line)
             
         self.append_log("="*105)

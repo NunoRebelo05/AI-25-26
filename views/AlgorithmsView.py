@@ -76,36 +76,22 @@ class AlgorithmsView(ctk.CTkFrame):
             gestor.definir_estrategia(estrategia)
             
             simulador = Simulador(gestor, hora_inicio, duracao_horas, usar_estaticos=True)
-            simulador.run()
+            try:
+                metrics = simulador.run()
+            except Exception as e:
+                log(f"ERRO ao correr {estrategia.name}: {e}")
+                continue
             
             # Metrics
-            pedidos = simulador.pedidos_gerados
-            total = len(pedidos)
-            concluidos = [p for p in pedidos if p.estado == EstadoPedido.CONCLUIDO]
-            rejeitados = [p for p in pedidos if p.estado == EstadoPedido.REJEITADO]
-            
-            taxa_rejeicao = (len(rejeitados) / total * 100) if total > 0 else 0.0
-            
-            tempo_medio = 0.0
-            if concluidos:
-                soma_tempos = sum(p.get_tempo_espera_total() for p in concluidos)
-                tempo_medio = soma_tempos / len(concluidos)
-                
             total_nos = gestor.stats['total_nos_visitados']
             total_procuras = gestor.stats['total_procuras']
             media_nos = (total_nos / total_procuras) if total_procuras > 0 else 0.0
             
-            res = {
-                'estrategia': estrategia.name,
-                'total': total,
-                'concluidos': len(concluidos),
-                'rejeitados': len(rejeitados),
-                'taxa_rejeicao': taxa_rejeicao,
-                'tempo_espera': tempo_medio,
-                'media_nos': media_nos
-            }
-            resultados_finais.append(res)
-            log(f"   -> Concluído (Rejeição: {taxa_rejeicao:.1f}%)")
+            metrics['estrategia'] = estrategia.name
+            metrics['media_nos'] = media_nos
+            
+            resultados_finais.append(metrics)
+            log(f"   -> Concluído (Rejeição: {metrics['taxa_rejeicao']:.1f}%)")
         
         self.after(0, self.show_results, resultados_finais)
 
@@ -119,13 +105,13 @@ class AlgorithmsView(ctk.CTkFrame):
         for i in range(num_ev):
             local = locais[i % len(locais)]
             taxi = Taxi(f"EV{i+1:02d}", TipoMotorizacao.ELETRICO, local, 
-                        specs_ev['capacidade'], specs_ev['custo_km'], specs_ev['autonomia'])
+                        specs_ev['capacidade'], specs_ev['custo_km'], specs_ev['autonomia'], specs_ev.get('emissao_co2_km', 0.0))
             gestor.add_taxi(taxi)
 
         for i in range(num_gas):
             local = locais[(i + 3) % len(locais)]
             taxi = Taxi(f"GAS{i+1:02d}", TipoMotorizacao.COMBUSTAO, local,
-                        specs_gas['capacidade'], specs_gas['custo_km'], specs_gas['autonomia'])
+                        specs_gas['capacidade'], specs_gas['custo_km'], specs_gas['autonomia'], specs_gas.get('emissao_co2_km', 0.14))
             gestor.add_taxi(taxi)
 
     def show_results(self, resultados):
@@ -133,14 +119,22 @@ class AlgorithmsView(ctk.CTkFrame):
         self.append_log(f"{'--- TABELA DE COMPARAÇÃO FINAL DAS ESTRATÉGIAS ---':^105}")
         self.append_log("="*105)
         
-        header = f"{'Estratégia':<12} | {'Total':>6} | {'Concl.':>6} | {'Rej.':>6} | {'Taxa Rej.':>10} | {'Espera (min)':>14} | {'Média Nós':>12}"
+        # Header
+        header = f"{'Estratégia':<10} | {'Rej.%':>5} | {'Esp.(m)':>8} | {'Ocup.%':>6} | {'Custo':>8} | {'CO2':>6} | {'Vazio%':>6} | {'Nós':>6}"
         self.append_log(header)
         self.append_log("-"*105)
         
         resultados_ordenados = sorted(resultados, key=lambda x: (x['taxa_rejeicao'], x['tempo_espera']))
         
         for res in resultados_ordenados:
-            line = f"{res['estrategia']:<12} | {res['total']:>6} | {res['concluidos']:>6} | {res['rejeitados']:>6} | {res['taxa_rejeicao']:>9.1f}% | {res['tempo_espera']:>14.2f} | {res['media_nos']:>12.1f}"
+            line = (f"{res['estrategia']:<10} | "
+                    f"{res['taxa_rejeicao']:>5.1f} | "
+                    f"{res['tempo_espera']:>8.2f} | "
+                    f"{res['taxa_ocupacao']:>6.1f} | "
+                    f"{res['custos_totais']:>8.2f} | "
+                    f"{res['emissoes_co2']:>6.2f} | " 
+                    f"{res['km_vazios']:>6.1f} | "
+                    f"{res['media_nos']:>6.1f}")
             self.append_log(line)
             
         self.append_log("="*105)
