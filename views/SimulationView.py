@@ -209,9 +209,15 @@ class SimulationView(ctk.CTkFrame):
         
         ctk.CTkLabel(req_container, textvariable=self.prob, font=("Roboto", 12)).pack()
         
-        self.usar_estaticos = ctk.BooleanVar(value=cfg.get('pedidos_estaticos.usar_estaticos'))
-        self.switch_estaticos = ctk.CTkSwitch(req_container, text="Pedidos Pré-Calculados", variable=self.usar_estaticos)
-        self.switch_estaticos.pack(pady=10)
+        # Scenario Selector
+        ctk.CTkLabel(req_container, text="Cenário", font=("Roboto", 14), text_color="gray").pack(pady=(10, 5))
+        
+        cenarios_dict = cfg.get('pedidos_estaticos.cenarios', {})
+        opcoes = ["Aleatório"] + (list(cenarios_dict.keys()) if cenarios_dict else ["Cenario 1 (Base)"])
+        self.cenario_var = ctk.StringVar(value="Aleatório")
+        
+        self.combo_cenario = ctk.CTkComboBox(req_container, values=opcoes, variable=self.cenario_var, width=180)
+        self.combo_cenario.pack(pady=(0, 10))
 
         # Algorithm Selector
         self.card_algo = SelectorCard(grid, "Algoritmo de Procura", [e.name for e in EstrategiaProcura], icon_path="assets/algorithm.png")
@@ -252,14 +258,14 @@ class SimulationView(ctk.CTkFrame):
             self.radius_frame.pack(side="left", padx=10)
             
             # Disable static requests for OSM (incompatible)
-            self.usar_estaticos.set(False)
-            self.switch_estaticos.configure(state="disabled")
+            self.cenario_var.set("Aleatório")
+            self.combo_cenario.configure(state="disabled")
         else:
             self.entry_location.pack_forget()
             self.radius_frame.pack_forget()
             
             # Re-enable for default map
-            self.switch_estaticos.configure(state="normal")
+            self.combo_cenario.configure(state="normal")
 
         
     def setup_loading_ui(self):
@@ -341,7 +347,8 @@ class SimulationView(ctk.CTkFrame):
             'duracao_horas': self.duracao,
             'horas_ponta': self.h_ponta,
             'prob_pedido': self.prob.get(),
-            'usar_estaticos': self.usar_estaticos.get()
+            'usar_estaticos': (self.cenario_var.get() != "Aleatório"),
+            'lista_estaticos': cfg.get(f'pedidos_estaticos.cenarios.{self.cenario_var.get()}', []) if self.cenario_var.get() != "Aleatório" else []
         }
         
         try:
@@ -407,7 +414,8 @@ class SimulationView(ctk.CTkFrame):
                 horas_ponta=config['horas_ponta'],
                 prob_pedido=config['prob_pedido'],
                 gui_interface=self.gui_mapa,
-                usar_estaticos=config['usar_estaticos']
+                usar_estaticos=config['usar_estaticos'],
+                lista_estaticos=config.get('lista_estaticos')
             )
             
             self.gui_mapa.set_simulador(self.simulador)

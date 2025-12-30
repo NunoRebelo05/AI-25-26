@@ -75,7 +75,10 @@ def iniciar_simulacao(config_launch: dict, app_gui: 'AppLauncher'):
             horas_ponta=config_launch['horas_ponta'],
             prob_pedido=config_launch['prob_pedido'],
             gui_interface=gui_mapa,
-            usar_estaticos=config_launch['usar_estaticos']
+            prob_pedido=config_launch['prob_pedido'],
+            gui_interface=gui_mapa,
+            usar_estaticos=config_launch['usar_estaticos'],
+            lista_estaticos=config_launch.get('lista_estaticos')
         )
         
         gui_mapa.set_simulador(simulador)
@@ -160,9 +163,16 @@ class AppLauncher(ctk.CTkToplevel):
             
         ctk.CTkSlider(sim_frame, from_=0.05, to=1.0, variable=self.prob, command=update_prob_label).pack(fill="x", padx=10, pady=5)
         
-        # Checkbox Estáticos
-        self.usar_estaticos = ctk.BooleanVar(value=cfg.get('pedidos_estaticos.usar_estaticos'))
-        ctk.CTkCheckBox(sim_frame, text="Usar Pedidos Estáticos", variable=self.usar_estaticos).pack(anchor="w", padx=10, pady=10)
+        # Cenários
+        ctk.CTkLabel(sim_frame, text="Cenário de Pedidos:", anchor="w").pack(fill="x", padx=10, pady=(10, 0))
+        
+        cenarios_dict = cfg.get('pedidos_estaticos.cenarios', {})
+        cenarios_nomes = list(cenarios_dict.keys()) if cenarios_dict else ["Cenario 1 (Base)"]
+        opcoes = ["Aleatório"] + cenarios_nomes
+        
+        self.cenario_var = ctk.StringVar(value="Aleatório")
+        self.combo_cenario = ctk.CTkComboBox(sim_frame, values=opcoes, variable=self.cenario_var)
+        self.combo_cenario.pack(fill="x", padx=10, pady=5)
 
         # Horas de Ponta
         ctk.CTkLabel(sim_frame, text="Horas de Ponta (sep. vírgula):", anchor="w").pack(fill="x", padx=10)
@@ -194,7 +204,9 @@ class AppLauncher(ctk.CTkToplevel):
             'duracao_horas': duracao,
             'horas_ponta': h_ponta,
             'prob_pedido': self.prob.get(),
-            'usar_estaticos': self.usar_estaticos.get()
+            'prob_pedido': self.prob.get(),
+            'usar_estaticos': (self.cenario_var.get() != "Aleatório"),
+            'lista_estaticos': cfg.get(f'pedidos_estaticos.cenarios.{self.cenario_var.get()}', []) if self.cenario_var.get() != "Aleatório" else []
         }
         threading.Thread(target=iniciar_simulacao, args=(config, self)).start()
 

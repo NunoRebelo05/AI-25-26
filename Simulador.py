@@ -21,7 +21,8 @@ class Simulador:
                  horas_ponta: list = None,        
                  prob_pedido: float = 0.15,        
                  gui_interface = None,
-                 usar_estaticos: bool = None):
+                 usar_estaticos: bool = None,
+                 lista_estaticos: list = None):
         """
         Inicializa o simulador.
         
@@ -33,6 +34,7 @@ class Simulador:
             prob_pedido (float, optional): Probabilidade de gerar um novo pedido a cada minuto.
             gui_interface (VisualizadorGUI, optional): Referência para a GUI (para atualizações visuais).
             usar_estaticos (bool, optional): Se True, usa lista pré-definida de pedidos.
+            lista_estaticos (list, optional): Lista explícita de pedidos para este cenário.
         """
         
         self.gestor = gestor
@@ -67,11 +69,19 @@ class Simulador:
         else:
             self.usar_estaticos = cfg.get('pedidos_estaticos.usar_estaticos', False)
             
-        self.lista_estaticos = cfg.get('pedidos_estaticos.lista', [])
+        # Use lista passada ou tente carregar da config default (compatibilidade)
+        if lista_estaticos is not None:
+             self.lista_estaticos = lista_estaticos
+        else:
+             self.lista_estaticos = cfg.get('pedidos_estaticos.cenarios.Cenario 1 (Base)', [])
+             if not self.lista_estaticos:
+                 # Fallback antigo
+                 self.lista_estaticos = cfg.get('pedidos_estaticos.lista', [])
+
         # Ordenar estáticos por minuto para eficiência
         self.lista_estaticos.sort(key=lambda x: x['minuto_simulacao'])
 
-        print(f"Simulador iniciado ({self.hora_inicio} -> {self.end_time}). Modo Estático: {self.usar_estaticos}")
+        print(f"Simulador iniciado ({self.hora_inicio} -> {self.end_time}). Modo Estático: {self.usar_estaticos}. Cenário com {len(self.lista_estaticos)} pedidos.")
 
     def run(self):
         """

@@ -23,9 +23,20 @@ class AlgorithmsView(ctk.CTkFrame):
         
         ctk.CTkLabel(self.header_frame, text="Comparação de Algoritmos", font=("Roboto Medium", 24)).pack(side="left")
         
-        self.btn_run = ctk.CTkButton(self.header_frame, text="Executar Benchmark", command=self.start_benchmark, 
+        self.controls_frame = ctk.CTkFrame(self.header_frame, fg_color="transparent")
+        self.controls_frame.pack(side="right")
+
+        cenarios_dict = cfg.get('pedidos_estaticos.cenarios', {})
+        cenarios_dict = cfg.get('pedidos_estaticos.cenarios', {})
+        opcoes = ["Aleatório", "Todos os Cenários"] + (list(cenarios_dict.keys()) if cenarios_dict else [])
+        self.cenario_var = ctk.StringVar(value="Aleatório")
+        
+        self.combo_cenario = ctk.CTkComboBox(self.controls_frame, values=opcoes, variable=self.cenario_var, width=200)
+        self.combo_cenario.pack(side="left", padx=10)
+
+        self.btn_run = ctk.CTkButton(self.controls_frame, text="Executar Benchmark", command=self.start_benchmark, 
                                      font=("Roboto Medium", 14), height=40)
-        self.btn_run.pack(side="right")
+        self.btn_run.pack(side="left")
 
         # Log Area
         self.txt_log = ctk.CTkTextbox(self, font=("Consolas", 12))
@@ -35,13 +46,14 @@ class AlgorithmsView(ctk.CTkFrame):
     def start_benchmark(self):
         self.btn_run.configure(state="disabled", text="A Executar...")
         self.txt_log.delete("0.0", "end")
-        threading.Thread(target=self.run_benchmark_thread).start()
+        cenario = self.cenario_var.get()
+        threading.Thread(target=self.run_benchmark_thread, args=(cenario,)).start()
 
     def append_log(self, msg):
         self.txt_log.insert("end", msg + "\n")
         self.txt_log.see("end")
 
-    def run_benchmark_thread(self):
+    def run_benchmark_thread(self, cenario_selecionado):
         def log(msg):
             self.after(0, self.append_log, msg)
 
@@ -63,37 +75,105 @@ class AlgorithmsView(ctk.CTkFrame):
             EstrategiaProcura.BFS
         ]
 
-        log("\n--- INÍCIO DO BENCHMARK ---\n")
-        resultados_finais = []
+        # Determinar quais cenários rodar
+        cenarios_a_rodar = []
+        if cenario_selecionado == "Todos os Cenários":
+            cenarios_dict = cfg.get('pedidos_estaticos.cenarios', {})
+            # Adicionar todos os cenários nomeados
+            cenarios_a_rodar = sorted(list(cenarios_dict.keys()))
+        else:
+            cenarios_a_rodar = [cenario_selecionado]
 
-        for estrategia in estrategias:
-            log(f">> A TESTAR: {estrategia.name}...")
-            
-            random.seed(42)
-            mapa_para_sim = Grafo.carregar_de_json("braga_mapa.json")
-            gestor = GestorDeFrota(mapa_para_sim)
-            self.setup_frota(gestor)
-            gestor.definir_estrategia(estrategia)
-            
-            simulador = Simulador(gestor, hora_inicio, duracao_horas, usar_estaticos=True)
-            try:
-                metrics = simulador.run()
-            except Exception as e:
-                log(f"ERRO ao correr {estrategia.name}: {e}")
-                continue
-            
-            # Metrics
-            total_nos = gestor.stats['total_nos_visitados']
-            total_procuras = gestor.stats['total_procuras']
-            media_nos = (total_nos / total_procuras) if total_procuras > 0 else 0.0
-            
-            metrics['estrategia'] = estrategia.name
-            metrics['media_nos'] = media_nos
-            
-            resultados_finais.append(metrics)
-            log(f"   -> Concluído (Rejeição: {metrics['taxa_rejeicao']:.1f}%)")
+        log("\n--- INÍCIO DO BENCHMARK ---")
         
-        self.after(0, self.show_results, resultados_finais)
+        for cenario_nome in cenarios_a_rodar:
+            log("\n" + "#"*60)
+            log(f"### {cenario_nome.upper()} ###")
+            log("#"*60 + "\n")
+            
+            resultados_deste_cenario = []
+            
+            for estrategia in estrategias:
+                log(f">> A TESTAR: {estrategia.name}...")
+                
+                random.seed(42)
+                mapa_para_sim = Grafo.carregar_de_json("braga_mapa.json")
+                gestor = GestorDeFrota(mapa_para_sim)
+                self.setup_frota(gestor)
+                gestor.definir_estrategia(estrategia)
+                
+                usar_estaticos = (cenario_nome != "Aleatório")
+                lista_pedidos = cfg.get(f'pedidos_estaticos.cenarios.{cenario_nome}', []) if usar_estaticos else []
+
+                simulador = Simulador(gestor, hora_inicio, duracao_horas, 
+                                      usar_estaticos=usar_estaticos,
+                                      lista_estaticos=lista_pedidos)
+                try:
+                    # Supressed output for batch run? Maybe kept to show progress
+                    metrics = simulador.run()
+                except Exception as e:
+                    log(f"ERRO ao correr {estrategia.name}: {e}")
+                    continue
+                
+                # Metrics
+                total_nos = gestor.stats['total_nos_visitados']
+                total_procuras = gestor.stats['total_procuras']
+                media_nos = (total_nos / total_procuras) if total_procuras > 0 else 0.0
+                
+                metrics['estrategia'] = estrategia.name
+                metrics['media_nos'] = media_nos
+                
+                resultados_deste_cenario.append(metrics)
+                log(f"   -> Concluído (Rejeição: {metrics['taxa_rejeicao']:.1f}%)")
+            
+            # Show table for THIS scenario immediately
+            self.after(0, self.show_results_table, resultados_deste_cenario, cenario_nome)
+
+        self.after(0, lambda: self.btn_run.configure(state="normal", text="Executar Benchmark"))
+
+    def show_results(self, resultados):
+        # Wrapper legacy ou usado internamente se precisar
+        self.show_results_table(resultados, "Resultados")
+
+    def show_results_table(self, resultados, titulo):
+        pad = " "
+        # Definição das larguras das colunas
+        w_strat, w_rej, w_esp, w_ocup, w_cust, w_co2, w_km, w_vaz, w_nos = 12, 8, 10, 8, 10, 8, 10, 8, 8
+        
+        # Headers e Separadores
+        top_border = f"┌{'─'*w_strat}┬{'─'*w_rej}┬{'─'*w_esp}┬{'─'*w_ocup}┬{'─'*w_cust}┬{'─'*w_co2}┬{'─'*w_km}┬{'─'*w_vaz}┬{'─'*w_nos}┐"
+        mid_border = f"├{'─'*w_strat}┼{'─'*w_rej}┼{'─'*w_esp}┼{'─'*w_ocup}┼{'─'*w_cust}┼{'─'*w_co2}┼{'─'*w_km}┼{'─'*w_vaz}┼{'─'*w_nos}┤"
+        bot_border = f"└{'─'*w_strat}┴{'─'*w_rej}┴{'─'*w_esp}┴{'─'*w_ocup}┴{'─'*w_cust}┴{'─'*w_co2}┴{'─'*w_km}┴{'─'*w_vaz}┴{'─'*w_nos}┘"
+        
+        header_str = (f"│{' Estratégia':<{w_strat}}│{' Rej.%':>{w_rej}}│{' Esp(m)':>{w_esp}}│{' Ocup%':>{w_ocup}}│"
+                      f"{' Custo':>{w_cust}}│{' CO2':>{w_co2}}│{' KmTot':>{w_km}}│{' Vaz%':>{w_vaz}}│{' Nós':>{w_nos}}│")
+
+        self.append_log("")
+        self.append_log(top_border)
+        # Ajustar titulo para caber
+        safe_title = f"{titulo}"[:len(top_border)-4]
+        self.append_log(f"│{safe_title:^{len(top_border)-2}}│")
+        self.append_log(mid_border)
+        self.append_log(header_str)
+        self.append_log(mid_border)
+        
+        resultados_ordenados = sorted(resultados, key=lambda x: (x['custos_totais'], x['media_nos']))
+        
+        for res in resultados_ordenados:
+            pct_vazio = (res['km_vazios'] / res['total_km'] * 100) if res.get('total_km', 0) > 0 else 0.0
+            
+            line = (f"│ {res['estrategia']:<{w_strat-1}}│"
+                    f"{res['taxa_rejeicao']:>{w_rej-1}.1f} │"
+                    f"{res['tempo_espera']:>{w_esp-1}.2f} │"
+                    f"{res['taxa_ocupacao']:>{w_ocup-1}.1f} │"
+                    f"{res['custos_totais']:>{w_cust-1}.1f} │"
+                    f"{res['emissoes_co2']:>{w_co2-1}.1f} │" 
+                    f"{res['total_km']:>{w_km-1}.1f} │"
+                    f"{pct_vazio:>{w_vaz-1}.1f} │"
+                    f"{res['media_nos']:>{w_nos-1}.0f} │")
+            self.append_log(line)
+            
+        self.append_log(bot_border)
 
     def setup_frota(self, gestor):
         specs_ev = cfg.get('frota.specs_eletrico')
@@ -115,32 +195,3 @@ class AlgorithmsView(ctk.CTkFrame):
                         specs_gas['capacidade'], specs_gas['custo_km'], specs_gas['autonomia'], 
                         specs_gas.get('emissao_co2_km', 0.14), specs_gas.get('tempo_abastecimento_min', 5))
             gestor.add_taxi(taxi)
-
-    def show_results(self, resultados):
-        self.append_log("\n" + "="*116)
-        self.append_log(f"{'--- TABELA DE COMPARAÇÃO FINAL DAS ESTRATÉGIAS ---':^116}")
-        self.append_log("="*116)
-        
-        # Header
-        header = f"{'Estratégia':<10} | {'Rej.%':>5} | {'Esp.(m)':>8} | {'Ocup.%':>6} | {'Custo':>8} | {'CO2':>6} | {'Km Tot':>8} | {'Vazio%':>6} | {'Nós':>6}"
-        self.append_log(header)
-        self.append_log("-"*116)
-        
-        resultados_ordenados = sorted(resultados, key=lambda x: (x['taxa_rejeicao'], x['tempo_espera']))
-        
-        for res in resultados_ordenados:
-            pct_vazio = (res['km_vazios'] / res['total_km'] * 100) if res.get('total_km', 0) > 0 else 0.0
-            
-            line = (f"{res['estrategia']:<10} | "
-                    f"{res['taxa_rejeicao']:>5.1f} | "
-                    f"{res['tempo_espera']:>8.2f} | "
-                    f"{res['taxa_ocupacao']:>6.1f} | "
-                    f"{res['custos_totais']:>8.2f} | "
-                    f"{res['emissoes_co2']:>6.2f} | " 
-                    f"{res['total_km']:>8.1f} | "
-                    f"{pct_vazio:>6.1f} | "
-                    f"{res['media_nos']:>6.1f}")
-            self.append_log(line)
-            
-        self.append_log("="*116)
-        self.btn_run.configure(state="normal", text="Executar Benchmark")
