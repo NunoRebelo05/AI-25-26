@@ -14,6 +14,12 @@ ctk.set_appearance_mode("System")
 ctk.set_default_color_theme("blue")
 
 class App(ctk.CTk):
+    """
+    Ponto de Entrada da Aplicação (Main Entry Point).
+    
+    Responsável pela orquestração de janelas, injeção de dependências e configuração
+    do ciclo de vida da interface gráfica (Tkinter Mainloop).
+    """
     def __init__(self):
         super().__init__()
 
@@ -22,6 +28,9 @@ class App(ctk.CTk):
         
         # Maximize window
         self.after(0, lambda: self.state('zoomed'))
+        
+        # Handle close event
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
 
         # Configure grid layout (1x2)
         self.grid_rowconfigure(0, weight=1)
@@ -104,6 +113,20 @@ class App(ctk.CTk):
 
     def change_appearance_mode_event(self, new_appearance_mode: str):
         ctk.set_appearance_mode(new_appearance_mode)
+
+    def on_close(self):
+        """
+        Gestor de Encerramento (Graceful Shutdown).
+        
+        Garante a terminação correta de threads de simulação e libertação de recursos gráficos
+        antes de destruir a janela principal, prevenindo 'Zombie Threads' e falhas de runtime.
+        """
+        try:
+            if hasattr(self, 'sim_view') and self.sim_view:
+                self.sim_view.stop_simulation()
+        except Exception as e:
+            print(f"Error checking sim_view on close: {e}")
+        self.destroy()
 
 if __name__ == "__main__":
     app = App()

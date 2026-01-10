@@ -338,6 +338,7 @@ class SimulationView(ctk.CTkFrame):
         messagebox.showerror("Erro", f"Erro ao carregar mapa: {error_msg}")
 
     def _on_map_ready(self, mapa, layers):
+        if not self.winfo_exists(): return
         self.lbl_loading.configure(text="A iniciar simulação...")
         
         config = {
@@ -431,3 +432,7 @@ class SimulationView(ctk.CTkFrame):
         
         self.sim_frame.grid_forget()
         self.config_frame.grid(row=0, column=0, sticky="nsew")
+
+    def destroy(self):
+        self.stop_simulation()
+        super().destroy()

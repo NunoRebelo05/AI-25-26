@@ -136,7 +136,7 @@ class MapaVisualizador(ctk.CTkFrame):
         
         ctk.CTkLabel(f_ctrl, text="Velocidade", font=("Roboto", 12)).pack(pady=(10,0))
         self.scale_speed = ctk.CTkSlider(f_ctrl, from_=1, to=20, number_of_steps=19, command=self.mudar_velocidade)
-        self.scale_speed.set(5)
+        self.scale_speed.set(1)
         self.scale_speed.pack(fill="x", pady=5)
 
         # Legenda Simples (Cores)
@@ -196,13 +196,23 @@ class MapaVisualizador(ctk.CTkFrame):
         self.drag_start_y = event.y
 
     def do_pan(self, event):
+        """
+        Executa a translação do viewport (Pan).
+        
+        Utiliza a primitiva 'move' do Canvas para otimização de desempenho,
+        evitando o redesenho completo da geometria durante a interação (Fast Panning).
+        """
         dx = event.x - self.drag_start_x
         dy = event.y - self.drag_start_y
+        
+        # Otimização: Translação direta de objetos gráficos
+        self.canvas.move("all", dx, dy)
+        
         self.pan_x += dx
         self.pan_y += dy
         self.drag_start_x = event.x
         self.drag_start_y = event.y
-        self.desenhar_mapa_base()
+        # Redesenho completo adiado para o fim da interação
 
     def do_zoom(self, event):
         # Windows: event.delta is usually 120 or -120
@@ -321,6 +331,16 @@ class MapaVisualizador(ctk.CTkFrame):
                         coords = list(poly.exterior.coords)
                         pixels = [self.coords_para_pixel(lat, lon) for lon, lat in coords]
                         flat_pixels = [val for sublist in pixels for val in sublist]
+                        
+                        # Culling for Polygons
+                        xs = flat_pixels[0::2]
+                        ys = flat_pixels[1::2]
+                        w_curr = self.canvas.winfo_width()
+                        h_curr = self.canvas.winfo_height()
+                        if (max(xs) < -100 or min(xs) > w_curr + 100 or
+                            max(ys) < -100 or min(ys) > h_curr + 100):
+                            continue
+
                         if len(flat_pixels) >= 6:
                             self.canvas.create_polygon(flat_pixels, fill=color, outline="", tags="base")
 
@@ -337,22 +357,35 @@ class MapaVisualizador(ctk.CTkFrame):
         self.after(0, self._desenhar_mapa_base_impl)
 
     def _desenhar_mapa_base_impl(self):
+        if not self.winfo_exists(): return
         self.canvas.delete("base")
         
         # 0. Desenhar Camadas de Fundo (Se existirem)
         if self.layers:
             self.desenhar_camadas_fundo()
 
-        # Desenhar estradas como linhas largas
+        # Viewport Culling: Definição da área visível + margem de segurança
+        w_curr = self.canvas.winfo_width()
+        h_curr = self.canvas.winfo_height()
+        margin = 100 
+
+        # Renderização de Arestas (Estradas)
         for origem, destinos in self.grafo.arestas.items():
             x1, y1 = self.coords_para_pixel(self.grafo.nos[origem]['lat'], self.grafo.nos[origem]['lon'])
+            
             for destino, dados in destinos.items():
                 x2, y2 = self.coords_para_pixel(self.grafo.nos[destino]['lat'], self.grafo.nos[destino]['lon'])
+                
+                # Otimização: Culling Geométrico
+                # Descarta primitivas totalmente fora do viewport ativo
+                if (max(x1, x2) < -margin or min(x1, x2) > w_curr + margin or
+                    max(y1, y2) < -margin or min(y1, y2) > h_curr + margin):
+                    continue
                 
                 multiplicador = self.grafo.condicoes_transito.get((origem, destino), 1.0)
                 cor = self.get_cor_transito(multiplicador)
                 
-                # Estradas largas (Uber style)
+                # Desenho da linha com estilo arredondado
                 self.canvas.create_line(x1, y1, x2, y2, fill=cor, width=5, capstyle=tk.ROUND, tags="base")
 
         # Nós (opcional, podem ser invisíveis ou muito discretos)
@@ -410,6 +443,7 @@ class MapaVisualizador(ctk.CTkFrame):
         self.after(0, lambda: self._atualizar_estado_impl(frota, pedidos_ativos, tempo_atual, descricoes_status))
 
     def _atualizar_estado_impl(self, frota, pedidos_ativos, tempo_atual, descricoes_status):
+        if not self.winfo_exists(): return
         self.canvas.delete("dinamico")
         self.lbl_hora.configure(text=tempo_atual.strftime("%H:%M"))
 

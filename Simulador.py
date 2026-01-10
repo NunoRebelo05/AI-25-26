@@ -102,7 +102,8 @@ class Simulador:
             while self.paused and self.running: 
                 time.sleep(0.1)
                 # Se tiver GUI, precisamos de atualizar a janela para não bloquear
-                if self.gui: self.gui.update()
+                # Se tiver GUI, a atualização é feita pelo mainloop do Tkinter
+                pass
 
             if not self.running: break
 
@@ -139,33 +140,24 @@ class Simulador:
 
     def set_speed(self, speed_level):
         """
-        Define a velocidade da simulação.
+        Define o fator de aceleração temporal da simulação.
+        
+        A escala de velocidade segue uma função linear mapeada para passos discretos de simulação.
+        - Nível 1: Tempo real aproximado (30 seg/seg).
+        - Nível 20: Aceleração máxima (300 seg/seg).
         
         Args:
-            speed_level (int): Nível de 1 a 20.
+            speed_level (int): Inteiro entre 1 e 20.
         """
-        # Nível 1-10: Controla o delay (steps=1)
-        # Nível 11-20: Controla steps_per_update (delay=0)
+        # Manter framerate constante a 30 FPS para estabilidade visual
+        self.delay = 0.033
         
-        if speed_level <= 10:
-            self.steps_per_update = 1
-            # Delay de 0.1s (lento) a 0.0s (rápido)
-            # speed 1 -> 0.1
-            # speed 10 -> 0.0
-            self.delay = 0.1 - ((speed_level - 1) * (0.1 / 9))
-        else:
-            self.delay = 0.0
-            # Steps de 1 a 60 (ou mais)
-            # speed 11 -> 2 steps
-            # speed 20 -> 60 steps
-            factor = speed_level - 10
-            self.steps_per_update = int(1 + (factor * 6)) # 1 -> 7 -> 13 ... -> 61
-            
-        # Garantir mínimo de delay para GUI não bloquear se steps for baixo
-        if self.gui and self.delay < 0.001 and self.steps_per_update < 5:
-             self.delay = 0.001
+        # Mapeamento Linear: [1, 20] -> [1, 10] passos por frame
+        # Formula: y = 1 + (x-1) * (9/19)
+        self.steps_per_update = int(1 + (speed_level - 1) * (9 / 19))
              
-        print(f"Velocidade ajustada: Nível {speed_level} -> Delay {self.delay:.4f}s, Steps {self.steps_per_update}")
+        # Log de ajuste de parâmetros
+        # print(f"DEBUG: Speed Lvl {speed_level} -> Delay {self.delay:.3f}s, Batch Size {self.steps_per_update}")
 
     def set_delay(self, delay):
         """Legacy: Mantido para compatibilidade, mas idealmente usar set_speed."""
@@ -173,24 +165,25 @@ class Simulador:
 
     def step(self):
         """
-        Executa um único passo da simulação (1 minuto).
+        Executa um passo discreto da simulação (avanço de 1 minuto).
         
-        1. Gera novos pedidos (se aplicável).
-        2. Atualiza posições dos táxis em movimento.
-        3. Tenta alocar pedidos em espera.
-        4. Gere táxis livres (ex: recarga).
+        Pipeline de Processamento:
+        1. Geração estocástica ou determinística de pedidos.
+        2. Atualização de agentes móveis (táxis).
+        3. Alocação de recursos (Matching Pedido-Táxi).
+        4. Gestão de estados de manutenção (Recarga/Abastecimento).
         """
-        # Só gera novos pedidos se ainda estivermos dentro do horário normal
-        # E apenas no início de cada minuto para manter a probabilidade correta
+        # Geração de Pedidos (Apenas no início do minuto para consistência probabilística)
         if self.current_time <= self.end_time and self.current_time.second == 0:
             self._generate_new_request()
 
+        # Atualização Física dos Agentes
         self._processar_movimentos()
         
-        # 1. Tentar esvaziar a fila de espera (Prioritário)
+        # Algoritmo de Alocação (Prioritário: Fila de Espera)
         self._processar_fila_espera()
         
-        # 2. Só depois é que vemos se os livres vão carregar
+        # Gestão de Manutenção de Frota
         self._manage_idle_taxis()
 
         # 3. Atualizar Metricas de Ocupação
