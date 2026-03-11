@@ -14,28 +14,22 @@
 
 </div>
 
----
-
 ## 📋 Table of Contents
 
-- [Overview](#-overview)
-- [Key Features](#-key-features)
-- [Architecture](#-architecture)
-- [Search Algorithms](#-search-algorithms)
-- [Tech Stack](#-tech-stack)
-- [Getting Started](#-getting-started)
-- [Configuration](#-configuration)
-- [Project Structure](#-project-structure)
-
----
+1. [Overview](#-overview)
+2. [Key Features](#-key-features)
+3. [Architecture](#-architecture)
+4. [Search Algorithms](#-search-algorithms)
+5. [Tech Stack](#-tech-stack)
+6. [Getting Started](#-getting-started)
+7. [Configuration](#-configuration)
+8. [Project Structure](#-project-structure)
 
 ## 🌍 Overview
 
 **TaxiGreen Simulator** is a full-stack desktop simulation platform that models the intelligent dispatch and routing of a mixed electric/combustion taxi fleet across a real city map (Braga, Portugal). The simulator integrates **real OpenStreetMap data**, **graph-based pathfinding algorithms** (A\*, Greedy, BFS, DFS, UCS), and a **dynamic GUI** to visualise fleet movement in real time.
 
 The project was developed as part of the Artificial Intelligence course (2025/26) and received a grade of **18/20**. It demonstrates the practical application of AI search strategies to a real-world optimization problem: minimising passenger wait times while balancing fleet cost, CO₂ emissions, and battery autonomy.
-
----
 
 ## ✨ Key Features
 
@@ -50,8 +44,6 @@ The project was developed as part of the Artificial Intelligence course (2025/26
 | 📈 **Live Statistics** | Real-time fleet dashboard: completed / pending / rejected trips, CO₂ saved, costs |
 | 🛠️ **Fully Configurable** | All parameters (fleet size, probabilities, weights, peak hours) tunable via `config.json` |
 | 🎨 **Dark-Mode GUI** | Uber-style map canvas with animated taxi icons, route highlighting, and a status sidebar |
-
----
 
 ## 🏗️ Architecture
 
@@ -100,34 +92,32 @@ The project follows a clean **Model-View-Controller (MVC)**-inspired layered arc
 | `MapCreator.py` | Utility to generate or edit custom map JSON files |
 | `OrganizeMap.py` | Cleans and simplifies raw OSM exports |
 
----
-
 ## 🔍 Search Algorithms
 
 All algorithms are implemented from scratch in `AlgoritmosDeProcura.py` and optimise either **travel distance (km)** or **travel time (minutes)**.
 
 ### A\* (A-Star) — *Default*
-- Uses an **admissible Haversine heuristic** (straight-line distance / maximum speed)
-- Heuristic is dynamically calibrated per graph to guarantee optimality
-- Falls back to **Dijkstra / UCS** when `use_heuristic=False`
-- Returns: optimal path, cost, nodes visited
+1. Uses an **admissible Haversine heuristic** (straight-line distance / maximum speed)
+2. Heuristic is dynamically calibrated per graph to guarantee optimality
+3. Falls back to **Dijkstra / UCS** when `use_heuristic=False`
+4. Returns: optimal path, cost, nodes visited
 
 ### Greedy Best-First Search
-- Expands the node *closest to the goal* according to the heuristic only
-- Faster than A\* in practice but does **not** guarantee optimality
-- Useful baseline for speed vs. quality trade-off analysis
+1. Expands the node *closest to the goal* according to the heuristic only
+2. Faster than A\* in practice but does **not** guarantee optimality
+3. Useful baseline for speed vs. quality trade-off analysis
 
 ### Breadth-First Search (BFS)
-- Guarantees the **minimum-hop** path
-- Cost-agnostic; useful for connectivity checks and short networks
+1. Guarantees the **minimum-hop** path
+2. Cost-agnostic; useful for connectivity checks and short networks
 
 ### Depth-First Search (DFS)
-- Memory-efficient exploration; does **not** guarantee shortest path
-- Included for completeness and academic benchmarking
+1. Memory-efficient exploration; does **not** guarantee shortest path
+2. Included for completeness and academic benchmarking
 
 ### Uniform Cost Search (UCS / Dijkstra)
-- A\* with zero heuristic; guarantees optimal cost
-- Explores more nodes than A\* but serves as the gold-standard reference
+1. A\* with zero heuristic; guarantees optimal cost
+2. Explores more nodes than A\* but serves as the gold-standard reference
 
 #### Benchmark comparison output (example)
 ```
@@ -139,8 +129,6 @@ UCS        | 7 nodes     | 3.2 km | 31            | 2.1
 BFS        | 6 nodes     | 5.8 km | 22            | 1.8
 DFS        | 12 nodes    | 8.4 km | 19            | 0.9
 ```
-
----
 
 ## 🛠️ Tech Stack
 
@@ -154,14 +142,11 @@ DFS        | 12 nodes    | 8.4 km | 19            | 0.9
 | Pathfinding | Custom implementations (heapq, deque) |
 | Graph Format | Custom JSON + Haversine distance |
 
----
-
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- Python 3.10 or higher
-- pip
+Python 3.10 or higher and pip.
 
 ### Installation
 
@@ -187,8 +172,6 @@ To download a fresh map for any city:
 from RealMapImporter import importar_mapa_osm
 grafo = importar_mapa_osm("Braga, Portugal", dist=3000)
 ```
-
----
 
 ## ⚙️ Configuration
 
@@ -221,12 +204,13 @@ All simulation parameters are controlled via `config.json`:
 ```
 
 Key parameters:
-- **`prob_pedido`** — probability of a new trip request each simulated minute
-- **`multiplicador_transito_ponta`** — peak-hour travel time multiplier (e.g. `1.75` = 75% slower)
-- **`limiar_recarga_eletrico`** — battery threshold below which an EV is sent to charge
-- **`PENALIZACAO_AMBIENTAL`** — extra cost score assigned to combustion vehicles when a customer prefers EV
 
----
+| Parameter | Description |
+|---|---|
+| `prob_pedido` | Probability of a new trip request each simulated minute |
+| `multiplicador_transito_ponta` | Peak-hour travel time multiplier (e.g. `1.75` = 75% slower) |
+| `limiar_recarga_eletrico` | Battery threshold below which an EV is sent to charge |
+| `PENALIZACAO_AMBIENTAL` | Extra cost score assigned to combustion vehicles when a customer prefers EV |
 
 ## 📁 Project Structure
 
@@ -254,8 +238,6 @@ AI-25-26/
     ├── SimulationView.py      # Simulation controls & map view
     └── AlgorithmsView.py      # Algorithm benchmark runner
 ```
-
----
 
 <div align="center">
 
